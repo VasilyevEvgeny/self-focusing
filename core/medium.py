@@ -23,7 +23,8 @@ class Medium:
     def info(self):
         return self.name
 
-    def calculate_n(self, omega, C_1, C_2, C_3, omega_1, omega_2, omega_3):
+    @staticmethod
+    def calculate_n(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3):
         return sqrt(1 +
                     C_1 / (1 - (omega / omega_1) ** 2) +
                     C_2 / (1 - (omega / omega_2) ** 2) +
@@ -32,7 +33,8 @@ class Medium:
     def calculate_k_0(self, omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, c):
         return omega / c * self.calculate_n(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3)
 
-    def calculate_k_1(self, omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, c):
+    @staticmethod
+    def calculate_k_1(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, c):
         return omega * (C_1 * omega / (omega_1 ** 2 * (-omega ** 2 / omega_1 ** 2 + 1) ** 2) +
                C_2 * omega / (omega_2 ** 2 * (-omega ** 2 / omega_2 ** 2 + 1) ** 2) +
                C_3 * omega / (omega_3 ** 2 * (-omega ** 2 / omega_3 ** 2 + 1) ** 2)) / \
@@ -40,7 +42,8 @@ class Medium:
                C_3 / (-omega ** 2 / omega_3 ** 2 + 1) + 1)) + sqrt(C_1 / (-omega ** 2 / omega_1 ** 2 + 1) +
                C_2 / (-omega ** 2 / omega_2 ** 2 + 1) + C_3 / (-omega ** 2 / omega_3 ** 2 + 1) + 1) / c
 
-    def calculate_k_2(self, omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, c):
+    @staticmethod
+    def calculate_k_2(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, c):
         return omega * (-C_1 * omega / (omega_1 ** 2 * (-omega ** 2 / omega_1 ** 2 + 1) ** 2) - C_2 * omega / (
                omega_2 ** 2 * (-omega ** 2 / omega_2 ** 2 + 1) ** 2) - C_3 * omega / (omega_3 ** 2 * (-omega ** 2 /
                omega_3 ** 2 + 1) ** 2)) * (C_1 * omega / (omega_1 ** 2 * (-omega ** 2 / omega_1 ** 2 + 1) ** 2) +

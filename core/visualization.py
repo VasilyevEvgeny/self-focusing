@@ -1,8 +1,7 @@
-from core.libs import *
 from core.functions import *
 
 
-def plot_beam(beam, z, step, path, plot_beam_normalization, max_val=1.0):
+def plot_beam(beam, z, step, path, plot_beam_normalization, title=False):
     x_left = -400 * 10**-6
     x_right = 400 * 10**-6
     y_left = -400 * 10**-6
@@ -47,9 +46,10 @@ def plot_beam(beam, z, step, path, plot_beam_normalization, max_val=1.0):
     plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
     plt.ylabel("y, мкм", fontsize=font_size, fontweight="bold")
 
-    #i_max = np.max(beam.a_to_i()) * beam.i_0
-    #plt.title("z = " + str(round(z * 10 ** 2, 3)) + " см\nI$_{max}$ = %.2E" % i_max + " Вт/м$^2$\n",
-    #          fontsize=font_size-10)
+    if title:
+        i_max = np.max(beam.a_to_i()) * beam.i_0
+        plt.title("z = " + str(round(z * 10 ** 2, 3)) + " см\nI$_{max}$ = %.2E" % i_max + " Вт/м$^2$\n",
+                 fontsize=font_size-10)
 
     plt.xlabel("x, мкм")
     plt.ylabel("y, мкм")
@@ -78,18 +78,13 @@ def plot_track(states_arr, parameter_index, path):
     plt.figure(figsize=(15, 5))
     plt.plot(zs, parameters, color="black", linewidth=5, alpha=0.8, label="Щелевой пучок")
 
-    #plt.title("$\mathbf{I_{max}(z)}$\n", fontsize=font_size, fontweight="bold")
     plt.grid(linestyle="dotted", linewidth=2)
 
-    #plt.xlim([0, 1.2])
     plt.xlabel("$\mathbf{z}$, см", fontsize=font_size, fontweight="bold")
     plt.xticks(fontsize=font_size, fontweight="bold")
 
-    #plt.ylim([0, 3])
     plt.ylabel("$\mathbf{I_{max} \ / \ I_0}$", fontsize=font_size, fontweight="bold")
     plt.yticks(fontsize=font_size, fontweight="bold")
-
-    #plt.legend(loc=2, prop={"size": 30})
 
     plt.savefig(path + "/i_max(z).png", bbox_inches='tight')
     plt.show()

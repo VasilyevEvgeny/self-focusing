@@ -64,7 +64,7 @@ class SweepDiffractionExecutor_R:
         for i in range(1, n_r - 1):
             beta[i] = 2.0 * c1 + c3 / dz + vx[i]
             delta[i] = alpha[i] * field[i + 1] - \
-                       (beta[i].conjugate() - vx[i]) * field[i] + \
+                       (conj(beta[i]) - vx[i]) * field[i] + \
                        gamma[i] * field[i - 1]
             xi[i + 1] = alpha[i] / (beta[i] - gamma[i] * xi[i])
             eta[i + 1] = (delta[i] + gamma[i] * eta[i]) / \

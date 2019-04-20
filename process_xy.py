@@ -2,9 +2,12 @@ from core.diffraction import FourierDiffractionExecutor_XY
 from core.kerr_effect import KerrExecutor_XY
 from core.propagation import Propagator
 from core.beam import Beam_XY
+from core.args import parse_args
 from core.libs import *
 
 t_start = time()
+
+args = parse_args()
 
 beam = Beam_XY(medium="SiO2",
                distribution_type="vortex",
@@ -18,7 +21,8 @@ beam = Beam_XY(medium="SiO2",
                n_x=1024,
                n_y=1024)
 
-propagator = Propagator(beam=beam,
+propagator = Propagator(global_root_dir=args.global_root_dir,
+                        beam=beam,
                         diffraction=FourierDiffractionExecutor_XY(beam=beam),
                         #kerr_effect=KerrExecutor_XY(beam=beam),
                         n_z=1000,

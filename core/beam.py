@@ -93,10 +93,7 @@ class Beam_R(Beam):
         return intensity
 
     def calculate_I0(self):
-        #if self.distribution_type != "gauss":
         return self.p_0 / (pi * self.r_0**2 * gamma(self.m+1))
-        #else:
-        #    return self.p_0 / (pi * self.r_0**2)
 
     @staticmethod
     @jit(nopython=True, debug=True)
@@ -186,10 +183,7 @@ class Beam_XY(Beam):
         # lim = mpf(max(self.x_max, self.y_max))
         # i_0 = self.p_0 / float(mpmath_nquad(lambda x, y: i_distribution(x, y), [-lim, +lim], [-lim, +lim]))
 
-        #if self.distribution_type != "gauss":
         return self.p_0 / (pi * (self.x_0**2 + self.y_0**2) / 2 * gamma(self.m+1))
-        #else:
-        #    return self.p_0 / (pi * (self.x_0 ** 2 + self.y_0 ** 2) / 2)
 
     @staticmethod
     @jit(nopython=True, debug=True)

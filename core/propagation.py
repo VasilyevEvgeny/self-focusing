@@ -5,12 +5,13 @@ from core.utils import Logger, Manager
 
 class Propagator:
     def __init__(self, **kwargs):
+        self.global_root_dir = kwargs["global_root_dir"]
         self.beam = kwargs["beam"]
 
         self.diffraction = kwargs.get("diffraction", None)
         self.kerr_effect = kwargs.get("kerr_effect", None)
 
-        self.manager = Manager(global_root_dir="L:/Vasilyev")
+        self.manager = Manager(global_root_dir=self.global_root_dir)
         self.logger = Logger(diffraction=self.diffraction,
                              kerr_effect=self.kerr_effect,
                              path=self.manager.results_dir)

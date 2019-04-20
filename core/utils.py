@@ -88,7 +88,8 @@ class Logger:
             f.write("{:20s} = {:.2f}\n".format("p_0, MW", beam.p_0 * 10 ** -6))
             f.write("{:20s} = {:e}\n".format("i_0, W/m^2", beam.i_0))
 
-    def print_current_state(self, n_step, states, states_columns):
+    @staticmethod
+    def print_current_state(n_step, states, states_columns):
         if n_step == 0:
             print("      |   %s   |    %s   |  %s |  %s |" % (states_columns[0],
                                                          states_columns[1],
