@@ -21,7 +21,7 @@ class FourierDiffractionExecutor_XY:
 
         return field_fft
 
-    def process(self, dz):
+    def process_diffraction(self, dz):
         field_fft = fft2(self.beam.field)
         field_fft = self.phase_increment(field_fft, self.beam.n_x, self.beam.n_y, self.beam.k_xs,
                                          self.beam.k_ys, self.beam.medium.k_0, dz)
@@ -78,7 +78,7 @@ class SweepDiffractionExecutor_R:
 
         return field
 
-    def process(self, dz):
+    def process_diffraction(self, dz):
         self.beam.field = self.fast_process(self.beam.field, self.beam.n_r, dz, self.c1,
                                             self.c3, self.alpha, self.beta, self.gamma, self.delta, self.xi, self.eta,
                                             self.vx, self.kappa_left, self.mu_left, self.kappa_right, self.mu_right)

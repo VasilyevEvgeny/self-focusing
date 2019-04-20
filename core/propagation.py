@@ -1,6 +1,7 @@
 from core.libs import *
-from core.visualization import *
-from core.utils import Logger, Manager
+from core.visualization import plot_beam, plot_track
+from core.logger import Logger
+from core.manager import Manager
 
 
 class Propagator:
@@ -29,6 +30,8 @@ class Propagator:
 
         self.z = 0.0
         self.dz = kwargs["dz0"]
+
+        self.max_intensity_to_stop = 100
 
         self.states_columns = ["z, m", "dz, m", "i_max / i_0", "i_max, W / m^2"]
         self.states_arr = np.zeros(shape=(self.n_z + 1, 4))
@@ -63,10 +66,6 @@ class Propagator:
         self.states_arr = self.states_arr[:row_max, :]
 
     def propagate(self):
-        t_diffraction, t_kerr, t_flush, t_plot_beam, t_logger = 0, 0, 0, 0, 0
-
-        start = time()
-
         self.manager.create_global_results_dir()
         self.manager.create_results_dir()
         self.manager.create_track_dir()
@@ -76,59 +75,41 @@ class Propagator:
 
         for n_step in range(int(self.n_z) + 1):
             if n_step:
-                t_start = time()
                 if self.diffraction:
-                    self.diffraction.process(self.dz)
-                t_end = time()
-                t_diffraction += t_end - t_start
+                    self.logger.measure_time(self.diffraction.process_diffraction, [self.dz])
 
-                t_start = time()
                 if self.kerr_effect:
-                    self.kerr_effect.process(self.dz)
-                t_end = time()
-                t_kerr = t_end - t_start
+                    self.logger.measure_time(self.kerr_effect.process_kerr_effect, [self.dz])
 
-                self.beam.update_intensity()
+                self.logger.measure_time(self.beam.update_intensity, [])
 
                 self.z += self.dz
 
                 if not self.flag_const_dz:
-                    self.dz = self.update_dz(self.beam.medium.k_0, self.beam.medium.n_0, self.beam.medium.n_2, self.beam.i_max, self.beam.i_0, self.dz)
+                    self.dz = self.logger.measure_time(self.update_dz, [self.beam.medium.k_0, self.beam.medium.n_0,
+                                                                        self.beam.medium.n_2, self.beam.i_max,
+                                                                        self.beam.i_0, self.dz])
 
-            t_start = time()
-            self.flush_current_state(self.states_arr, n_step, self.z, self.dz,
-                                     self.beam.i_max, self.beam.i_0)
-            t_end = time()
-            t_flush += t_end - t_start
+            self.logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
+                                                                self.beam.i_max, self.beam.i_0])
 
-            t_start = time()
             if not n_step % self.dn_print_current_state:
-                self.logger.print_current_state(n_step, self.states_arr, self.states_columns)
-            t_end = time()
-            t_logger += t_end - t_start
+                self.logger.measure_time(self.logger.print_current_state, [n_step, self.states_arr,
+                                                                           self.states_columns])
 
-            t_start = time()
             if (not (n_step % self.dn_plot_beam)) and self.flag_print_beam:
-                plot_beam(self.beam, self.z, n_step, self.manager.beam_dir, self.plot_beam_normalization)
-            t_end = time()
-            t_plot_beam += t_end - t_start
+                self.logger.measure_time(plot_beam, [self.beam, self.z, n_step, self.manager.beam_dir,
+                                                     self.plot_beam_normalization])
 
-            if (self.beam.i_max > 100):
+            if self.beam.i_max > self.max_intensity_to_stop:
                 break
 
-        self.crop_states_arr()
-        self.logger.log_track(self.states_arr, self.states_columns)
+        self.logger.measure_time(self.crop_states_arr, [])
+        self.logger.measure_time(self.logger.log_track, [self.states_arr, self.states_columns])
 
         if self.flag_print_track:
             parameter_index = self.states_columns.index("i_max / i_0")
-            plot_track(self.states_arr, parameter_index,
-                        self.manager.track_dir)
-        end = time()
+            self.logger.measure_time(plot_track, [self.states_arr, parameter_index,
+                                                  self.manager.track_dir])
 
-        print("diffraction = %.02f s" % (t_diffraction))
-        print("kerr = %.02f s" % (t_kerr))
-        print("pandas = %.02f s" % (t_flush))
-        print("plot_beam = %.02f s" % (t_plot_beam))
-        print("logger = %.02f s" % (t_logger))
-
-        print("\ntime = %.02f s" % (end-start))
+        self.logger.log_times()

@@ -1,44 +1,31 @@
 from core.libs import *
 
 
-class Manager:
-    def __init__(self, **kwargs):
-        self.global_root_dir = kwargs.get("global_root_dir", "/".join(os.path.abspath(__file__).split("\\")[:-2]))
-        self.global_results_dir_name = "Self-focusing_3D_results"
-        self.global_results_dir = self.global_root_dir + "/" + self.global_results_dir_name
-        datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.results_dir = self.global_results_dir + "/" + datetime_string
-        self.track_dir = self.results_dir + "/track"
-        self.beam_dir = self.results_dir + "/beam"
-
-    @staticmethod
-    def create_dir(path):
-        if os.path.exists(path):
-            raise Exception("Directory %s already exists" % path)
-        else:
-            os.makedirs(path)
-
-    def create_global_results_dir(self):
-        try:
-            self.create_dir(self.global_results_dir)
-        except:
-            pass
-
-    def create_results_dir(self):
-        self.create_dir(self.results_dir)
-
-    def create_track_dir(self):
-        self.create_dir(self.track_dir)
-
-    def create_beam_dir(self):
-        self.create_dir(self.beam_dir)
-
-
 class Logger:
     def __init__(self, **kwargs):
         self.path = kwargs["path"]
         self.diffraction = kwargs["diffraction"]
         self.kerr_effect = kwargs["kerr_effect"]
+
+        self.functions = OrderedDict()
+
+    def measure_time(self, function, args):
+        t_start = time()
+        res = function(*args)
+        t_end = time()
+        duration = t_end - t_start
+        function_name = function.__name__
+        if function_name in self.functions.keys():
+            self.functions[function_name] += duration
+        else:
+            self.functions.update({function_name: 0.0})
+
+        return res
+
+    def log_times(self):
+        with open(self.path + "/time_logs.txt", "w") as f:
+            for key in self.functions:
+                f.write("{:20s} = {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
 
     def save_initial_parameters(self, beam):
         separator = "========================================"

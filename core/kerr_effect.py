@@ -27,7 +27,7 @@ class KerrExecutor_R(KerrExecutor):
 
         return field
 
-    def process(self, dz):
+    def process_kerr_effect(self, dz):
         current_nonlin_phase = self.nonlin_phase_const * dz
         n_r = self.beam.field.shape[0]
         self.beam.field = self.phase_multiplication(self.beam.field, self.beam.intensity, current_nonlin_phase, n_r)
@@ -50,7 +50,7 @@ class KerrExecutor_XY(KerrExecutor):
 
         return field
 
-    def process(self, dz):
+    def process_kerr_effect(self, dz):
         current_nonlin_phase = self.nonlin_phase_const * dz
         n_x, n_y = self.beam.field.shape[0], self.beam.field.shape[1]
         self.beam.field = self.phase_multiplication(self.beam.field, self.beam.intensity, current_nonlin_phase, n_x, n_y)

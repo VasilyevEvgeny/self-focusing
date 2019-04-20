@@ -5,7 +5,6 @@ from core.beam import Beam_XY
 from core.args import parse_args
 from core.libs import *
 
-t_start = time()
 
 args = parse_args()
 
@@ -26,13 +25,11 @@ propagator = Propagator(global_root_dir=args.global_root_dir,
                         diffraction=FourierDiffractionExecutor_XY(beam=beam),
                         #kerr_effect=KerrExecutor_XY(beam=beam),
                         n_z=1000,
-                        dz0=beam.z_diff / 1000, #10**-5, #,
+                        dz0=beam.z_diff / 1000,
                         flag_const_dz=True,
                         dn_print_current_state=50,
                         dn_plot_beam=50,
                         plot_beam_normalization="local")
 
-
 propagator.propagate()
-t_end = time()
-print("FULL TIME = %.02f" % (t_end - t_start))
+

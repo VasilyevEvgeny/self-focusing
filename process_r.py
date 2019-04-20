@@ -5,7 +5,6 @@ from core.beam import Beam_R
 from core.args import parse_args
 from core.libs import *
 
-t_start = time()
 
 args = parse_args()
 
@@ -30,7 +29,4 @@ propagator = Propagator(global_root_dir=args.global_root_dir,
                         dn_plot_beam=50,
                         plot_beam_normalization="local")
 
-
 propagator.propagate()
-t_end = time()
-print("FULL TIME = %.02f" % (t_end - t_start))
