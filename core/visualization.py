@@ -87,5 +87,4 @@ def plot_track(states_arr, parameter_index, path):
     plt.yticks(fontsize=font_size, fontweight="bold")
 
     plt.savefig(path + "/i_max(z).png", bbox_inches='tight')
-    plt.show()
     plt.close()

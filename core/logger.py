@@ -50,8 +50,6 @@ class Logger:
             f.write("{:20s} = {:s}\n".format("distribution", beam.distribution_type))
             if beam.distribution_type == "vortex":
                 f.write("{:20s} = {:d}\n".format("m", beam.m))
-                f.write("{:20s} = {:1.4f}\n".format("amp_noise_coeff", beam.amp_noise_coeff))
-                f.write("{:20s} = {:1.4f}\n".format("phase_noise_coeff", beam.phase_noise_coeff))
             if beam.info == "beam_r":
                 f.write("{:20s} = {:d}\n".format("r_0, microns", round(beam.r_0 * 10 ** 6)))
                 f.write("{:20s} = {:d}\n".format("r_max, microns", round(beam.r_max * 10 ** 6)))
@@ -66,6 +64,8 @@ class Logger:
                 f.write("{:20s} = {:d}\n".format("n_y", beam.n_y))
                 f.write("{:20s} = {:2.2f}\n".format("dx, microns", beam.dx * 10**6))
                 f.write("{:20s} = {:2.2f}\n".format("dy, microns", beam.dy * 10**6))
+                f.write("{:20s} = {:1.4f}\n".format("amp_noise_coeff", beam.amp_noise_coeff))
+                f.write("{:20s} = {:1.4f}\n".format("phase_noise_coeff", beam.phase_noise_coeff))
             f.write("{:20s} = {:d}\n".format("lmbda, nm", round(beam.lmbda * 10**9)))
             f.write("{:20s} = {:2.4f}\n".format("z_diff, m", beam.z_diff))
             if beam.distribution_type == "gauss" or beam.distribution_type == "ring":

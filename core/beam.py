@@ -30,8 +30,6 @@ class Beam(metaclass=abc.ABCMeta):
         elif self.distribution_type == "vortex":
             self.m = kwargs["m"]
             self.M = self.m
-            self.amp_noise_coeff = kwargs["amp_noise_coeff"]
-            self.phase_noise_coeff = kwargs["phase_noise_coeff"]
             self.Pcr_V = self.calculate_Pcr_V()
             self.P0_to_Pcr_V = kwargs["P0_to_Pcr_V"]
             self.p_0 = self.P0_to_Pcr_V * self.Pcr_V
@@ -70,7 +68,7 @@ class Beam_R(Beam):
         elif self.distribution_type == "vortex":
             self.field = self.initialize_field_vortex(self.m, self.r_0, self.dr, self.n_r)
 
-        self.i_0 = self.calculate_I0()
+        self.i_0 = self.calculate_i0()
         self.z_diff = self.medium.k_0 * self.r_0**2
 
         self.update_intensity()
@@ -92,7 +90,7 @@ class Beam_R(Beam):
 
         return intensity
 
-    def calculate_I0(self):
+    def calculate_i0(self):
         return self.p_0 / (pi * self.r_0**2 * gamma(self.m+1))
 
     @staticmethod
@@ -144,6 +142,9 @@ class Beam_XY(Beam):
         self.k_xs = [i * self.dk_x if i < self.n_x / 2 else (i - self.n_x) * self.dk_x for i in range(self.n_x)]
         self.k_ys = [i * self.dk_y if i < self.n_y / 2 else (i - self.n_y) * self.dk_y for i in range(self.n_y)]
 
+        self.amp_noise_coeff = kwargs["amp_noise_coeff"]
+        self.phase_noise_coeff = kwargs["phase_noise_coeff"]
+
         if self.distribution_type == "gauss":
             self.field = self.initialize_field_gauss(self.x_0, self.y_0, self.x_max, self.y_max, self.dx, self.dy,
                                                      self.n_x, self.n_y)
@@ -155,7 +156,7 @@ class Beam_XY(Beam):
                                                       self.dy, self.n_x, self.n_y, self.amp_noise_coeff,
                                                       self.phase_noise_coeff)
 
-        self.i_0 = self.calculate_I0()
+        self.i_0 = self.calculate_i0()
         self.z_diff = self.medium.k_0 * (self.x_0 ** 2 + self.y_0 ** 2) / 2
 
         self.update_intensity()
@@ -178,12 +179,21 @@ class Beam_XY(Beam):
 
         return intensity
 
-    def calculate_I0(self):
-        # i_distribution = lambda x, y: mpmath.norm(self.a_distribution(x, y))**2
-        # lim = mpf(max(self.x_max, self.y_max))
-        # i_0 = self.p_0 / float(mpmath_nquad(lambda x, y: i_distribution(x, y), [-lim, +lim], [-lim, +lim]))
+    @staticmethod
+    @jit(nopython=True)
+    def calculate_intensity_intergral(field, n_x, n_y, dx, dy):
+        intensity_intergral = 0.0
+        for i in range(n_x):
+            for j in range(n_y):
+                intensity_intergral += (field[i, j] * conj(field[i, j])).real * dx * dy
 
-        return self.p_0 / (pi * (self.x_0**2 + self.y_0**2) / 2 * gamma(self.m+1))
+        return intensity_intergral
+
+    def calculate_i0(self):
+        if self.amp_noise_coeff == 0.0 and self.phase_noise_coeff == 0.0:
+            return self.p_0 / (pi * (self.x_0**2 + self.y_0**2) / 2 * gamma(self.m+1))
+        else:
+            return self.p_0 / self.calculate_intensity_intergral(self.field, self.n_x, self.n_y, self.dx, self.dy)
 
     @staticmethod
     @jit(nopython=True, debug=True)

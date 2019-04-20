@@ -11,20 +11,20 @@ class FourierDiffractionExecutor_XY:
 
     @staticmethod
     @jit(nopython=True)
-    def phase_increment(field_fft, n_x, n_y, k_xs, k_ys, k_0, dz):
-        const = 0.5j * dz / k_0
+    def phase_increment(field_fft, n_x, n_y, k_xs, k_ys, current_lin_phase):
         for i in range(n_x):
-            field_fft[i, :] *= exp(const * k_xs[i] ** 2)
+            field_fft[i, :] *= exp(current_lin_phase * k_xs[i] ** 2)
 
         for j in range(n_y):
-            field_fft[:, j] *= exp(const * k_ys[j] ** 2)
+            field_fft[:, j] *= exp(current_lin_phase * k_ys[j] ** 2)
 
         return field_fft
 
     def process_diffraction(self, dz):
+        current_lin_phase = 0.5j * dz / self.beam.medium.k_0
         field_fft = fft2(self.beam.field)
         field_fft = self.phase_increment(field_fft, self.beam.n_x, self.beam.n_y, self.beam.k_xs,
-                                         self.beam.k_ys, self.beam.medium.k_0, dz)
+                                         self.beam.k_ys, current_lin_phase)
         self.beam.field = ifft2(field_fft)
 
 
