@@ -142,8 +142,14 @@ class Beam_XY(Beam):
         self.k_xs = [i * self.dk_x if i < self.n_x / 2 else (i - self.n_x) * self.dk_x for i in range(self.n_x)]
         self.k_ys = [i * self.dk_y if i < self.n_y / 2 else (i - self.n_y) * self.dk_y for i in range(self.n_y)]
 
-        self.amp_noise_coeff = kwargs["amp_noise_coeff"]
-        self.phase_noise_coeff = kwargs["phase_noise_coeff"]
+        self.amp_noise_percent = kwargs["amp_noise_percent"]
+        self.phase_noise_percent = kwargs["phase_noise_percent"]
+
+        self.phase_noise_screen, self.amp_noise_screen = None, None
+        if self.phase_noise_percent:
+            self.generate_phase_noise_screen()
+
+
 
         if self.distribution_type == "gauss":
             self.field = self.initialize_field_gauss(self.x_0, self.y_0, self.x_max, self.y_max, self.dx, self.dy,
@@ -153,8 +159,8 @@ class Beam_XY(Beam):
                                                     self.dy, self.n_x, self.n_y)
         elif self.distribution_type == "vortex":
             self.field = self.initialize_field_vortex(self.m, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
-                                                      self.dy, self.n_x, self.n_y, self.amp_noise_coeff,
-                                                      self.phase_noise_coeff)
+                                                      self.dy, self.n_x, self.n_y, self.amp_noise_percent,
+                                                      self.phase_noise_percent)
 
         self.i_0 = self.calculate_i0()
         self.z_diff = self.medium.k_0 * (self.x_0 ** 2 + self.y_0 ** 2) / 2
@@ -168,6 +174,16 @@ class Beam_XY(Beam):
     def update_intensity(self):
         self.intensity = self.field_to_intensity(self.field, self.n_x, self.n_y)
         self.i_max = np.max(self.intensity)
+
+    def generate_phase_noise_screen(self, smooth_parameter_meters=20*10**-6):
+        phase_distortions = np.random.rand(self.n_x, self.n_y)
+        smooth_parameter_points = int(smooth_parameter_meters / self.dx)
+        smoothed = filters.gaussian_filter(phase_distortions, [smooth_parameter_points, smooth_parameter_points],
+                                           mode='constant')
+        desired_med = 2 * pi * self.phase_noise_percent / 100
+        current_med = np.median(smoothed)
+
+        self.phase_noise_screen = smoothed * np.full((self.n_x, self.n_y), desired_med / current_med)
 
     @staticmethod
     @jit(nopython=True)
@@ -190,7 +206,7 @@ class Beam_XY(Beam):
         return intensity_intergral
 
     def calculate_i0(self):
-        if self.amp_noise_coeff == 0.0 and self.phase_noise_coeff == 0.0:
+        if self.amp_noise_percent == 0.0 and self.phase_noise_percent == 0.0:
             return self.p_0 / (pi * (self.x_0**2 + self.y_0**2) / 2 * gamma(self.m+1))
         else:
             return self.p_0 / self.calculate_intensity_intergral(self.field, self.n_x, self.n_y, self.dx, self.dy)

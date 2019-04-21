@@ -1,5 +1,5 @@
 from core.libs import *
-from core.visualization import plot_beam, plot_track
+from core.visualization import plot_beam, plot_track, plot_phase_screen
 from core.logger import Logger
 from core.manager import Manager
 
@@ -72,6 +72,7 @@ class Propagator:
         self.manager.create_beam_dir()
 
         self.logger.save_initial_parameters(self.beam)
+        plot_phase_screen(self.beam, self.manager.results_dir)
 
         for n_step in range(int(self.n_z) + 1):
             if n_step:
@@ -89,6 +90,9 @@ class Propagator:
                     self.dz = self.logger.measure_time(self.update_dz, [self.beam.medium.k_0, self.beam.medium.n_0,
                                                                         self.beam.medium.n_2, self.beam.i_max,
                                                                         self.beam.i_0, self.dz])
+
+                if self.beam.phase_noise_percent:
+                    self.logger.measure_time(self.beam.generate_phase_noise_screen, [])
 
             self.logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
                                                                 self.beam.i_max, self.beam.i_0])
