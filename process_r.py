@@ -13,7 +13,7 @@ beam = Beam_R(medium="SiO2",
               P0_to_Pcr_V=5,
               m=1,
               amp_noise_coeff=0.00,
-              phase_noise_coeff=0.0,
+              phase_noise_coeff=0.00,
               lmbda=1800*10**-9,
               r_0=100*10**-6,
               n_r=1024)

@@ -31,7 +31,9 @@ class Propagator:
         self.z = 0.0
         self.dz = kwargs["dz0"]
 
-        self.max_intensity_to_stop = 100
+        self.max_intensity_to_stop = 10**17
+
+        plot_phase_screen(self.beam, self.manager.results_dir)
 
         self.states_columns = ["z, m", "dz, m", "i_max / i_0", "i_max, W / m^2"]
         self.states_arr = np.zeros(shape=(self.n_z + 1, 4))
@@ -65,6 +67,9 @@ class Propagator:
 
         self.states_arr = self.states_arr[:row_max, :]
 
+    def apply_phase_noise_screen_to_field(self):
+        self.beam.field = np.multiply(self.beam.field, self.beam.phase_noise_screen)
+
     def propagate(self):
         self.manager.create_global_results_dir()
         self.manager.create_results_dir()
@@ -72,10 +77,13 @@ class Propagator:
         self.manager.create_beam_dir()
 
         self.logger.save_initial_parameters(self.beam)
-        plot_phase_screen(self.beam, self.manager.results_dir)
 
         for n_step in range(int(self.n_z) + 1):
             if n_step:
+                if self.beam.phase_noise_percent:
+                    if n_step == 1:
+
+
                 if self.diffraction:
                     self.logger.measure_time(self.diffraction.process_diffraction, [self.dz])
 
@@ -91,8 +99,8 @@ class Propagator:
                                                                         self.beam.medium.n_2, self.beam.i_max,
                                                                         self.beam.i_0, self.dz])
 
-                if self.beam.phase_noise_percent:
-                    self.logger.measure_time(self.beam.generate_phase_noise_screen, [])
+
+
 
             self.logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
                                                                 self.beam.i_max, self.beam.i_0])
@@ -105,7 +113,7 @@ class Propagator:
                 self.logger.measure_time(plot_beam, [self.beam, self.z, n_step, self.manager.beam_dir,
                                                      self.plot_beam_normalization])
 
-            if self.beam.i_max > self.max_intensity_to_stop:
+            if self.beam.i_max * self.beam.i_0 > self.max_intensity_to_stop:
                 break
 
         self.logger.measure_time(self.crop_states_arr, [])

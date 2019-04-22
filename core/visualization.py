@@ -69,28 +69,52 @@ def plot_beam(beam, z, step, path, plot_beam_normalization, title=False):
 
     del arr
 
-def plot_phase_screen(beam, path):
 
-    print("median = ", np.median(beam.phase_noise_screen))
-    print("min = ", np.min(beam.phase_noise_screen))
-    print("max = ", np.max(beam.phase_noise_screen))
+def plot_phase_screen(beam, path):
+    x_left = -400 * 10 ** -6
+    x_right = 400 * 10 ** -6
+    y_left = -400 * 10 ** -6
+    y_right = 400 * 10 ** -6
+
+    arr = beam.phase_noise_screen.imag
+    xs, ys = beam.xs, beam.ys
+
+    arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode="x")
+    arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode="y")
+
+    arr = np.transpose(arr)
+
+    xs = xs[x_idx_left:x_idx_right]
+    ys = ys[y_idx_left:y_idx_right]
+
+    #print("median = ", np.median(beam.phase_noise_screen))
+    #print("min = ", np.min(beam.phase_noise_screen))
+    #print("max = ", np.max(beam.phase_noise_screen))
 
     font_size = 50
-    fig, ax = plt.subplots(figsize=(15, 12))
+    fig, ax = plt.subplots(figsize=(12, 10))
 
-    const_sigma = 0.2
+    const_sigma = 0.3
     med_val = beam.phase_noise_percent / 100 * 2 * pi
     max_val = med_val + const_sigma * med_val
     min_val = med_val - const_sigma * med_val
     n_levels_plot = 100
     dp = (max_val - min_val) / n_levels_plot
     levels_plot = [ min_val + i * dp for i in range(n_levels_plot) ]
-    plot = plt.contourf(beam.phase_noise_screen, cmap="jet", levels=levels_plot)
 
+    plot = plt.contourf(arr, cmap="jet", levels=levels_plot)
+
+    x_labels = ["-200", "0", "+200"]
+    y_labels = ["-200", "0", "+200"]
+    x_ticks = calc_ticks_x(x_labels, xs)
+    y_ticks = calc_ticks_x(y_labels, ys)
+    plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
+    plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
+    plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
+    plt.ylabel("y, мкм", fontsize=font_size, fontweight="bold")
+
+    ax.grid(color="white", linestyle='--', linewidth=5)
     ax.set_aspect("equal")
-
-    plt.xticks([])
-    plt.yticks([])
 
     levels_ticks_colorbar = [ med_val - 0.5 * const_sigma * med_val,
                               med_val,
@@ -100,8 +124,8 @@ def plot_phase_screen(beam, path):
                    "%05.2f" % beam.phase_noise_percent,
                    "%05.2f" % (beam.phase_noise_percent + 0.5 * const_sigma * beam.phase_noise_percent)]
 
-    print(levels_ticks_colorbar)
-    print(ticks_cbar)
+    #print(levels_ticks_colorbar)
+    #print(ticks_cbar)
 
     colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation="vertical", aspect=10, pad=0.05)
     colorbar.set_label("$\mathbf{\Delta \\varphi / 2\pi}$, %", labelpad=-120, y=1.15, rotation=0, fontsize=font_size, fontweight="bold")
@@ -110,6 +134,8 @@ def plot_phase_screen(beam, path):
 
     plt.savefig(path + "/example_of_phase_screen.png", bbox_inches="tight")
     plt.close()
+
+    del arr
 
 def plot_track(states_arr, parameter_index, path):
     zs = [ e * 10**2 for e in states_arr[:,0] ]

@@ -25,7 +25,7 @@ class Logger:
     def log_times(self):
         with open(self.path + "/time_logs.txt", "w") as f:
             for key in self.functions:
-                f.write("{:20s} = {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
+                f.write("{:40s} = {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
 
     def save_initial_parameters(self, beam):
         separator = "========================================"

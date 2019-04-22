@@ -145,11 +145,12 @@ class Beam_XY(Beam):
         self.amp_noise_percent = kwargs["amp_noise_percent"]
         self.phase_noise_percent = kwargs["phase_noise_percent"]
 
-        self.phase_noise_screen, self.amp_noise_screen = None, None
-        if self.phase_noise_percent:
-            self.generate_phase_noise_screen()
+        #self.beam.generate_phase_noise_screen, []
 
 
+
+        #self.phase_noise_screen = np.zeros(shape=(self.n_x, self.n_y), dtype=np.complex64)
+        #self.amp_noise_screen = np.zeros(shape=(self.n_x, self.n_y), dtype=np.complex64)
 
         if self.distribution_type == "gauss":
             self.field = self.initialize_field_gauss(self.x_0, self.y_0, self.x_max, self.y_max, self.dx, self.dy,
@@ -175,7 +176,7 @@ class Beam_XY(Beam):
         self.intensity = self.field_to_intensity(self.field, self.n_x, self.n_y)
         self.i_max = np.max(self.intensity)
 
-    def generate_phase_noise_screen(self, smooth_parameter_meters=20*10**-6):
+    def generate_phase_noise_screen(self, smooth_parameter_meters=50*10**-6):
         phase_distortions = np.random.rand(self.n_x, self.n_y)
         smooth_parameter_points = int(smooth_parameter_meters / self.dx)
         smoothed = filters.gaussian_filter(phase_distortions, [smooth_parameter_points, smooth_parameter_points],
@@ -183,7 +184,7 @@ class Beam_XY(Beam):
         desired_med = 2 * pi * self.phase_noise_percent / 100
         current_med = np.median(smoothed)
 
-        self.phase_noise_screen = smoothed * np.full((self.n_x, self.n_y), desired_med / current_med)
+        self.phase_noise_screen = exp(1j * smoothed * np.full((self.n_x, self.n_y), desired_med / current_med))
 
     @staticmethod
     @jit(nopython=True)
@@ -241,9 +242,7 @@ class Beam_XY(Beam):
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
-                da = 2 * (np.random.random() - 0.5) * amp_noise_coeff
-                dphi = 2 * (np.random.random() - 0.5) * phase_noise_coeff
-                arr[i, j] = (1 + da) * sqrt(x**2 / x_0**2 + y**2 / y_0**2)**m * exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2)) * \
-                            exp(1j * m * arctan2(x, y) * (1.0 + dphi))
+                arr[i, j] = sqrt(x**2 / x_0**2 + y**2 / y_0**2)**m * exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2)) * \
+                            exp(1j * m * arctan2(x, y))
 
         return arr
