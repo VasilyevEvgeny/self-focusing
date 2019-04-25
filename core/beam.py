@@ -142,26 +142,23 @@ class Beam_XY(Beam):
         self.k_xs = [i * self.dk_x if i < self.n_x / 2 else (i - self.n_x) * self.dk_x for i in range(self.n_x)]
         self.k_ys = [i * self.dk_y if i < self.n_y / 2 else (i - self.n_y) * self.dk_y for i in range(self.n_y)]
 
-        self.amp_noise_percent = kwargs["amp_noise_percent"]
-        self.phase_noise_percent = kwargs["phase_noise_percent"]
-
-        #self.beam.generate_phase_noise_screen, []
-
-
-
-        #self.phase_noise_screen = np.zeros(shape=(self.n_x, self.n_y), dtype=np.complex64)
-        #self.amp_noise_screen = np.zeros(shape=(self.n_x, self.n_y), dtype=np.complex64)
+        self.noise_percent = kwargs["noise_percent"]
+        if self.noise_percent:
+            self.noise_field = self.generate_gaussian_noise_field(r_corr_in_meters=self.x_0,
+                                                                  mu=0,
+                                                                  sigma=1)
+        else:
+            self.noise_field = np.zeros(shape=(self.n_x, self.n_y))
 
         if self.distribution_type == "gauss":
             self.field = self.initialize_field_gauss(self.x_0, self.y_0, self.x_max, self.y_max, self.dx, self.dy,
-                                                     self.n_x, self.n_y)
+                                                     self.n_x, self.n_y, self.noise_percent, self.noise_field)
         elif self.distribution_type == "ring":
             self.field = self.initialize_field_ring(self.M, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
-                                                    self.dy, self.n_x, self.n_y)
+                                                    self.dy, self.n_x, self.n_y, self.noise_percent, self.noise_field)
         elif self.distribution_type == "vortex":
             self.field = self.initialize_field_vortex(self.m, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
-                                                      self.dy, self.n_x, self.n_y, self.amp_noise_percent,
-                                                      self.phase_noise_percent)
+                                                      self.dy, self.n_x, self.n_y, self.noise_percent, self.noise_field)
 
         self.i_0 = self.calculate_i0()
         self.z_diff = self.medium.k_0 * (self.x_0 ** 2 + self.y_0 ** 2) / 2
@@ -176,15 +173,15 @@ class Beam_XY(Beam):
         self.intensity = self.field_to_intensity(self.field, self.n_x, self.n_y)
         self.i_max = np.max(self.intensity)
 
-    def generate_phase_noise_screen(self, smooth_parameter_meters=50*10**-6):
-        phase_distortions = np.random.rand(self.n_x, self.n_y)
-        smooth_parameter_points = int(smooth_parameter_meters / self.dx)
-        smoothed = filters.gaussian_filter(phase_distortions, [smooth_parameter_points, smooth_parameter_points],
-                                           mode='constant')
-        desired_med = 2 * pi * self.phase_noise_percent / 100
-        current_med = np.median(smoothed)
+    def generate_gaussian_noise_field(self, **params):
+        r_corr_in_meters = params["r_corr_in_meters"]
+        mu = params["mu"]
+        sigma = params["sigma"]
 
-        self.phase_noise_screen = exp(1j * smoothed * np.full((self.n_x, self.n_y), desired_med / current_med))
+        r_corr_x_in_points, r_corr_y_in_points = int(r_corr_in_meters / self.dx), int(r_corr_in_meters / self.dy)
+        gaussian_noise = np.random.normal(mu, sigma, (self.n_x, self.n_y))
+
+        return filters.gaussian_filter(gaussian_noise, [r_corr_x_in_points, r_corr_y_in_points])
 
     @staticmethod
     @jit(nopython=True)
@@ -207,42 +204,45 @@ class Beam_XY(Beam):
         return intensity_intergral
 
     def calculate_i0(self):
-        if self.amp_noise_percent == 0.0 and self.phase_noise_percent == 0.0:
+        if self.noise_percent == 0.0:
             return self.p_0 / (pi * (self.x_0**2 + self.y_0**2) / 2 * gamma(self.m+1))
         else:
             return self.p_0 / self.calculate_intensity_intergral(self.field, self.n_x, self.n_y, self.dx, self.dy)
 
     @staticmethod
     @jit(nopython=True, debug=True)
-    def initialize_field_gauss(x_0, y_0, x_max, y_max, dx, dy, n_x, n_y):
+    def initialize_field_gauss(x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
         arr = np.zeros(shape=(n_x, n_y), dtype=np.complex64)
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
-                arr[i, j] = exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2))
+                arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
+                            exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2))
 
         return arr
 
     @staticmethod
     @jit(nopython=True)
-    def initialize_field_ring(M, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y):
+    def initialize_field_ring(M, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
         arr = np.zeros(shape=(n_x, n_y), dtype=np.complex64)
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
-                arr[i, j] = sqrt(x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2) ** M * exp(
-                    -0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2))
+                arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
+                            sqrt(x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2) ** M * \
+                            exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2))
 
         return arr
 
     @staticmethod
     @jit(nopython=False)
-    def initialize_field_vortex(m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, amp_noise_coeff, phase_noise_coeff):
+    def initialize_field_vortex(m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
         arr = np.zeros(shape=(n_x, n_y), dtype=np.complex64)
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
-                arr[i, j] = sqrt(x**2 / x_0**2 + y**2 / y_0**2)**m * exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2)) * \
-                            exp(1j * m * arctan2(x, y))
+                arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
+                            sqrt(x**2 / x_0**2 + y**2 / y_0**2)**m * \
+                            exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2)) * exp(1j * m * arctan2(x, y))
 
         return arr

@@ -1,7 +1,8 @@
 from core.libs import *
-from core.visualization import plot_beam, plot_track, plot_phase_screen
+from core.visualization import plot_beam, plot_track
 from core.logger import Logger
 from core.manager import Manager
+from core.visualization import plot_noise_field
 
 
 class Propagator:
@@ -32,8 +33,6 @@ class Propagator:
         self.dz = kwargs["dz0"]
 
         self.max_intensity_to_stop = 10**17
-
-        plot_phase_screen(self.beam, self.manager.results_dir)
 
         self.states_columns = ["z, m", "dz, m", "i_max / i_0", "i_max, W / m^2"]
         self.states_arr = np.zeros(shape=(self.n_z + 1, 4))
@@ -78,12 +77,11 @@ class Propagator:
 
         self.logger.save_initial_parameters(self.beam)
 
+        if self.beam.noise_percent:
+            plot_noise_field(self.beam, self.manager.results_dir)
+
         for n_step in range(int(self.n_z) + 1):
             if n_step:
-                if self.beam.phase_noise_percent:
-                    if n_step == 1:
-
-
                 if self.diffraction:
                     self.logger.measure_time(self.diffraction.process_diffraction, [self.dz])
 
@@ -98,9 +96,6 @@ class Propagator:
                     self.dz = self.logger.measure_time(self.update_dz, [self.beam.medium.k_0, self.beam.medium.n_0,
                                                                         self.beam.medium.n_2, self.beam.i_max,
                                                                         self.beam.i_0, self.dz])
-
-
-
 
             self.logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
                                                                 self.beam.i_max, self.beam.i_0])

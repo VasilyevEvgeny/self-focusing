@@ -64,8 +64,7 @@ class Logger:
                 f.write("{:20s} = {:d}\n".format("n_y", beam.n_y))
                 f.write("{:20s} = {:2.2f}\n".format("dx, microns", beam.dx * 10**6))
                 f.write("{:20s} = {:2.2f}\n".format("dy, microns", beam.dy * 10**6))
-                f.write("{:20s} = {:1.4f}\n".format("amp_noise_percent", beam.amp_noise_percent))
-                f.write("{:20s} = {:1.4f}\n".format("phase_noise_percent", beam.phase_noise_percent))
+                f.write("{:20s} = {:03.2f}\n".format("noise_percent", beam.noise_percent))
             f.write("{:20s} = {:d}\n".format("lmbda, nm", round(beam.lmbda * 10**9)))
             f.write("{:20s} = {:2.4f}\n".format("z_diff, m", beam.z_diff))
             if beam.distribution_type == "gauss" or beam.distribution_type == "ring":
