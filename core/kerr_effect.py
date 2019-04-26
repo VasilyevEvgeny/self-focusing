@@ -42,11 +42,8 @@ class KerrExecutor_XY(KerrExecutor):
         return "kerr_executor_xy"
 
     @staticmethod
-    @jit(nopython=True)
     def phase_multiplication(field, intensity, current_nonlin_phase, n_x, n_y):
-        for i in range(n_x):
-            for j in range(n_y):
-                field[i, j] *= exp(current_nonlin_phase * intensity[i, j])
+        field = np.multiply(field, exp(current_nonlin_phase * intensity))
 
         return field
 
