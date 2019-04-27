@@ -77,7 +77,7 @@ class Propagator:
 
         self.logger.save_initial_parameters(self.beam)
 
-        if self.beam.noise_percent:
+        if self.beam.info == "beam_xy" and self.beam.noise_percent:
             plot_noise_field(self.beam, self.manager.results_dir)
 
         for n_step in range(int(self.n_z) + 1):

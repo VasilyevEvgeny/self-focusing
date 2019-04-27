@@ -8,7 +8,15 @@ class KerrExecutor(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def info(self):
-        """Information about beam"""
+        """Information about KerrExecutor type"""
+
+    @staticmethod
+    @jit(nopython=True)
+    def phase_increment(field, intensity, current_nonlin_phase):
+        return np.multiply(field, exp(current_nonlin_phase * intensity))
+
+    def process_kerr_effect(self, dz):
+        self.beam.field = self.phase_increment(self.beam.field, self.beam.intensity, self.nonlin_phase_const * dz)
 
 
 class KerrExecutor_R(KerrExecutor):
@@ -19,19 +27,6 @@ class KerrExecutor_R(KerrExecutor):
     def info(self):
         return "kerr_executor_r"
 
-    @staticmethod
-    @jit(nopython=True, debug=True)
-    def phase_multiplication(field, intensity, current_nonlin_phase, n_r):
-        for i in range(n_r):
-            field[i] *= exp(current_nonlin_phase * intensity[i])
-
-        return field
-
-    def process_kerr_effect(self, dz):
-        current_nonlin_phase = self.nonlin_phase_const * dz
-        n_r = self.beam.field.shape[0]
-        self.beam.field = self.phase_multiplication(self.beam.field, self.beam.intensity, current_nonlin_phase, n_r)
-
 
 class KerrExecutor_XY(KerrExecutor):
     def __init__(self, **kwargs):
@@ -40,14 +35,3 @@ class KerrExecutor_XY(KerrExecutor):
     @property
     def info(self):
         return "kerr_executor_xy"
-
-    @staticmethod
-    def phase_multiplication(field, intensity, current_nonlin_phase, n_x, n_y):
-        field = np.multiply(field, exp(current_nonlin_phase * intensity))
-
-        return field
-
-    def process_kerr_effect(self, dz):
-        current_nonlin_phase = self.nonlin_phase_const * dz
-        n_x, n_y = self.beam.field.shape[0], self.beam.field.shape[1]
-        self.beam.field = self.phase_multiplication(self.beam.field, self.beam.intensity, current_nonlin_phase, n_x, n_y)

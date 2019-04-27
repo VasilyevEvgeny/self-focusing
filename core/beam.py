@@ -86,7 +86,7 @@ class Beam_R(Beam):
     def field_to_intensity(field, n_r):
         intensity = np.zeros(shape=(n_r,), dtype=np.float64)
         for i in range(n_r):
-            intensity[i] = conj(field[i] * field[i]).real
+            intensity[i] = (field[i] * conj(field[i])).real
 
         return intensity
 
