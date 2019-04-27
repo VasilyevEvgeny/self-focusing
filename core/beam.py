@@ -143,10 +143,14 @@ class Beam_XY(Beam):
         self.k_ys = [i * self.dk_y if i < self.n_y / 2 else (i - self.n_y) * self.dk_y for i in range(self.n_y)]
 
         self.noise_percent = kwargs["noise_percent"]
+        self.r_corr_in_meters, self.autocorrelation = None, None
         if self.noise_percent:
-            self.noise_field = self.generate_gaussian_noise_field(r_corr_in_meters=self.x_0,
+            self.r_corr_in_meters = self.x_0
+            self.noise_field = self.generate_gaussian_noise_field(r_corr_in_meters=self.r_corr_in_meters,
                                                                   mu=0,
                                                                   sigma=1)
+            self.autocorrelation_x, self.autocorrelation_y = \
+                self.calculate_autocorrelations(self.noise_field, self.n_x, self.n_y)
         else:
             self.noise_field = np.zeros(shape=(self.n_x, self.n_y))
 
@@ -182,6 +186,24 @@ class Beam_XY(Beam):
         gaussian_noise = np.random.normal(mu, sigma, (self.n_x, self.n_y))
 
         return filters.gaussian_filter(gaussian_noise, [r_corr_x_in_points, r_corr_y_in_points])
+
+    @staticmethod
+    #@jit(nopython=True)
+    def calculate_autocorrelations(noise_field, n_x, n_y):
+        corr_arr_x, corr_arr_y = np.zeros(shape=(2 * n_x - 1,)), np.zeros(shape=(2 * n_y - 1,))
+
+        #corr_arr_x = np.correlate(noise_field[0, :], noise_field[0, :], mode="full")
+        #corr_arr_y = np.correlate(noise_field[:, 0], noise_field[:, 0], mode="full")
+
+        for i in range(n_x):
+            corr_arr_y += np.correlate(noise_field[i, :], noise_field[i, :], mode="full")
+        corr_arr_y /= n_x
+
+        for i in range(n_y):
+            corr_arr_x += np.correlate(noise_field[:, i], noise_field[:, i], mode="full")
+        corr_arr_x /= n_y
+
+        return corr_arr_x, corr_arr_y
 
     @staticmethod
     @jit(nopython=True)

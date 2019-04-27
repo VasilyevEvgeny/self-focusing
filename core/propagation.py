@@ -1,8 +1,7 @@
 from core.libs import *
-from core.visualization import plot_beam, plot_track
+from core.visualization import plot_beam, plot_track, plot_noise_field, plot_autocorrelations
 from core.logger import Logger
 from core.manager import Manager
-from core.visualization import plot_noise_field
 
 
 class Propagator:
@@ -79,6 +78,7 @@ class Propagator:
 
         if self.beam.info == "beam_xy" and self.beam.noise_percent:
             plot_noise_field(self.beam, self.manager.results_dir)
+            plot_autocorrelations(self.beam, self.manager.results_dir)
 
         for n_step in range(int(self.n_z) + 1):
             if n_step:

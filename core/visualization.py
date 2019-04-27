@@ -110,6 +110,36 @@ def plot_noise_field(beam, path):
     del arr
 
 
+def plot_autocorrelations(beam, path):
+    xx_s = [(i * beam.dx - beam.x_max) * 10**6 for i in range(2 * beam.n_x - 1)]
+    yy_s = [(i * beam.dy - beam.y_max) * 10**6 for i in range(2 * beam.n_y - 1)]
+
+    r_corr = beam.r_corr_in_meters * 10 ** 6
+
+    font_size = 20
+    plt.figure(figsize=(10, 5))
+    plt.plot(xx_s, beam.autocorrelation_x, color="red", linewidth=5, alpha=0.5, label="$\\bar{K}_x$")
+    plt.plot(yy_s, beam.autocorrelation_y, color="blue", linewidth=5, alpha=0.5, label="$\\bar{K}_y$")
+
+    plt.axvline(-r_corr, color="black", linewidth=2)
+    plt.axvline(r_corr, color="black", linewidth=2)
+
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
+
+    plt.xlim([-3.5 * r_corr, 3.5 * r_corr])
+
+    plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
+    plt.ylabel("$\\bar{K}$", fontsize=font_size, fontweight="bold")
+
+    plt.grid(linestyle="dotted", linewidth=2, alpha=0.5)
+
+    plt.legend(bbox_to_anchor=(0., 1.05, 1., .102), fontsize=font_size, loc="center", ncol=2)
+
+    plt.savefig(path + "/autocorrelations.png", bbox_inches="tight")
+    plt.close()
+
+
 def plot_track(states_arr, parameter_index, path):
     zs = [e * 10 ** 2 for e in states_arr[:, 0]]
     parameters = states_arr[:, parameter_index]
