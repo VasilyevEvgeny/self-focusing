@@ -1,7 +1,7 @@
 from core.functions import *
 
 
-def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(5, 5), x_max=200, y_max=200,
+def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(3, 3), x_max=250, y_max=250,
               title=False, ticks=False, labels=False, colorbar=False):
     x_left = -x_max * 10 ** -6
     x_right = x_max * 10 ** -6
