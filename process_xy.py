@@ -19,7 +19,7 @@ beam = Beam_XY(medium="SiO2",
                n_x=2048,
                n_y=2048)
 
-propagator = Propagator(global_root_dir=args.global_root_dir,
+propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=FourierDiffractionExecutor_XY(beam=beam),
                         kerr_effect=KerrExecutor_XY(beam=beam),

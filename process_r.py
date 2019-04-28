@@ -16,7 +16,7 @@ beam = Beam_R(medium="SiO2",
               r_0=100*10**-6,
               n_r=4096)
 
-propagator = Propagator(global_root_dir=args.global_root_dir,
+propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutor_R(beam=beam),
                         kerr_effect=KerrExecutor_R(beam=beam),

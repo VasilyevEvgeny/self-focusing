@@ -1,11 +1,12 @@
 from core.functions import *
 
 
-def plot_beam(beam, z, step, path, plot_beam_normalization, title=False):
-    x_left = -400 * 10 ** -6
-    x_right = 400 * 10 ** -6
-    y_left = -400 * 10 ** -6
-    y_right = 400 * 10 ** -6
+def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(5, 5), x_max=200, y_max=200,
+              title=False, ticks=False, labels=False, colorbar=False):
+    x_left = -x_max * 10 ** -6
+    x_right = x_max * 10 ** -6
+    y_left = -y_max * 10 ** -6
+    y_right = y_max * 10 ** -6
 
     arr, xs, ys = None, None, None
     if beam.info == "beam_r":
@@ -33,36 +34,43 @@ def plot_beam(beam, z, step, path, plot_beam_normalization, title=False):
     di = max_intensity_value / (n_plot_levels)
     levels_plot = [i * di for i in range(n_plot_levels + 1)]
 
-    fig, ax = plt.subplots(figsize=(12, 10))
+    fig, ax = plt.subplots(figsize=fig_size)
     font_size = 50
     cmap = plt.get_cmap("jet")
     plot = contourf(arr, cmap=cmap, levels=levels_plot)
-    x_labels = ["-200", "0", "+200"]
-    y_labels = ["-200", "0", "+200"]
-    x_ticks = calc_ticks_x(x_labels, xs)
-    y_ticks = calc_ticks_x(y_labels, ys)
-    plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
-    plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
-    plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
-    plt.ylabel("y, мкм", fontsize=font_size, fontweight="bold")
+
+    if ticks:
+        x_labels = ["-200", "0", "+200"]
+        y_labels = ["-200", "0", "+200"]
+        x_ticks = calc_ticks_x(x_labels, xs)
+        y_ticks = calc_ticks_x(y_labels, ys)
+        plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
+        plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
+    else:
+        plt.xticks([])
+        plt.yticks([])
+
+    if labels:
+        plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
+        plt.ylabel("y, мкм", fontsize=font_size, fontweight="bold")
 
     if title:
         i_max = np.max(beam.a_to_i()) * beam.i_0
         plt.title("z = " + str(round(z * 10 ** 2, 3)) + " см\nI$_{max}$ = %.2E" % i_max + " Вт/м$^2$\n",
                   fontsize=font_size - 10)
 
-    plt.xlabel("x, мкм")
-    plt.ylabel("y, мкм")
     ax.grid(color="white", linestyle='--', linewidth=3, alpha=0.5)
     ax.set_aspect("equal")
-    n_ticks_colorbar_levels = 4
-    dcb = max_intensity_value / n_ticks_colorbar_levels
-    levels_ticks_colorbar = [i * dcb for i in range(n_ticks_colorbar_levels + 1)]
-    colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation="vertical", aspect=10, pad=0.05)
-    colorbar.set_label("I/I$\mathbf{_0}$", labelpad=-140, y=1.2, rotation=0, fontsize=font_size, fontweight="bold")
-    ticks_cbar = ["%05.2f" % e if e != 0 else "00.00" for e in levels_ticks_colorbar]
-    colorbar.ax.set_yticklabels(ticks_cbar)
-    colorbar.ax.tick_params(labelsize=font_size - 10)
+
+    if colorbar:
+        n_ticks_colorbar_levels = 4
+        dcb = max_intensity_value / n_ticks_colorbar_levels
+        levels_ticks_colorbar = [i * dcb for i in range(n_ticks_colorbar_levels + 1)]
+        colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation="vertical", aspect=10, pad=0.05)
+        colorbar.set_label("I/I$\mathbf{_0}$", labelpad=-140, y=1.2, rotation=0, fontsize=font_size, fontweight="bold")
+        ticks_cbar = ["%05.2f" % e if e != 0 else "00.00" for e in levels_ticks_colorbar]
+        colorbar.ax.set_yticklabels(ticks_cbar)
+        colorbar.ax.tick_params(labelsize=font_size - 10)
 
     plt.savefig(path + "/%04d.png" % step, bbox_inches="tight")
     plt.close()

@@ -6,13 +6,15 @@ from core.manager import Manager
 
 class Propagator:
     def __init__(self, **kwargs):
-        self.global_root_dir = kwargs["global_root_dir"]
+        self.args = kwargs["args"]
+        self.global_root_dir = self.args.global_root_dir
+
         self.beam = kwargs["beam"]
 
         self.diffraction = kwargs.get("diffraction", None)
         self.kerr_effect = kwargs.get("kerr_effect", None)
 
-        self.manager = Manager(global_root_dir=self.global_root_dir)
+        self.manager = Manager(global_root_dir=self.global_root_dir, gif=self.args.gif)
         self.logger = Logger(diffraction=self.diffraction,
                              kerr_effect=self.kerr_effect,
                              path=self.manager.results_dir)

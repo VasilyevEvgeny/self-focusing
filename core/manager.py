@@ -4,10 +4,17 @@ from core.libs import *
 class Manager:
     def __init__(self, **kwargs):
         self.global_root_dir = kwargs.get("global_root_dir", "/".join(os.path.abspath(__file__).split("\\")[:-2]))
-        self.global_results_dir_name = "Self-focusing_3D_results"
+        self.gif = kwargs.get("gif", False)
+
+        self.global_results_dir_name = kwargs.get("global_results_dir_name", "Self-focusing_3D_results")
         self.global_results_dir = self.global_root_dir + "/" + self.global_results_dir_name
         datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.results_dir = self.global_results_dir + "/" + datetime_string
+
+        if not self.gif:
+            self.results_dir = self.global_results_dir + "/" + datetime_string
+        else:
+            self.results_dir = self.global_results_dir + "/GIF_" + datetime_string
+
         self.track_dir = self.results_dir + "/track"
         self.beam_dir = self.results_dir + "/beam"
 

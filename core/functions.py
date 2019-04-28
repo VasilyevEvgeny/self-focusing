@@ -53,3 +53,35 @@ def r_to_xy_real(r_slice):
             if int(r) < n_r - 1:
                 arr[i, j] = linear_approximation_real(r, int(r), r_slice[int(r)], int(r) + 1, r_slice[int(r) + 1])
     return arr
+
+
+def get_files_for_gif(path, prefix="GIF_"):
+    paths_with_gif = []
+    for path in glob(path + "/*"):
+        if path.split("\\")[-1][:4] == prefix:
+            paths_with_gif.append(path)
+
+    if paths_with_gif:
+        files = []
+        for file in glob(paths_with_gif[-1] + "/beam/*"):
+            files.append(file.replace("\\", "/"))
+
+        return files
+    else:
+        raise Exception("No 'GIF_' directories!")
+
+
+def make_animation(files, name, path="./gifs", fps=10):
+    images = []
+    for file in files:
+        images.append(imageio.imread(file))
+
+    # 1 second pause at the beginning
+    for i in range(fps):
+        images = [imageio.imread(files[0])] + images
+
+    # 1 second pause at the end
+    for i in range(fps):
+        images.append(imageio.imread(files[-1]))
+
+    imageio.mimsave(path + "/" + name + ".gif", images, fps=fps)
