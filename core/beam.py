@@ -124,7 +124,7 @@ class Beam_XY(Beam):
         self.x_0 = kwargs["x_0"]
         self.y_0 = kwargs["y_0"]
 
-        self.x_max = 20.0 * max(self.x_0, self.y_0)
+        self.x_max = 10.0 * max(self.x_0, self.y_0)
         self.y_max = self.x_max
 
         self.n_x = kwargs["n_x"]
@@ -145,7 +145,7 @@ class Beam_XY(Beam):
         self.noise_percent = kwargs["noise_percent"]
         self.r_corr_in_meters, self.autocorrelation = None, None
         if self.noise_percent:
-            self.r_corr_in_meters = self.x_0
+            self.r_corr_in_meters = 50 * 10**-6 #self.x_0
             self.noise_field = self.generate_gaussian_noise_field(r_corr_in_meters=self.r_corr_in_meters,
                                                                   mu=0,
                                                                   sigma=1)

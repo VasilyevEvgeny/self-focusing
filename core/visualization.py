@@ -129,8 +129,8 @@ def plot_autocorrelations(beam, path):
 
     plt.xlim([-3.5 * r_corr, 3.5 * r_corr])
 
-    plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
-    plt.ylabel("$\\bar{K}$", fontsize=font_size, fontweight="bold")
+    plt.xlabel("$\mathbf{\Delta}$, мкм", fontsize=font_size, fontweight="bold")
+    plt.ylabel("$\mathbf{\\bar{K}}$", fontsize=font_size, fontweight="bold")
 
     plt.grid(linestyle="dotted", linewidth=2, alpha=0.5)
 
