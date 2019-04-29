@@ -89,4 +89,6 @@ def make_animations(all_files, names, n_pictures_max, path="./gifs", fps=10):
         for i in range(fps):
             images.append(imageio.imread(all_files[idx][-1]))
 
+        print(len(images))
+
         imageio.mimsave(path + "/" + names[idx] + ".gif", images, fps=fps)

@@ -22,8 +22,8 @@ for noise_percent in [20]:
                        lmbda=1800*10**-9,
                        x_0=100*10**-6,
                        y_0=100*10**-6,
-                       n_x=512,
-                       n_y=512)
+                       n_x=256,
+                       n_y=256)
 
         propagator = Propagator(args=args,
                                 beam=beam,
