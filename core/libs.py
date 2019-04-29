@@ -22,4 +22,6 @@ from pylab import contourf
 from numba import jit
 
 import imageio
+from PIL import Image
 from glob import glob
+import shutil

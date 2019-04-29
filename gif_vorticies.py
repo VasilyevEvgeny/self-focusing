@@ -3,7 +3,7 @@ from core.kerr_effect import KerrExecutor_XY
 from core.propagation import Propagator
 from core.beam import Beam_XY
 from core.args import parse_args
-from core.functions import get_files_for_gif, make_animations
+from core.functions import get_files_for_gif, make_gif_vorticies
 from core.libs import *
 
 args = parse_args()
@@ -22,8 +22,8 @@ for noise_percent in [20]:
                        lmbda=1800*10**-9,
                        x_0=100*10**-6,
                        y_0=100*10**-6,
-                       n_x=256,
-                       n_y=256)
+                       n_x=128,
+                       n_y=128)
 
         propagator = Propagator(args=args,
                                 beam=beam,
@@ -33,7 +33,7 @@ for noise_percent in [20]:
                                 dz0=10**-5,
                                 flag_const_dz=True,
                                 dn_print_current_state=50,
-                                dn_plot_beam=10,
+                                dn_plot_beam=100,
                                 plot_beam_normalization="local")
 
         propagator.propagate()
@@ -54,4 +54,4 @@ for noise_percent in [20]:
         del propagator
 
 
-make_animations(all_files, names, n_pictures_max)
+make_gif_vorticies(all_files, names, n_pictures_max)
