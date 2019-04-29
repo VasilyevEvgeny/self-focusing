@@ -56,32 +56,37 @@ def r_to_xy_real(r_slice):
 
 
 def get_files_for_gif(path, prefix="GIF_"):
-    paths_with_gif = []
+    paths_with_gifs = []
     for path in glob(path + "/*"):
         if path.split("\\")[-1][:4] == prefix:
-            paths_with_gif.append(path)
+            paths_with_gifs.append(path)
 
-    if paths_with_gif:
-        files = []
-        for file in glob(paths_with_gif[-1] + "/beam/*"):
-            files.append(file.replace("\\", "/"))
+    files = []
+    n_pictures = 0
+    for file in glob(paths_with_gifs[-1] + "/beam/*"):
+        files.append(file.replace("\\", "/"))
+        n_pictures += 1
 
-        return files
-    else:
-        raise Exception("No 'GIF_' directories!")
+    return files, n_pictures
 
 
-def make_animation(files, name, path="./gifs", fps=10):
-    images = []
-    for file in files:
-        images.append(imageio.imread(file))
+def make_animations(all_files, names, n_pictures_max, path="./gifs", fps=10):
 
-    # 1 second pause at the beginning
-    for i in range(fps):
-        images = [imageio.imread(files[0])] + images
+    for idx in range(len(all_files)):
+        images = []
+        for file in all_files[idx]:
+            images.append(imageio.imread(file))
 
-    # 1 second pause at the end
-    for i in range(fps):
-        images.append(imageio.imread(files[-1]))
+        delta = n_pictures_max - len(images)
+        for i in range(delta):
+            images.append(imageio.imread(all_files[idx][-1]))
 
-    imageio.mimsave(path + "/" + name + ".gif", images, fps=fps)
+        # 1 second pause at the beginning
+        for i in range(fps):
+            images = [imageio.imread(all_files[idx][0])] + images
+
+        # 1 second pause at the end
+        for i in range(fps):
+            images.append(imageio.imread(all_files[idx][-1]))
+
+        imageio.mimsave(path + "/" + names[idx] + ".gif", images, fps=fps)

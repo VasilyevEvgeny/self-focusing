@@ -33,7 +33,7 @@ class Propagator:
         self.z = 0.0
         self.dz = kwargs["dz0"]
 
-        self.max_intensity_to_stop = +np.inf #10**17
+        self.max_intensity_to_stop = 10**17
 
         self.states_columns = ["z, m", "dz, m", "i_max / i_0", "i_max, W / m^2"]
         self.states_arr = np.zeros(shape=(self.n_z + 1, 4))
