@@ -9,10 +9,10 @@ from core.libs import *
 args = parse_args()
 
 all_files = []
-names = []
+indices = []
 n_pictures_max = 0
-for noise_percent in [20]:
-    for m in [1, 2]:
+for idx_noise_percent, noise_percent in enumerate([0, 10, 20]):
+    for idx_m, m in enumerate([1, 2]):
 
         beam = Beam_XY(medium="SiO2",
                        distribution_type="vortex",
@@ -22,8 +22,8 @@ for noise_percent in [20]:
                        lmbda=1800*10**-9,
                        x_0=100*10**-6,
                        y_0=100*10**-6,
-                       n_x=128,
-                       n_y=128)
+                       n_x=2048,
+                       n_y=2048)
 
         propagator = Propagator(args=args,
                                 beam=beam,
@@ -33,7 +33,7 @@ for noise_percent in [20]:
                                 dz0=10**-5,
                                 flag_const_dz=True,
                                 dn_print_current_state=50,
-                                dn_plot_beam=100,
+                                dn_plot_beam=10,
                                 plot_beam_normalization="local")
 
         propagator.propagate()
@@ -44,14 +44,11 @@ for noise_percent in [20]:
         if n_pictures > n_pictures_max:
             n_pictures_max = n_pictures
 
-        name = "noise_percent=%02d" % noise_percent + "__m=%d" % m
-        names.append(name)
-
-        #print(n_pictures)
-        #print(files)
+        index = (idx_noise_percent, idx_m)
+        indices.append(index)
 
         del beam
         del propagator
 
 
-make_gif_vorticies(all_files, names, n_pictures_max)
+make_gif_vorticies(all_files, indices, n_pictures_max)

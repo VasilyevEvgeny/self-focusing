@@ -69,6 +69,7 @@ def get_files_for_gif(path, prefix="GIF_"):
 
     return files, n_pictures
 
+
 def create_dir(path, dir_name='pictures', mode='remote'):
     if mode == 'local':
         res_path = os.getcwd()
@@ -85,13 +86,15 @@ def create_dir(path, dir_name='pictures', mode='remote'):
 
     return res_path
 
-def make_gif_vorticies(all_files, names, n_pictures_max, path="./gifs", fps=10, tmp_dir_name="tmp_dir_for_animation"):
+
+def make_gif_vorticies(all_files, indices, n_pictures_max, path="./gifs", name="vorticies", fps=10):
     all_files_upd = []
     for idx in range(len(all_files)):
         files = []
         for file in all_files[idx]:
             files.append(file)
 
+        # append last picture if n_pictures < n_pictures_max
         delta = n_pictures_max - len(files)
         for i in range(delta):
             files.append(all_files[idx][-1])
@@ -106,25 +109,23 @@ def make_gif_vorticies(all_files, names, n_pictures_max, path="./gifs", fps=10, 
 
         all_files_upd.append(files)
 
-    create_dir(path=path, dir_name=tmp_dir_name)
+    # save composed images to dir
+    create_dir(path=path, dir_name=name)
 
     images_for_animation = []
-    im = Image.open(all_files_upd[0][0])
-    width, height = im.size
-    total_width, total_height = 2 * width, height
+    width, height = Image.open(all_files_upd[0][0]).size
+    i1_max, i2_max = indices[-1]
+    total_width, total_height = (i1_max + 1) * width, (i2_max + 1) * height
     for i in range(len(all_files_upd[0])):
-        big_final_im = Image.new('RGB', (total_width, total_height))
-        x_offset = 0
+        composed_im = Image.new('RGB', (total_width, total_height))
         for j in range(len(all_files_upd)):
-            small_im = Image.open(all_files_upd[j][i])
+            im = Image.open(all_files_upd[j][i])
+            i1, i2 = indices[j]
+            composed_im.paste(im, (i1 * width, i2 * height))
+        composed_im.save(path + "/" + name + "/%04d.png" % i, "PNG")
 
-            big_final_im.paste(small_im, (x_offset, 0))
-            x_offset += small_im.size[0]
-
-        big_final_im.save(path + "/" + tmp_dir_name + "/%04d.png" % i, "PNG")
-
-    for file in glob(path + "/" + tmp_dir_name + "/*"):
+    # generate gif animation
+    for file in glob(path + "/" + name + "/*"):
         images_for_animation.append(imageio.imread(file))
-    imageio.mimsave(path + "/" + "vorticies" + ".gif", images_for_animation, fps=fps)
+    imageio.mimsave(path + "/" + name + ".gif", images_for_animation, fps=fps)
 
-    shutil.rmtree(path + "/" + tmp_dir_name)
