@@ -3,7 +3,7 @@
 A software package for solving the problem of self-focusing of beams with different profiles, including vortex beams, as well as noise accounting. It is solved numerically a nonlinear wave equation for 3D-beam propagation:
 
 <p align="center">
- <img src="https://latex.codecogs.com/gif.latex?2&space;i&space;k_0&space;\frac{\partial&space;A(\mathbf{r},z)}{\partial&space;z}&space;=&space;\Delta_\perp&space;A(\mathbf{r},z)&space;&plus;&space;\frac{2&space;i&space;k_0}{n_0}&space;n_2&space;I(\mathbf{r})&space;A(\mathbf{r},z)">
+ <img src="https://latex.codecogs.com/gif.latex?2&space;i&space;k_0&space;\frac{\partial&space;A(\mathbf{r},z)}{\partial&space;z}&space;=&space;\Delta_\perp&space;A(\mathbf{r},z)&space;&plus;&space;\frac{2&space;k_0^2}{n_0}&space;n_2&space;I(\mathbf{r})&space;A(\mathbf{r},z)">
 </p>
 
 where use `A` - slowly varying complex amplitude of laser field, `z` - evolutionary coordinate along propagation axis, `r` - radius vector in transversal plane, `k_0` -- wave vector, ![delta_perp](https://latex.codecogs.com/gif.latex?\Delta_\perp)
