@@ -6,7 +6,7 @@ A software package for solving the problem of self-focusing of beams with differ
  <img src="https://latex.codecogs.com/gif.latex?2&space;i&space;k_0&space;\frac{\partial&space;A(\mathbf{r},z)}{\partial&space;z}&space;=&space;\Delta_\perp&space;A(\mathbf{r},z)&space;&plus;&space;\frac{2&space;i&space;k_0}{n_0}&space;n_2&space;I(\mathbf{r})&space;A(\mathbf{r},z)">
 </p>
 
-where use `A` - slowly varying complex amplitude of laser field, `z` - evolution coordinate along propagation axis, `r` - radius vector in transversal plane. ew Use `gs` and `git status` to list all new or modified files that haven't yet been committed.
+where use `A` - slowly varying complex amplitude of laser field, `z` - evolutionary coordinate along propagation axis, `r` - radius vector in transversal plane. ew Use `gs` and `git status` to list all new or modified files that haven't yet been committed.
 
 The program supports self-focusing calculation both in the axisymmetric approximation, and taking into account both spatial coordinates ```x``` and ``y``. Depending on the approximation, the equation and the initial condition can have the following form:
 
