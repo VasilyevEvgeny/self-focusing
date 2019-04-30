@@ -6,4 +6,4 @@ A software package for solving the problem of self-focusing of beams with differ
 </p>
 The program supports self-focusing calculation both in the axisymmetric approximation 
 
-<img src="svgs/test.svg">
+<img src="svgs/259d4727151cc935aeb8fe62d105f493.svg">
