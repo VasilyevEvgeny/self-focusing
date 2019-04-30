@@ -1,5 +1,7 @@
 # Description
 
+[Mathematical model](math_model/math_model.pdf)
+
 A software package for solving the problem of self-focusing of beams with different profiles, including vortex beams, as well as noise accounting. It is solved numerically a nonlinear wave equation for 3D-beam propagation:
 
 <p align="center">
