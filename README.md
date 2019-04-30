@@ -17,4 +17,6 @@ The program supports self-focusing calculation both in the axisymmetric approxim
 
 <img src="svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg">
 
-<p align="center"><img src="svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg?invert_in_darkmode" align=middle width=57.8938074pt height=11.232861749999998pt/></p>
+<p align="center"><img src="svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg?invert_in_darkmode"/></p>
+
+ align=middle width=57.8938074pt height=11.232861749999998pt
