@@ -1,0 +1,6 @@
+
+[graph]
+objgraph>=1.7.2
+
+[readline]
+pyreadline>=1.7.1

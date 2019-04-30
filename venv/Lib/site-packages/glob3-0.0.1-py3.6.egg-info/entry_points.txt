@@ -1,0 +1,3 @@
+[console_scripts]
+glob3 = glob3.__main__:main
+
