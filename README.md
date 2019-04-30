@@ -6,4 +6,4 @@ A software package for solving the problem of self-focusing of beams with differ
 </p>
 The program supports self-focusing calculation both in the axisymmetric approximation, and taking into account both spatial coordinates ![x](https://latex.codecogs.com/gif.latex?x) and ![y](https://latex.codecogs.com/gif.latex?y).
 
-<p align="center"><img src="https://rawgit.com/VasilyevEvgeny/self-focusing_3D/None/svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg?invert_in_darkmode" align=middle width=57.8938074pt height=11.232861749999998pt/></p>
+<p align="center"><img src="https://rawgit.com/VasilyevEvgeny/self-focusing_3D/master/svgs/32737e0a8d5a4cf32ba3ab1b74902ab7.svg?invert_in_darkmode" align=middle width=127.9847844pt height=39.452455349999994pt/></p>
