@@ -15,4 +15,6 @@ The program supports self-focusing calculation both in the axisymmetric approxim
 |Wave equation| <img src="https://latex.codecogs.com/gif.latex?2ik_0\frac{\partial&space;A(x,y,z)}{\partial&space;z}=\biggl(\frac{\partial^2}{\partial&space;x^2}+\frac{\partial^2}{\partial&space;y^2}\biggr)&space;A(x,y,z)&space;&plus;&space;\frac{2k_0^2}{n_0}&space;n_2&space;I(x,y)&space;A(x,y,z)"> | <img src="https://latex.codecogs.com/gif.latex?2&space;i&space;k_0&space;\frac{\partial&space;A(r,z)}{\partial&space;z}&space;=&space;\biggl(\frac{\partial^2}{\partial&space;r^2}+\frac1{r}\frac{\partial}{\partial&space;r}-\frac{m^2}{r^2}\biggr)&space;A(r,z)&space;&plus;&space;\frac{2k_0^2}{n_0}&space;n_2&space;I(r)&space;A(r,z)">|
 |Initial condition|<img src="https://latex.codecogs.com/gif.latex?A(x,y,z=0)=A_0\biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)^{M/2}\exp\biggl\{-\frac1{2}\biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)\biggr\}\exp\biggl\{i&space;m&space;\varphi\biggr\}">|<img src="https://latex.codecogs.com/gif.latex?A(r,z=0)=A_0\biggl(\frac{r}{r_0}\biggr)^M\exp\biggl\{-\frac{r^2}{2r_0^2}\biggr\}">|
 
+<img src="svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg">
+
 <p align="center"><img src="svgs/8e36a0b8a3687e71d9f83a60ee40f5b2.svg?invert_in_darkmode" align=middle width=57.8938074pt height=11.232861749999998pt/></p>
