@@ -7,6 +7,8 @@ A software package for solving the problem of self-focusing of beams with differ
 where 
 ``A``
 
+Use `git status` to list all new or modified files that haven't yet been committed.
+
 The program supports self-focusing calculation both in the axisymmetric approximation, and taking into account both spatial coordinates ```x``` and ``y``. Depending on the approximation, the equation and the initial condition can have the following form:
 
 |             | Full model taking into account both x and y | Axisymmetric approximation (x,y)->r |
