@@ -5,7 +5,7 @@ A software package for solving the problem of self-focusing of beams with differ
  <img src="https://latex.codecogs.com/gif.latex?2&space;i&space;k_0&space;\frac{\partial&space;A(\mathbf{r},z)}{\partial&space;z}&space;=&space;\Delta_\perp&space;A(\mathbf{r},z)&space;&plus;&space;\frac{2&space;i&space;k_0}{n_0}&space;n_2&space;I(\mathbf{r})&space;A(\mathbf{r},z)">
 </p>
 where 
-use `git status`
+use `git status` ew
 
 Use `gtus` to list all new or modified files that haven't yet been committed.
 
