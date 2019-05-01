@@ -1,10 +1,11 @@
 \documentclass[a4paper, 12pt]{article}
 
+\usepackage{MyMnSymbol}
+
 \usepackage[left=1cm, right=1cm, top=2cm, bottom=2cm]{geometry}
 
 \usepackage [russian]{babel}
-\usepackage{amsmath}
-\usepackage{amsfonts}
+\usepackage{amssymb,amsmath,latexsym,amsfonts,amsthm}
 
 
 \usepackage{hyperref}
@@ -20,6 +21,8 @@
 \begin{center}
 \Huge{\textbf{Mathematical model of self-focusing}}
 \end{center}
+
+We obtain the self-focusing equation in the approximation of a slowly varying amplitude to study the propagation of beams including vortices -- annular beams with phase singularity on the optical axis.
 
 \section{Obtaining a self-focusing equation}
 
@@ -45,10 +48,10 @@ where $\mathbf{E}(\mathbf{r}, t)$ и $\mathbf{D}(\mathbf{r}, t)$ -- electric fie
 Considering medium is dielectric ($\mathbf{\rho_f}(\mathbf{r}, t) = 0$) and nonmagnetic ($\mathbf{B}(\mathbf{r}, t) = \mu_0 \mathbf{H}(\mathbf{r}, t)$) 
 we get:
 \begin{equation}
-\label{prototype}
+\label{eqn:prototype}
 \Delta \mathbf{E}(\mathbf{r}, t) - \nabla (\nabla \cdot \mathbf{E}(\mathbf{r}, t)) =  \frac1{\varepsilon_0 c^2} \frac{\partial \mathbf{j}(\mathbf{r}, t)}{\partial t} + \frac1{c^2} \frac{\partial^2 \mathbf{E}(\mathbf{r}, t)}{\partial t^2} + \frac1{\varepsilon_0 c^2} \frac{\partial^2 \mathbf{P}(\mathbf{r}, t)}{\partial t^2},
 \end{equation}
-where $\mathbf{E}$ is electric field, $\mathbf{j}$ is current density and $\mathbf{P}$ is polarization, $c=1/\sqrt{\varepsilon_0 \mu_0}$. We examine each of equation (\ref{prototype}) members one by one using several further approximations. 
+where $\mathbf{E}$ is electric field, $\mathbf{j}$ is current density and $\mathbf{P}$ is polarization, $c=1/\sqrt{\varepsilon_0 \mu_0}$. We examine each of equation (\ref{eqn:prototype}) members one by one using several further approximations. 
 
 Assuming paraxiality, that is transverse wave number is much smaller than longitudinal one, $k_\perp \ll k_z$, and linear polarization of the electric field $\mathbf{E}$, we can use method of slowly varying amplitude $\mathbf{E}$:
 \begin{equation}
@@ -57,10 +60,10 @@ Assuming paraxiality, that is transverse wave number is much smaller than longit
 where $A(\mathbf{r}, t)$ is a complex slowly varying amplitude, $\mathbf{e}$ is a unit vector.
 Using dipole approximation ($\chi^{(i)}(\mathbf{r},t) = \chi^{(i)}(t)$) we can write ($\otimes$ means convolution) polarization as:
 \begin{multline}
-\label{polarizations}
+\label{eqn:polarizations}
 \mathbf{P}(\mathbf{r}, t) = \mathbf{P}^{(1)}(\mathbf{r}, t) + \mathbf{P}^{(2)}(\mathbf{r}, t) + \mathbf{P}^{(3)}(\mathbf{r}, t) + ... = \varepsilon_0 \chi^{(1)}(t) \otimes \mathbf{E}(\mathbf{r}, t) +\\+ \varepsilon_0  \chi^{(2)}(t) \otimes \mathbf{E}(\mathbf{r}, t) \mathbf{E}(\mathbf{r}, t) + \varepsilon_0  \chi^{(3)}(t) \otimes \mathbf{E}(\mathbf{r}, t) \mathbf{E}(\mathbf{r}, t) \mathbf{E}(\mathbf{r}, t) + ...
 \end{multline}
-where $\chi^{(i)}(t)$ -- permittivity tensor of $i$-th order. We consider isotropic medium ($\mathbf{P}^{(2 m)}(\mathbf{r}, t)=0, \ m \in \mathbb{N}$). Each $(n+2)$-th term of the polarization series (\ref{polarizations}) refers to $n$-th one as $\sim \bigl|I(\mathbf{r}, t) \bigr| \bigl/ \bigl|I_a \bigr|$, where $I_a \sim 5 \times 10^{16}$ W/cm$^2$ is atomic intensity. Peak intensity inside the filament is about $5 \times 10^{13}$ W/cm$^2$, so the ratio is of the order of $\sim 10^{-3}$. We can neglect nonlinearities of higher orders and write:
+where $\chi^{(i)}(t)$ -- permittivity tensor of $i$-th order. We consider isotropic medium ($\mathbf{P}^{(2 m)}(\mathbf{r}, t)=0, \ m \in \mathbb{N}$). Each $(n+2)$-th term of the polarization series (\ref{eqn:polarizations}) refers to $n$-th one as $\sim \bigl|I(\mathbf{r}, t) \bigr| \bigl/ \bigl|I_a \bigr|$, where $I_a \sim 5 \times 10^{16}$ W/cm$^2$ is atomic intensity. Peak intensity inside the filament is about $5 \times 10^{13}$ W/cm$^2$, so the ratio is of the order of $\sim 10^{-3}$. We can neglect nonlinearities of higher orders and write:
 \begin{equation}
 \mathbf{P}(\mathbf{r}, t) = \mathbf{P}^{(1)}(\mathbf{r}, t) + \mathbf{P}^{(3)}(\mathbf{r}, t).
 \end{equation}
@@ -75,16 +78,16 @@ A(\mathbf{r}, t) = \frac1{2 \pi} \int\limits_{-\infty}^{+\infty} \tilde{A}(\math
 \end{equation}
 forward Fourier transform of electric susceptibility
 \begin{equation}
-\label{susceptibility_fourier}
+\label{eqn:susceptibility_fourier}
 \tilde{\chi}^{(1)}(\omega) = \int\limits_{-\infty}^{+\infty} \chi^{(1)}(t) \exp \{ -i \omega t \} dt
 \end{equation}
 and relation between susceptibility and wave vector $\tilde{\chi}^{(1)}(\omega) = k^2(\omega) c^2 / \omega^2 - 1$, we obtain
 \begin{equation}
 \mathbf{P}^{(1)}(\mathbf{r}, t) = \frac1{2}\mathbf{e} \exp\{i (\omega_0 t  - k_0 z)\} \varepsilon_0 c^2 \frac1{2 \pi} \int\limits_{-\infty}^{+\infty} \frac{k^2(\omega_0 + \Omega)}{\omega_0^2 + 2 \omega_0 \Omega + \Omega^2} \tilde{A}(\mathbf{r}, \Omega) \exp \{ i \Omega t \} d \Omega - \varepsilon_0 \mathbf{E}(\mathbf{r}, t),
 \end{equation}
-where $k(\omega) = \omega n(\omega)/ c$, $n(\omega)$ -- index of refraction. The linear part of the last term in equation (\ref{prototype}) takes the form:
+where $k(\omega) = \omega n(\omega)/ c$, $n(\omega)$ -- index of refraction. The linear part of the last term in equation (\ref{eqn:prototype}) takes the form:
 \begin{equation}
-\label{p1_derivative}
+\label{eqn:p1_derivative}
 \frac1{\varepsilon_0 c^2} \frac{\partial^2 \mathbf{P}^{(1)}(\mathbf{r}, t)}{\partial t^2} = -\frac1{2}\mathbf{e} \exp\{i (\omega_0 t  - k_0 z)\}   \frac1{2 \pi} \int\limits_{-\infty}^{+\infty} k^2(\omega_0 + \Omega) \tilde{A}(\mathbf{r}, \Omega) \exp \{ i \Omega t \} d \Omega - \frac1{c^2} \frac{\partial^2 \mathbf{E}(\mathbf{r}, t)}{\partial t^2}.
 \end{equation}
 The expression for cubic polarization consists of two terms related to the first and third harmonics:
@@ -102,13 +105,13 @@ The expression for cubic polarization consists of two terms related to the first
 \begin{equation}
 \times \exp\{-i \omega_0 (\tau_1 + \tau_2 - \tau_3) \} d\tau_1 d\tau_2 d \tau_3.
 \end{equation}
-Due to strong violation of wave synchronism, $\Delta k = 3 k (\omega_0) - k(3 \omega_0) \ne 0$, we neglect the third harmonic generation. Fourier transform of 3-th order electric susceptibility (similarly to (\ref{susceptibility_fourier})) and well-known relation between intensity and electric field amplitude  $I(\mathbf{r}, t) = c n_0 \varepsilon_0 |A(\mathbf{r}, t)|^2 \bigl/ 2$ yield
+Due to strong violation of wave synchronism, $\Delta k = 3 k (\omega_0) - k(3 \omega_0) \ne 0$, we neglect the third harmonic generation. Fourier transform of 3-th order electric susceptibility (similarly to (\ref{eqn:susceptibility_fourier})) and well-known relation between intensity and electric field amplitude  $I(\mathbf{r}, t) = c n_0 \varepsilon_0 |A(\mathbf{r}, t)|^2 \bigl/ 2$ yield
 \begin{equation}
 \mathbf{P}^{(3)}(\mathbf{r}, t) = \frac{3}{4} \mathbf{e} \exp \{ i (\omega_0 t - k_0 z) \} \varepsilon_0 \frac{\tilde{\chi}^{(3)}}{c n_0 \varepsilon_0} I(\mathbf{r}, t) A(\mathbf{r}, t).
 \end{equation}
-The second time derivative of nonlinear polarization in (\ref{prototype}) takes the form
+The second time derivative of nonlinear polarization in (\ref{eqn:prototype}) takes the form
 \begin{equation}
-\label{p3_derivative}
+\label{eqn:p3_derivative}
 \frac1{\varepsilon_0 c^2} \frac{\partial^2 \mathbf{P}^{(3)}(\mathbf{r}, t)}{\partial t^2} = -\frac1{2} \mathbf{e} \exp \{ i (\omega_0 t - k_0 z) \} \frac{2 k_0^2}{n_0} \hat{T}^2 \Delta n_k(\mathbf{r}, t) A(\mathbf{r}, t), 
 \end{equation}
 where
@@ -121,22 +124,52 @@ In case of instant response the nonlinear (Kerr) addition to the refractive inde
 
 We will consider only self-focusing process without taking into account the ionization in the medium by a strong laser field, so $\mathbf{j}(\mathbf{r}, t)=0$
 
-Substituting the expressions (\ref{p1_derivative}), (\ref{p3_derivative}) to (\ref{prototype}), assuming $\nabla \cdot \mathbf{E}(\mathbf{r}, t) = 0$ and expanding the Laplace operator to transverse and longitudinal parts $\Delta = \Delta_\perp + \partial^2/\partial z^2$ we obtain nonlinear wave equation, which can be written in retarded time $t'=t-k_1 z$ and $z'=z$ coordinates as
+Substituting the expressions (\ref{eqn:p1_derivative}), (\ref{eqn:p3_derivative}) to (\ref{eqn:prototype}), assuming $\nabla \cdot \mathbf{E}(\mathbf{r}, t) = 0$ and expanding the Laplace operator to transverse and longitudinal parts $\Delta = \Delta_\perp + \partial^2/\partial z^2$ we obtain nonlinear wave equation, which can be written in retarded time $t'=t-k_1 z$ and $z'=z$ coordinates as
 \begin{multline}
-\label{equation_without_dissipation}
+\label{eqn:equation_without_dissipation}
 \frac{\partial^2 A (\mathbf{r}, t', z')}{\partial z'^2} - 2 i k_0  \biggl( 1 - \frac{i k_1}{k_0} \frac{\partial }{\partial t'}  \biggr) \frac{\partial A (\mathbf{r}, t', z')}{\partial z'} + \Delta_{\perp} A (\mathbf{r}, t', z')= \\ =-\frac1{2 \pi} \int\limits_{-\infty}^{+\infty} \Bigl( k^2(\omega_0 + \Omega) - (k_0 + k_1 \Omega)^2 \Bigr) \tilde{A}(\mathbf{r}, \Omega, z') \exp \{ i \Omega t' \} d \Omega - \frac{2 k_0^2}{n_0} \hat{T}^2 \Delta n_k(\mathbf{r}, t') A(\mathbf{r}, t', z'),
 \end{multline}
 where $k_1 = dk / d\omega |_{\omega=\omega_0}$. We neglect the second derivative of the field $A$ on $z'$ due to slowly varying amplitude approximation, assume the factor $k_1/k_0$ in brackets approximately equals to $1/\omega_0$ and redesignate $t'$, $z'$ back to $t$, $z$. 
 
 Since the original problem is limited to the consideration of spatial effects, it will be assumed that the pulses are long enough and will not take into account temporal effects, therefore, we equate the dispersion integral to zero and remove the wave-nonstationarity operator $\hat{T}$. Then we get:
 \begin{equation}
-\label{approx_final}
+\label{eqn:approx_final}
 \frac{\partial^2 A (\mathbf{r}, z)}{\partial z^2} - 2 i k_0 \frac{\partial A (\mathbf{r}, z)}{\partial z} + \Delta_{\perp} A (\mathbf{r}, z)= - \frac{2 k_0^2}{n_0} n_2 I(\mathbf{r}, z) A(\mathbf{r}, z).
 \end{equation}
 We use the quasi-optical approximation assuming $| \partial^2 A(\mathbf{r}, z) / \partial z^2| \ll k_0 |\partial A(\mathbf{r},z) / \partial z|$ and get the final equation of 3D-beam self-focusing  propagating in cubic nonlinear media in approximation of slowly varying field amplitudes:
 \begin{equation}
-\label{final}
-2 i k_0 \frac{\partial A (\mathbf{r}, z)}{\partial z} = \Delta_{\perp} A (\mathbf{r}, z) + \frac{2 k_0^2}{n_0} n_2 I(\mathbf{r}, z) A(\mathbf{r}, z).
+\label{eqn:final}
+2 i k_0 \frac{\partial A (\mathbf{r}, z)}{\partial z} = \Delta_{\perp} A (\mathbf{r}, z) + \frac{2 k_0^2}{n_0} n_2 I(\mathbf{r}, z) A(\mathbf{r}, z),
 \end{equation}
+where $\mathbf{r}$ -- transversal radius-vector, $z$ -- evolutionary coordinate, $A(\mathbf{r},z)$ -- complex slowly varying amplitude of laser field, $k_0$ -- wave vector, $\Delta_\perp$ -- transversal laplacian, $n_0$ -- linear refractive index, $n_2$ -- cubic nonlinear refractive index, $I(\mathbf{r},z)$ -- intensity of laser field. 
+
+\section{Initial conditions}
+
+The amplitude of the laser field $A(\mathbf{r},z)$ depends on the radius vector $\mathbf{r}$, which in the general case can be represented as two transverse spatial coordinates $x$ and $y$. However, there is also an axisymmetric approximation according to which the field $A(\mathbf{r},z)$ does not depend on the polar angle $\varphi$ and therefore the radius vector $\mathbf{r}$ can be replaced by a scalar value $r$. The initial conditions in these two cases will look different.
+
+\subsection{$\mathbf{r}\longrightarrow(x,y)$}
+
+The general form of initial conditions is
+\begin{equation}
+A(x,y, z = 0) = \biggl(1 + \xi\biggr)A_0 \biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)^{M/2}\exp\biggl\{-\frac1{2}\biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)\biggr\}\exp\biggl\{i m \varphi\biggr\},
+\end{equation}
+where $x$ and $y$ -- transversal coordinates, $x_0$ and $y_0$ -- spatial parameters along corresponding coordinates, $M$ -- parameter describing the inner form of the beam ring, $m$ -- topological charge, $\varphi=\arctan{x/y}$, $\xi=\xi(\mathbb{E}, \sigma, r_{corr})$ -- gaussian noise with expectation $\mathbb{E}$, dispersion $\sigma^2$ and correlation radius $r_{corr}$.
+
+\section{Numerical solution}
+
+The nonlinear equation for the self-focusing of a laser beam \eqref{eqn:final} was solved by splitting into physical factors, according to which the initial equation is divided into a system of several equations, in which the solution of the $i$-th equation is the initial condition for $(i+1)$:
+\begin{equation}
+\left\{
+\label{eqn:system}
+\begin{split}
+    2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z}  &= \underbrace{\Delta_\perp A(\mathbf{r},z),}_{\textcolor{red}{\text{\small{diffraction}}}} \\
+    2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z} &= \underbrace{\frac{2 k_0^2}{n_0} n_2 I(\mathbf{r},z) A(\mathbf{r},z).}_{\substack{\text{\textcolor{red}{\small{Kerr's}}}\\\text{\textcolor{red}{\small{nonlinearity}}}}}
+\end{split}
+\right.
+\end{equation}
+
+\subsection{Diffraction}
+
+
 
 \end{document}
