@@ -23,6 +23,7 @@ from pylab import contourf
 from numba import jit
 
 import imageio
+import cv2
 from PIL import Image
 from glob import glob
 import shutil

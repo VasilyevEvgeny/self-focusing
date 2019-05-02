@@ -1,12 +1,17 @@
 from core.libs import *
+from core.functions import make_paths
 
 
 class Manager:
     def __init__(self, **kwargs):
-        self.global_root_dir = kwargs.get("global_root_dir", "/".join(os.path.abspath(__file__).split("\\")[:-2]))
-        self.gif = kwargs.get("gif", False)
+        self.args = kwargs["args"]
+        self.global_root_dir = self.args.global_root_dir
+        self.global_results_dir_name = self.args.global_results_dir_name
+        self.prefix = self.args.prefix
 
-        self.global_results_dir_name = kwargs.get("global_results_dir_name", "Self-focusing_3D_results")
+        self.global_results_dir, self.results_dir = make_paths(self.global_root_dir, self.global_results_dir_name)
+
+
         self.global_results_dir = self.global_root_dir + "/" + self.global_results_dir_name
         datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -20,16 +25,11 @@ class Manager:
 
     @staticmethod
     def create_dir(path):
-        if os.path.exists(path):
-            raise Exception("Directory %s already exists" % path)
-        else:
+        if not os.path.exists(path):
             os.makedirs(path)
 
     def create_global_results_dir(self):
-        try:
-            self.create_dir(self.global_results_dir)
-        except:
-            pass
+        self.create_dir(self.global_results_dir)
 
     def create_results_dir(self):
         self.create_dir(self.results_dir)

@@ -70,21 +70,52 @@ def get_files_for_gif(path, prefix="GIF_"):
     return files, n_pictures
 
 
-def create_dir(path, dir_name='pictures', mode='remote'):
-    if mode == 'local':
-        res_path = os.getcwd()
-    elif mode == 'remote':
-        res_path = path + '/' + dir_name
-    else:
-        raise Exception("Wrong mode for create_dir!")
+def make_paths(global_root_dir, global_results_dir_name, prefix):
+    global_results_dir = global_root_dir + "/" + global_results_dir_name
+    datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    results_dir = global_results_dir + "/" + prefix + datetime_string
+
+    return global_results_dir, results_dir
+
+
+def create_dir(**kwargs):
+    path = kwargs["path"]
+    dir_name = kwargs.get("dir_name", "images")
+
+    res_path = path + '/' + dir_name
 
     try:
         os.makedirs(res_path)
-    except:
+    except OSError:
         shutil.rmtree(res_path)
+        sleep(1)
         os.makedirs(res_path)
 
     return res_path
+
+
+def make_animation(root_dir, name, images_dir="images", fps=10):
+    images_for_animation = []
+    for file in glob(root_dir + "/" + images_dir + "/*"):
+        images_for_animation.append(imageio.imread(file))
+    imageio.mimsave(root_dir + "/" + name + ".gif", images_for_animation, fps=fps)
+
+
+def make_video(root_dir, name, images_dir="images", fps=10):
+    images_for_video = []
+    for file in glob(root_dir + "/" + images_dir + "/*"):
+        images_for_video.append(cv2.imread(file))
+
+    height, width, leyers = images_for_video[0].shape
+
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    video = cv2.VideoWriter(root_dir + "/" + name + ".avi", fourcc, fps, (width, height))
+
+    for img in images_for_video:
+        video.write(cv2.resize(img, (width, height)))
+
+    cv2.destroyAllWindows()
+    video.release()
 
 
 def make_gif_vorticies(all_files, indices, n_pictures_max, path="./gifs", name="vorticies", fps=10):

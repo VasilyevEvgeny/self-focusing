@@ -1,5 +1,6 @@
 from core.libs import *
-from core.functions import create_dir
+from core.functions import create_dir, make_paths, make_animation, make_video
+from core.args import parse_args
 
 
 @jit(nopython=True)
@@ -19,17 +20,16 @@ def phase_initialization(phase, x, y, n_points, m):
     return phase
 
 
-def plot_topological_charge(res_dir="misc/topological_charge/images", **kwargs):
+def plot_images(**kwargs):
+    global_root_dir = kwargs["global_root_dir"]
+    global_results_dir_name = kwargs["global_results_dir_name"]
+    prefix = kwargs["prefix"]
     m = kwargs["m"]
 
-    create_dir()
+    _, results_dir = make_paths(global_root_dir, global_results_dir_name, prefix)
+    res_dir = create_dir(path=results_dir)
 
-    if os.path.exists(res_dir):
-        shutil.rmtree(res_dir)
-        sleep(1)
-    os.makedirs(res_dir)
-
-    n_points = 100
+    n_points = 50
     x_max, y_max = 600.0, 600.0  # micrometers
 
     x, y = np.zeros(n_points), np.zeros(n_points)
@@ -42,7 +42,7 @@ def plot_topological_charge(res_dir="misc/topological_charge/images", **kwargs):
     xx, yy = np.meshgrid(x, y)
 
     for i in tqdm(range(360)):
-        fig = plt.figure(figsize=(13, 10))
+        fig = plt.figure(figsize=(3, 3))
         ax = fig.add_subplot(111, projection="3d")
         ax.plot_surface(xx, yy, phase, cmap="gray", rstride=1, cstride=1, linewidth=0, antialiased=False)
         ax.view_init(elev=75, azim=int(i + 315))
@@ -54,9 +54,30 @@ def plot_topological_charge(res_dir="misc/topological_charge/images", **kwargs):
         ax.xaxis.set_tick_params(pad=15)
         ax.yaxis.set_tick_params(pad=15)
         ax.zaxis.set_tick_params(pad=15)
-        bbox = fig.bbox_inches.from_bounds(3, 2, 7.5, 6.1)
-        plt.savefig(res_dir + '/%d.png' % i, bbox_inches=bbox, transparent=True)
+        #bbox = fig.bbox_inches.from_bounds(3, 2, 7.5, 6.1)
+        bbox = fig.bbox_inches.from_bounds(0.6, 0.5, 2, 2)
+        plt.savefig(res_dir + '/%04d.png' % i, bbox_inches=bbox, transparent=False)
         plt.close()
 
+    return results_dir
 
-plot_topological_charge(m=3)
+
+def process_topological_charge(m, animation=True, video=True):
+    args = parse_args()
+
+    prefix = "m=%d" % m
+    results_dir = plot_images(global_root_dir=args.global_root_dir,
+                              global_results_dir_name=args.global_results_dir_name,
+                              m=m,
+                              prefix=prefix + "_")
+
+    if animation:
+        make_animation(root_dir=results_dir,
+                       name=prefix)
+
+    if video:
+        make_video(root_dir=results_dir,
+                   name=prefix)
+
+
+process_topological_charge(m=3)
