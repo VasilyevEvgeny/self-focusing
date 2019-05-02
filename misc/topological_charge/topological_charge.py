@@ -80,4 +80,4 @@ def process_topological_charge(m, animation=True, video=True):
                    name=prefix)
 
 
-process_topological_charge(m=3)
+process_topological_charge(m=2)
