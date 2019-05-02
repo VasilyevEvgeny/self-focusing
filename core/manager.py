@@ -5,20 +5,18 @@ from core.functions import make_paths
 class Manager:
     def __init__(self, **kwargs):
         self.args = kwargs["args"]
+        self.multidir_name = kwargs.get("multidir_name", None)
         self.global_root_dir = self.args.global_root_dir
         self.global_results_dir_name = self.args.global_results_dir_name
         self.prefix = self.args.prefix
 
-        self.global_results_dir, self.results_dir = make_paths(self.global_root_dir, self.global_results_dir_name)
+        self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir, self.global_results_dir_name,
+                                                                  self.prefix)
 
-
-        self.global_results_dir = self.global_root_dir + "/" + self.global_results_dir_name
-        datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-        if not self.gif:
-            self.results_dir = self.global_results_dir + "/" + datetime_string
-        else:
-            self.results_dir = self.global_results_dir + "/GIF_" + datetime_string
+        if self.prefix == "vortices":
+            self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir,
+                                                                      self.global_results_dir_name + "/" + self.multidir_name,
+                                                                      prefix=None)
 
         self.track_dir = self.results_dir + "/track"
         self.beam_dir = self.results_dir + "/beam"

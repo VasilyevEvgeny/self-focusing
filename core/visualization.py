@@ -1,8 +1,25 @@
 from core.functions import *
 
 
-def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(3, 3), x_max=250, y_max=250,
-              title=False, ticks=False, labels=False, colorbar=False):
+def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
+    fig_size, x_max, y_max, title, ticks, labels, colorbar = None, None, None, None, None, None, None
+    if mode in ("xy", "r"):
+        fig_size = (12, 10)
+        x_max = 250
+        y_max = 250
+        title = False
+        ticks = True
+        labels = True
+        colorbar = True
+    elif mode in ("vortices"):
+        fig_size = (3, 3)
+        x_max = 250
+        y_max = 250
+        title = False
+        ticks = False
+        labels = False
+        colorbar = False
+
     x_left = -x_max * 10 ** -6
     x_right = x_max * 10 ** -6
     y_left = -y_max * 10 ** -6
@@ -40,8 +57,8 @@ def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(3, 3), x_m
     plot = contourf(arr, cmap=cmap, levels=levels_plot)
 
     if ticks:
-        x_labels = ["-200", "0", "+200"]
-        y_labels = ["-200", "0", "+200"]
+        x_labels = ["-150", "0", "+150"]
+        y_labels = ["-150", "0", "+150"]
         x_ticks = calc_ticks_x(x_labels, xs)
         y_ticks = calc_ticks_x(y_labels, ys)
         plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
@@ -51,12 +68,12 @@ def plot_beam(beam, z, step, path, plot_beam_normalization, fig_size=(3, 3), x_m
         plt.yticks([])
 
     if labels:
-        plt.xlabel("x, мкм", fontsize=font_size, fontweight="bold")
-        plt.ylabel("y, мкм", fontsize=font_size, fontweight="bold")
+        plt.xlabel("x, $\mathbf{\mu m}$", fontsize=font_size, fontweight="bold")
+        plt.ylabel("y, $\mathbf{\mu m}$", fontsize=font_size, fontweight="bold")
 
     if title:
         i_max = np.max(beam.a_to_i()) * beam.i_0
-        plt.title("z = " + str(round(z * 10 ** 2, 3)) + " см\nI$_{max}$ = %.2E" % i_max + " Вт/м$^2$\n",
+        plt.title("z = " + str(round(z * 10 ** 2, 3)) + " см\nI$_{max}$ = %.2E" % i_max + " W/m$^2$\n",
                   fontsize=font_size - 10)
 
     ax.grid(color="white", linestyle='--', linewidth=3, alpha=0.5)

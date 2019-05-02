@@ -26,7 +26,7 @@ def plot_images(**kwargs):
     prefix = kwargs["prefix"]
     m = kwargs["m"]
 
-    _, results_dir = make_paths(global_root_dir, global_results_dir_name, prefix)
+    _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
 
     n_points = 400

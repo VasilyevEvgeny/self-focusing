@@ -11,7 +11,8 @@ class Propagator:
         self.kerr_effect = kwargs.get("kerr_effect", None)
 
         self.args = kwargs["args"]
-        self.manager = Manager(args=self.args)
+        self.multidir_name = kwargs.get("multidir_name", None)
+        self.manager = Manager(args=self.args, multidir_name=self.multidir_name)
         self.logger = Logger(diffraction=self.diffraction,
                              kerr_effect=self.kerr_effect,
                              path=self.manager.results_dir)
@@ -25,7 +26,7 @@ class Propagator:
         self.dn_plot_beam = kwargs.get("dn_plot_beam", None)
         self.flag_print_track = True if self.dn_plot_beam else False
         if self.dn_plot_beam:
-            self.plot_beam_normalization = kwargs["plot_beam_normalization"]
+            self.beam_normalization_type = kwargs["beam_normalization_type"]
 
         self.z = 0.0
         self.dz = kwargs["dz0"]
@@ -104,8 +105,8 @@ class Propagator:
                                                                            self.states_columns])
 
             if (not (n_step % self.dn_plot_beam)) and self.flag_print_beam:
-                self.logger.measure_time(plot_beam, [self.beam, self.z, n_step, self.manager.beam_dir,
-                                                     self.plot_beam_normalization])
+                self.logger.measure_time(plot_beam, [self.args.prefix, self.beam, self.z, n_step, self.manager.beam_dir,
+                                                     self.beam_normalization_type])
 
             if self.beam.i_max * self.beam.i_0 > self.max_intensity_to_stop:
                 break

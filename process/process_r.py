@@ -25,6 +25,6 @@ propagator = Propagator(args=args,
                         flag_const_dz=True,
                         dn_print_current_state=50,
                         dn_plot_beam=50,
-                        plot_beam_normalization="local")
+                        beam_normalization_type="local")
 
 propagator.propagate()

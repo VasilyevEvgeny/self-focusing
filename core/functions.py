@@ -55,27 +55,32 @@ def r_to_xy_real(r_slice):
     return arr
 
 
-def get_files_for_gif(path, prefix="GIF_"):
-    paths_with_gifs = []
+def get_files(path):
+    all_files = []
+    n_pictures_max = 0
     for path in glob(path + "/*"):
-        if path.split("\\")[-1][:4] == prefix:
-            paths_with_gifs.append(path)
+        files = []
+        n_pictures = 0
+        for file in glob(path + "/beam/*"):
+            files.append(file.replace("\\", "/"))
+            n_pictures += 1
 
-    files = []
-    n_pictures = 0
-    for file in glob(paths_with_gifs[-1] + "/beam/*"):
-        files.append(file.replace("\\", "/"))
-        n_pictures += 1
+        all_files.append(files)
+        n_pictures_max = max(n_pictures, n_pictures_max)
 
-    return files, n_pictures
+    return all_files, n_pictures_max
 
 
 def make_paths(global_root_dir, global_results_dir_name, prefix):
     global_results_dir = global_root_dir + "/" + global_results_dir_name
     datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    results_dir = global_results_dir + "/" + prefix + datetime_string
+    if prefix is None:
+        results_dir_name = datetime_string
+    else:
+        results_dir_name = prefix + "_" + datetime_string
+    results_dir = global_results_dir + "/" + results_dir_name
 
-    return global_results_dir, results_dir
+    return global_results_dir, results_dir, results_dir_name
 
 
 def create_dir(**kwargs):
@@ -92,6 +97,13 @@ def create_dir(**kwargs):
         os.makedirs(res_path)
 
     return res_path
+
+
+def create_multidir(global_root_dir, global_results_dir_name, prefix):
+    global_results_dir, results_dir, results_dir_name = make_paths(global_root_dir, global_results_dir_name, prefix)
+    create_dir(path=global_results_dir, dir_name=results_dir_name)
+
+    return results_dir, results_dir_name
 
 
 def make_animation(root_dir, name, images_dir="images", fps=10):
@@ -116,47 +128,3 @@ def make_video(root_dir, name, images_dir="images", fps=10):
 
     cv2.destroyAllWindows()
     video.release()
-
-
-def make_gif_vorticies(all_files, indices, n_pictures_max, path="./gifs", name="vorticies", fps=10):
-    all_files_upd = []
-    for idx in range(len(all_files)):
-        files = []
-        for file in all_files[idx]:
-            files.append(file)
-
-        # append last picture if n_pictures < n_pictures_max
-        delta = n_pictures_max - len(files)
-        for i in range(delta):
-            files.append(all_files[idx][-1])
-
-        # 1 second pause at the beginning
-        for i in range(fps):
-            files = [all_files[idx][0]] + files
-
-        # 1 second pause at the end
-        for i in range(fps):
-            files.append(all_files[idx][-1])
-
-        all_files_upd.append(files)
-
-    # save composed images to dir
-    create_dir(path=path, dir_name=name)
-
-    images_for_animation = []
-    width, height = Image.open(all_files_upd[0][0]).size
-    i1_max, i2_max = indices[-1]
-    total_width, total_height = (i1_max + 1) * width, (i2_max + 1) * height
-    for i in range(len(all_files_upd[0])):
-        composed_im = Image.new('RGB', (total_width, total_height))
-        for j in range(len(all_files_upd)):
-            im = Image.open(all_files_upd[j][i])
-            i1, i2 = indices[j]
-            composed_im.paste(im, (i1 * width, i2 * height))
-        composed_im.save(path + "/" + name + "/%04d.png" % i, "PNG")
-
-    # generate gif animation
-    for file in glob(path + "/" + name + "/*"):
-        images_for_animation.append(imageio.imread(file))
-    imageio.mimsave(path + "/" + name + ".gif", images_for_animation, fps=fps)
-

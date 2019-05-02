@@ -16,8 +16,8 @@ beam = Beam_XY(medium="SiO2",
                lmbda=1800*10**-9,
                x_0=100*10**-6,
                y_0=100*10**-6,
-               n_x=2048,
-               n_y=2048)
+               n_x=512,
+               n_y=512)
 
 propagator = Propagator(args=args,
                         beam=beam,
@@ -28,7 +28,7 @@ propagator = Propagator(args=args,
                         flag_const_dz=False,
                         dn_print_current_state=50,
                         dn_plot_beam=50,
-                        plot_beam_normalization="local")
+                        beam_normalization_type="local")
 
 propagator.propagate()
 
