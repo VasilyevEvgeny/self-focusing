@@ -29,7 +29,7 @@ def plot_images(**kwargs):
     _, results_dir = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
 
-    n_points = 50
+    n_points = 400
     x_max, y_max = 600.0, 600.0  # micrometers
 
     x, y = np.zeros(n_points), np.zeros(n_points)
@@ -41,7 +41,7 @@ def plot_images(**kwargs):
 
     xx, yy = np.meshgrid(x, y)
 
-    for i in tqdm(range(360)):
+    for i in tqdm(range(0, 360, 2)):
         fig = plt.figure(figsize=(3, 3))
         ax = fig.add_subplot(111, projection="3d")
         ax.plot_surface(xx, yy, phase, cmap="gray", rstride=1, cstride=1, linewidth=0, antialiased=False)
@@ -56,7 +56,7 @@ def plot_images(**kwargs):
         ax.zaxis.set_tick_params(pad=15)
         #bbox = fig.bbox_inches.from_bounds(3, 2, 7.5, 6.1)
         bbox = fig.bbox_inches.from_bounds(0.6, 0.5, 2, 2)
-        plt.savefig(res_dir + '/%04d.png' % i, bbox_inches=bbox, transparent=False)
+        plt.savefig(res_dir + '/%04d.png' % i, bbox_inches=bbox, transparent=True)
         plt.close()
 
     return results_dir
