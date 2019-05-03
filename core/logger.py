@@ -27,102 +27,279 @@ class Logger:
             for key in self.functions:
                 f.write("{:40s} = {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
 
-    def save_initial_parameters(self, beam):
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import A4
-        from reportlab.lib.units import cm
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.platypus import Paragraph, Table, TableStyle
-        from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
-        from reportlab.lib import colors
+    def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename = "parameters"):
+        tex_file_name = filename + ".tex"
+        tex_file_path = self.path + "/" + tex_file_name
 
-        width, height = A4
-        styles = getSampleStyleSheet()
-        styleN = styles["BodyText"]
-        styleN.alignment = TA_LEFT
-        styleBH = styles["Normal"]
-        styleBH.alignment = TA_CENTER
+##########################
+# BEGIN
+##########################
 
-        def coord(x, y, unit=1):
-            x, y = x * unit, height - y * unit
-            return x, y
+#
+#
 
-        # Headers
-        hdescrpcion = Paragraph('''<b>descrpcion</b>''', styleBH)
-        hpartida = Paragraph('''<b>partida</b>''', styleBH)
-        hcandidad = Paragraph('''<b>candidad</b>''', styleBH)
-        hprecio_unitario = Paragraph('''<b>precio_unitario</b>''', styleBH)
-        hprecio_total = Paragraph('''<b>precio_total</b>''', styleBH)
+        tex_file_data = \
+"""\documentclass[10pt]{extarticle}
 
-        # Texts
-        descrpcion = Paragraph('long paragraph', styleN)
-        partida = Paragraph('1', styleN)
-        candidad = Paragraph('120', styleN)
-        precio_unitario = Paragraph('$52.00', styleN)
-        precio_total = Paragraph('$6240.00  $n_x$', styleN)
+\\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
 
-        data = [[hdescrpcion, hcandidad, hcandidad, hprecio_unitario, hprecio_total],
-                [partida, candidad, descrpcion, precio_unitario, precio_total]]
+\\usepackage{array}
+\\newcolumntype{P}[1]{>{\centering\\arraybackslash}p{#1}}
+\\newcolumntype{M}[1]{>{\centering\\arraybackslash}m{#1}}
 
-        table = Table(data, colWidths=[2.05 * cm, 2.7 * cm, 5 * cm,
-                                       3 * cm, 3 * cm])
+\\usepackage[table]{xcolor}
 
-        table.setStyle(TableStyle([
-            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-        ]))
+\\renewcommand{\\arraystretch}{1.2}
+\setlength{\\tabcolsep}{0pt}
 
-        c = canvas.Canvas(self.path + "/a.pdf", pagesize=A4)
-        table.wrapOn(c, width, height)
-        table.drawOn(c, *coord(1.8, 9.6, cm))
-        c.save()
+\setlength\\arrayrulewidth{1.05pt}
 
+\\begin{document}
+\pagestyle{empty}
+\\begin{center}
+\\begin{tabular}{|M{5cm}|M{5cm}|M{5cm}|}
+\hline
+"""
 
-        separator = "========================================"
-        with open(self.path + "/parameters.txt", "w") as f:
-            f.write(self.path + "\n")
-            f.write(separator + "\n")
-            f.write("EQUATION:\n")
+##########################
+# EQUATION
+##########################
+        left_r_str = "2 i k_0 \\frac{\partial A(r,z)}{\partial z}"
+        left_xy_str = "2 i k_0 \\frac{\partial A(x,y,z)}{\partial z}"
+
+        if beam.distribution_type == "vortex":
+            diffraction_r_str = "\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} - \\frac{m^2}{r^2} \\biggr] A(r,z)"
+        else:
+            diffraction_r_str = "\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} \\biggr] A(r,z)"
+        diffraction_xy_str = "\\biggl[ \\frac{\partial^2}{\partial x^2} + \\frac{\partial^2}{\partial y^2} \\biggr] A(x,y,z)"
+
+        kerr_r_str = "\\frac{2 k_0^2}{n_0} n_2 I(r,z) A(r,z)"
+        kerr_xy_str = "\\frac{2 k_0^2}{n_0} n_2 I(x,y,z) A(x,y,z)"
+
+        equation = []
+        if beam.info == "beam_r":
+            equation.append(left_r_str)
             if self.diffraction is not None:
-                f.write(self.diffraction.info + "\n")
+                equation.append(diffraction_r_str)
             if self.kerr_effect is not None:
-                f.write(self.kerr_effect.info + "\n")
-            f.write(separator + "\n")
-            f.write("MEDIUM:\n")
-            f.write("{:20s} = {:s}\n".format("material", beam.medium.info))
-            f.write("{:20s} = {:2.4f}\n".format("n_0", beam.medium.n_0))
-            f.write("{:20s} = {:g}\n".format("k_0, m^-1", beam.medium.k_0))
-            f.write("{:20s} = {:4.2f}\n".format("k_1, fs/mm", beam.medium.k_1 * 10**12))
-            f.write("{:20s} = {:2.2f}\n".format("k_2, fs^2/mm", beam.medium.k_2 * 10**27))
-            f.write("{:20s} = {:2.2f}\n".format("n_2, *10^-20 m^2/W", beam.medium.n_2 * 10**20))
-            f.write(separator + "\n")
-            f.write("BEAM:\n")
-            f.write("{:20s} = {:s}\n".format("distribution", beam.distribution_type))
-            if beam.distribution_type == "vortex":
-                f.write("{:20s} = {:d}\n".format("m", beam.m))
-            if beam.info == "beam_r":
-                f.write("{:20s} = {:d}\n".format("r_0, microns", round(beam.r_0 * 10 ** 6)))
-                f.write("{:20s} = {:d}\n".format("r_max, microns", round(beam.r_max * 10 ** 6)))
-                f.write("{:20s} = {:d}\n".format("n_r", beam.n_r))
-                f.write("{:20s} = {:2.2f}\n".format("dr, microns", beam.dr * 10 ** 6))
-            if beam.info == "beam_xy":
-                f.write("{:20s} = {:d}\n".format("x_0, microns", round(beam.x_0 * 10**6)))
-                f.write("{:20s} = {:d}\n".format("y_0, microns", round(beam.y_0 * 10**6)))
-                f.write("{:20s} = {:d}\n".format("x_max, microns", round(beam.x_max * 10**6)))
-                f.write("{:20s} = {:d}\n".format("y_max, microns", round(beam.y_max * 10**6)))
-                f.write("{:20s} = {:d}\n".format("n_x", beam.n_x))
-                f.write("{:20s} = {:d}\n".format("n_y", beam.n_y))
-                f.write("{:20s} = {:2.2f}\n".format("dx, microns", beam.dx * 10**6))
-                f.write("{:20s} = {:2.2f}\n".format("dy, microns", beam.dy * 10**6))
-                f.write("{:20s} = {:03.2f}\n".format("noise_percent", beam.noise_percent))
-            f.write("{:20s} = {:d}\n".format("lmbda, nm", round(beam.lmbda * 10**9)))
-            f.write("{:20s} = {:2.4f}\n".format("z_diff, m", beam.z_diff))
-            if beam.distribution_type == "gauss" or beam.distribution_type == "ring":
-                f.write("{:20s} = {:.2f}\n".format("p_0 / Pcr_G", beam.P0_to_Pcr_G))
-            if beam.distribution_type == "vortex":
-                f.write("{:20s} = {:.2f}\n".format("p_0 / Pcr_V", beam.P0_to_Pcr_V))
-            f.write("{:20s} = {:.2f}\n".format("p_0, MW", beam.p_0 * 10 ** -6))
-            f.write("{:20s} = {:e}\n".format("i_0, W/m^2", beam.i_0))
+                equation.append(kerr_r_str)
+        elif beam.info == "beam_xy":
+            equation.append(left_xy_str)
+            if self.diffraction is not None:
+                equation.append(diffraction_xy_str)
+            if self.kerr_effect is not None:
+                equation.append(kerr_xy_str)
+
+        eq_length = len(equation)
+        if eq_length == 1:
+            equation.append("= 0")
+        elif eq_length == 2:
+            equation = equation[:1] + ["="] + equation[1:]
+        elif eq_length == 3:
+            equation = equation[:1] + ["="] + equation[1:2] + ["+"] + equation[2:]
+
+        equation_str = " ".join(equation)
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{EQUATION}} \\tabularnewline
+\hline
+\multicolumn{3}{|M{15cm}|}{\[ %s \]} \\tabularnewline
+\hline
+""" % equation_str
+
+##########################
+# INITIAL CONDITION
+##########################
+
+        initial_condition_str = None
+        if beam.info == "beam_r":
+            initial_condition_str = "A(r,z=0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}"
+        elif beam.info == "beam_xy":
+            initial_condition_str = "A(x,y, z = 0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}"
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{INITIAL CONDITION}} \\tabularnewline
+\hline
+\multicolumn{3}{|M{15cm}|}{\[ %s \]} \\tabularnewline
+\hline
+""" % initial_condition_str
+
+
+    ##########################
+    # MEDIUM
+    ##########################
+
+        if beam.medium.info == "SiO2":
+            material = "SiO$_2$"
+        elif beam.medium.info == "CaF2":
+            material = "CaF$_2$"
+        elif beam.medium.info == "LiF":
+            material = "LiF"
+        else:
+            material = "noname"
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{MEDIUM}} \\tabularnewline
+\hline
+material & %s & -- \\tabularnewline
+\hline
+$n_0$ & %1.4f & -- \\tabularnewline
+\hline
+$n_2$ & %1.2f $\\times 10^{-16}$ & cm$^2$/W \\tabularnewline
+\hline
+$k_0$ & %.2f & 1/mm \\tabularnewline
+\hline
+$k_1$ & %.2f & fs/mm \\tabularnewline
+\hline
+$k_2$ & %.2f & fs$^2$/mm \\tabularnewline
+\hline
+""" % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12, beam.medium.k_2 * 10**27)
+
+
+##########################
+# BEAM
+##########################
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{BEAM}} \\tabularnewline
+\hline
+distribution & %s & -- \\tabularnewline
+\hline
+"""% (beam.distribution_type)
+
+        if beam.distribution_type in ("ring", "vortex"):
+            tex_file_data += \
+"""$M$ & %d & -- \\tabularnewline
+\hline
+""" % (beam.M)
+        if beam.distribution_type == "vortex":
+            tex_file_data += \
+"""$m$ & %d & -- \\tabularnewline
+\hline
+""" % (beam.m)
+
+        if beam.info == "beam_r":
+            tex_file_data += \
+"""$r_0$ & %d & $\mu$m \\tabularnewline
+\hline
+""" % (round(beam.r_0 * 10**6))
+
+        elif beam.info == "beam_xy":
+            tex_file_data += \
+"""$x_0$ & %d & $\mu$m \\tabularnewline
+\hline
+$y_0$ & %d & $\mu$m \\tabularnewline
+\hline
+""" % (round(beam.x_0 * 10 ** 6), round(beam.y_0 * 10 ** 6))
+
+        tex_file_data += \
+"""
+$\lambda$ & %d & nm \\tabularnewline
+\hline
+$z_{diff}$ & %2.4f & cm \\tabularnewline
+\hline
+""" % (beam.lmbda * 10**9, beam.z_diff * 10**2)
+
+        if beam.distribution_type == "gauss" or beam.distribution_type == "ring":
+            tex_file_data += \
+"""$P_0 / P_G$ & %.2f & -- \\tabularnewline
+\hline
+""" % (beam.P0_to_Pcr_G)
+
+        if beam.distribution_type == "vortex":
+            tex_file_data += \
+"""$P_0 / P_V$ & %.2f & -- \\tabularnewline
+\hline
+""" % (beam.P0_to_Pcr_V)
+
+        tex_file_data += \
+"""$P_0$ & %.2f & MW \\tabularnewline
+\hline
+$I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
+\hline
+""" % (beam.p_0 * 10**-6, beam.i_0 * 10**-16)
+
+        if beam.info == "beam_xy":
+            tex_file_data += \
+"""C & %.2f & -- \\tabularnewline
+\hline
+""" % (beam.noise_percent / 100)
+
+##########################
+# GRID
+##########################
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{GRID}} \\tabularnewline
+\hline
+"""
+        if beam.info == "beam_r":
+            tex_file_data += \
+"""$r_{max}$ & % d & $\mu$m \\tabularnewline
+\hline
+$n_r$ & % d & -- \\tabularnewline
+\hline
+$h_r$ & % d & $\mu$m \\tabularnewline
+\hline
+""" % (round(beam.r_max * 10**6), beam.n_r, round(beam.dr * 10**6))
+        elif beam.info == "beam_xy":
+            tex_file_data += \
+"""$x_{max}$ & %d & $\mu$m \\tabularnewline
+\hline
+$y_{max}$ & %d & $\mu$m \\tabularnewline
+\hline
+$n_x$ & %d & -- \\tabularnewline
+\hline
+$n_y$ & %d & -- \\tabularnewline
+\hline
+$h_x$ & %d & $\mu$m \\tabularnewline
+\hline
+$h_y$ & %d & $\mu$m \\tabularnewline
+\hline
+""" % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
+       beam.n_x, beam.n_y,
+       round(beam.dx * 10 ** 6),
+       round(beam.dy * 10 ** 6))
+
+##########################
+# TRACK
+##########################
+
+        tex_file_data += \
+"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{TRACK}} \\tabularnewline
+\hline
+$n_z$ & %d & -- \\tabularnewline
+\hline
+$h_z (z=0)$ & %.2f & $\mu$m \\tabularnewline
+\hline
+$I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
+\hline
+""" % (n_z, dz0 * 10**6, max_intensity_to_stop * 10**-16)
+
+##########################
+# END
+##########################
+
+        tex_file_data += \
+"""\end{tabular}
+\end{center}
+\end{document}
+"""
+
+        with open(self.path + "/" + tex_file_name, "w") as f:
+            f.write(tex_file_data)
+
+        try:
+            subprocess.check_output(["pdflatex", "-quiet", "-interaction=nonstopmode", tex_file_path, "-output-directory", self.path])
+        except:
+            Exception("Wrong pdflatex compilation!")
+
+        for ext in ['tex', 'aux', 'log', 'out', 'fls', 'fdb_latexmk']:
+            try:
+                file = self.path + "/" + filename + "." + ext
+                os.remove(file)
+            except:
+                pass
 
     @staticmethod
     def print_current_state(n_step, states, states_columns):

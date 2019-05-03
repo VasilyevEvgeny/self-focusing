@@ -7,7 +7,7 @@ class Beam(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
         self.m_constants = M_Constants()
         self.lmbda = kwargs["lmbda"]
-        self.omega = 2.0 * pi * self.m_constants.c / self.lmbda
+        #self.omega = 2.0 * pi * self.m_constants.c / self.lmbda
 
         self.medium = Medium(name=kwargs["medium"],
                              lmbda=self.lmbda,
@@ -29,7 +29,7 @@ class Beam(metaclass=abc.ABCMeta):
             self.p_0 = self.P0_to_Pcr_G * self.Pcr_G
         elif self.distribution_type == "vortex":
             self.m = kwargs["m"]
-            self.M = self.m
+            self.M = kwargs["M"]
             self.Pcr_V = self.calculate_Pcr_V()
             self.P0_to_Pcr_V = kwargs["P0_to_Pcr_V"]
             self.p_0 = self.P0_to_Pcr_V * self.Pcr_V
@@ -66,7 +66,7 @@ class Beam_R(Beam):
         elif self.distribution_type == "ring":
             self.field = self.initialize_field_ring(self.M, self.r_0, self.dr, self.n_r)
         elif self.distribution_type == "vortex":
-            self.field = self.initialize_field_vortex(self.m, self.r_0, self.dr, self.n_r)
+            self.field = self.initialize_field_vortex(self.M, self.r_0, self.dr, self.n_r)
 
         self.i_0 = self.calculate_i0()
         self.z_diff = self.medium.k_0 * self.r_0**2
@@ -113,8 +113,8 @@ class Beam_R(Beam):
 
         return arr
 
-    def initialize_field_vortex(self, m, r_0, dr, n_r):
-        return self.initialize_field_ring(m, r_0, dr, n_r)
+    def initialize_field_vortex(self, M, r_0, dr, n_r):
+        return self.initialize_field_ring(M, r_0, dr, n_r)
 
 
 class Beam_XY(Beam):
@@ -161,7 +161,7 @@ class Beam_XY(Beam):
             self.field = self.initialize_field_ring(self.M, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
                                                     self.dy, self.n_x, self.n_y, self.noise_percent, self.noise_field)
         elif self.distribution_type == "vortex":
-            self.field = self.initialize_field_vortex(self.m, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
+            self.field = self.initialize_field_vortex(self.m, self.M, self.x_0, self.y_0, self.x_max, self.y_max, self.dx,
                                                       self.dy, self.n_x, self.n_y, self.noise_percent, self.noise_field)
 
         self.i_0 = self.calculate_i0()
@@ -258,13 +258,13 @@ class Beam_XY(Beam):
 
     @staticmethod
     @jit(nopython=False)
-    def initialize_field_vortex(m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
+    def initialize_field_vortex(m, M, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
         arr = np.zeros(shape=(n_x, n_y), dtype=np.complex64)
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
                 arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
-                            sqrt(x**2 / x_0**2 + y**2 / y_0**2)**m * \
+                            sqrt(x**2 / x_0**2 + y**2 / y_0**2)**M * \
                             exp(-0.5 * (x ** 2 / x_0 ** 2 + y ** 2 / y_0 ** 2)) * exp(1j * m * arctan2(x, y))
 
         return arr

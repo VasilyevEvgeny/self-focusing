@@ -74,7 +74,7 @@ class Propagator:
         self.manager.create_track_dir()
         self.manager.create_beam_dir()
 
-        self.logger.save_initial_parameters(self.beam)
+        self.logger.save_initial_parameters(self.beam, self.n_z, self.dz, self.max_intensity_to_stop)
 
         if self.beam.info == "beam_xy" and self.beam.noise_percent:
             plot_noise_field(self.beam, self.manager.results_dir)

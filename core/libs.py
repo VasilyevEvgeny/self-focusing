@@ -1,4 +1,5 @@
 import os
+import subprocess
 import argparse
 import abc
 from multiprocessing import cpu_count
@@ -28,5 +29,3 @@ from PIL import Image
 from glob import glob
 import shutil
 from tqdm import tqdm
-
-from reportlab.pdfgen import canvas
