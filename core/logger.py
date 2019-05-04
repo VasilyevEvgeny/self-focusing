@@ -1,4 +1,5 @@
 from core.libs import *
+from core.functions import compile_to_pdf
 
 
 class Logger:
@@ -24,7 +25,7 @@ class Logger:
 
     def log_times(self):
         with open(self.path + "/times.log", "w") as f:
-            f.write("{:40s} | {:15}".format("MODULE NAME", "TIME (hh:mm:ss)\n"))
+            f.write("{:40s} | {:15}".format("MODULE", "TIME (hh:mm:ss)\n"))
             f.write("--------------------------------------------------------------\n")
             for key in self.functions:
                 f.write("{:40s} | {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
@@ -115,9 +116,9 @@ class Logger:
 
         initial_condition_str = None
         if beam.info == "beam_r":
-            initial_condition_str = "A(r,z=0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}"
+            initial_condition_str = "A(r,0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}"
         elif beam.info == "beam_xy":
-            initial_condition_str = "A(x,y, z = 0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}"
+            initial_condition_str = "A(x,y,0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}"
 
         tex_file_data += \
 """\multicolumn{3}{M{15cm}}{\\textbf{INITIAL CONDITION}} \\tabularnewline
@@ -291,17 +292,7 @@ $I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
         with open(self.path + "/" + tex_file_name, "w") as f:
             f.write(tex_file_data)
 
-        try:
-            subprocess.check_output(["pdflatex", "-quiet", "-interaction=nonstopmode", tex_file_path, "-output-directory", self.path])
-        except:
-            Exception("Wrong pdflatex compilation!")
-
-        for ext in ['tex', 'aux', 'log', 'out', 'fls', 'fdb_latexmk']:
-            try:
-                file = self.path + "/" + filename + "." + ext
-                os.remove(file)
-            except:
-                pass
+        compile_to_pdf(self.path + "/" + tex_file_name, delete_tex_file=True)
 
     @staticmethod
     def print_current_state(n_step, states, states_columns):

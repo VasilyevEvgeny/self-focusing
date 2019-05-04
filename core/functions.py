@@ -128,3 +128,28 @@ def make_video(root_dir, name, images_dir="images", fps=10):
 
     cv2.destroyAllWindows()
     video.release()
+
+
+def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
+    path_list = (tex_file_path.replace('\\', '/')).split('/')
+    path, filename = "/".join(path_list[:-1]), path_list[-1].split('.')[0]
+
+    try:
+        subprocess.check_output(
+            ["pdflatex", "-quiet", "-interaction=nonstopmode", tex_file_path, "-output-directory", path])
+    except:
+        Exception("Wrong pdflatex compilation!")
+
+    if delete_tmp_files:
+        for ext in ['aux', 'log', 'out', 'fls', 'fdb_latexmk']:
+            try:
+                file = path + "/" + filename + "." + ext
+                os.remove(file)
+            except:
+                pass
+
+    if delete_tex_file:
+        try:
+            os.remove(path + "/" + filename + ".tex")
+        except:
+            pass
