@@ -41,11 +41,11 @@ def plot_images(**kwargs):
 
     xx, yy = np.meshgrid(x, y)
 
-    for i in tqdm(range(0, 360, 2)):
+    for number, gradus in enumerate(tqdm(range(0, 360, 2))):
         fig = plt.figure(figsize=(3, 3))
         ax = fig.add_subplot(111, projection="3d")
         ax.plot_surface(xx, yy, phase, cmap="gray", rstride=1, cstride=1, linewidth=0, antialiased=False)
-        ax.view_init(elev=75, azim=int(i + 315))
+        ax.view_init(elev=75, azim=int(gradus + 315))
         ax.set_axis_off()
         ax.set_xticks([])
         ax.set_yticks([])
@@ -56,7 +56,7 @@ def plot_images(**kwargs):
         ax.zaxis.set_tick_params(pad=15)
         #bbox = fig.bbox_inches.from_bounds(3, 2, 7.5, 6.1)
         bbox = fig.bbox_inches.from_bounds(0.6, 0.5, 2, 2)
-        plt.savefig(res_dir + '/%04d.png' % i, bbox_inches=bbox, transparent=True)
+        plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=True)
         plt.close()
 
     return results_dir
@@ -80,4 +80,4 @@ def process_topological_charge(m, animation=True, video=True):
                    name=prefix)
 
 
-process_topological_charge(m=2)
+process_topological_charge(m=3)

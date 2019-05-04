@@ -141,7 +141,7 @@ def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
         Exception("Wrong pdflatex compilation!")
 
     if delete_tmp_files:
-        for ext in ['aux', 'log', 'out', 'fls', 'fdb_latexmk']:
+        for ext in ['aux', 'log', 'out', 'fls', 'fdb_latexmk', 'dvi']:
             try:
                 file = path + "/" + filename + "." + ext
                 os.remove(file)

@@ -2,11 +2,20 @@
 
 \usepackage{underbrace}
 
+\usepackage{graphicx}
+
 \usepackage[left=1cm, right=1cm, top=2cm, bottom=2cm]{geometry}
+
+\usepackage{animate} 
 
 \usepackage [russian]{babel}
 \usepackage{amssymb,amsmath,latexsym,amsfonts,amsthm}
 
+\renewcommand{\arraystretch}{1.1}
+
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 
 \usepackage{hyperref}
 \hypersetup{
@@ -143,7 +152,7 @@ We use the quasi-optical approximation assuming $| \partial^2 A(\mathbf{r}, z) /
 \end{equation}
 where $\mathbf{r}$ -- transversal radius-vector, $z$ -- evolutionary coordinate, $A(\mathbf{r},z)$ -- complex slowly varying amplitude of laser field, $k_0$ -- wave vector, $\Delta_\perp$ -- transversal laplacian, $n_0$ -- linear refractive index, $n_2$ -- cubic nonlinear refractive index, $I(\mathbf{r},z)$ -- intensity of laser field. 
 
-\section{Initial conditions}
+\section{Wave equation and initial conditions}
 
 The amplitude of the laser field $A(\mathbf{r},z)$ depends on the radius vector $\mathbf{r}$, which in the general case can be represented as two transverse spatial coordinates $x$ and $y$. However, there is also an axisymmetric approximation according to which the field $A(\mathbf{r},z)$ does not depend on the polar angle $\varphi$ and therefore the radius vector $\mathbf{r}$ can be replaced by a scalar value $r$. Wave equation and initial conditions in these two cases will look different.
 
@@ -157,7 +166,7 @@ The general form of initial conditions is
 \begin{equation}
 A(x,y, z = 0) = \biggl(1 + C \xi(x,y)\biggr)A_0 \biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)^{M/2}\exp\biggl\{-\frac1{2}\biggl(\frac{x^2}{x_0^2}+\frac{y^2}{y_0^2}\biggr)\biggr\}\exp\biggl\{i m \varphi(x,y)\biggr\},
 \end{equation}
-where $x$ and $y$ -- transversal coordinates, $x_0$ and $y_0$ -- spatial parameters along corresponding coordinates, $M$ -- parameter describing the inner form of the beam ring, $m$ -- topological charge, $\varphi=\arctan{x/y}$, $\xi=\xi(\mathbb{E}, \sigma, r_{corr})$ -- gaussian noise with expectation $\mathbb{E}$, dispersion $\sigma^2$ and correlation radius $r_{corr}$.
+where $x$ and $y$ -- transversal coordinates, $x_0$ and $y_0$ -- spatial parameters along corresponding coordinates, $M$ -- parameter describing the inner form of the beam ring, $m$ -- topological charge, $\varphi=\arctan{x/y}$, $\xi=\xi(\mathbb{E}, \sigma, r_{corr})$ -- gaussian noise with expectation $\mathbb{E}$, dispersion $\sigma^2$ and correlation radius $r_{corr}$. Vortex phase is defined as $\theta(x,y) = m \varphi(x,y)$.
 
 
 \subsection{$\mathbf{r}\longrightarrow r$}
@@ -170,6 +179,42 @@ The general form of initial conditions is
 \begin{equation}
 A(r,z=0) = A_0 \biggl( \frac{r}{r_0} \biggr)^M \exp \biggl\{ -\frac{r^2}{2r_0^2} \biggr\}
 \end{equation}
+
+\subsection{Types of initial conditions}
+
+Depending on the values $M$ and $m$ ($M, m \in \mathbb{N}$), the initial conditions can take different forms:
+\begin{itemize}
+\item \textbf{Gauss ($M=m=0$)} 
+\item \textbf{Ring ($M>0$, $m=0$)} 
+\item \textbf{Vortex ($M>0$, $m>0$)}
+\end{itemize}
+Examples:
+\begin{center}
+\begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
+\ & \textbf{Gauss ($M=m=0$)} & \textbf{Ring ($M=1$, $m=0$)} & \textbf{Ring ($M=2$, $m=0$)} \\
+$I(x,y)$ &
+\includegraphics[width=\linewidth]{../resources/intensity_M=0.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=2.png} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
+\ & \textbf{Vortex ($M=1$, $m=1$)} & \textbf{Vortex ($M=2$, $m=2$)} & \textbf{Vortex ($M=3$, $m=3$)} \\
+$I(x,y)$ &
+\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=2.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=3.png} \\
+$\theta(x,y)$ &
+\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} 
+& 
+\animategraphics[loop,controls=play]{180}{../resources/m=2/images/}{0000}{0179} 
+& 
+\animategraphics[loop,controls=play]{180}{../resources/m=3/images/}{0000}{0179}  \\
+\end{tabular}
+\end{center}
+It should be noted that both the amplitude and phase profiles can be changed by the noise component.
 
 \section{Numerical solution}
 
@@ -185,7 +230,92 @@ The nonlinear equation for the self-focusing of a laser beam \eqref{eqn:final} w
 \end{equation}
 
 \subsection{Diffraction}
+The solution of the beam diffraction equation differs depending on the approximation used.
 
+\subsubsection{$\mathbf{r}\longrightarrow(x,y)$}
 
+smth
+
+\subsubsection{$\mathbf{r}\longrightarrow r$}
+In axisymmetric approximation diffraction equation looks like:
+\begin{equation}
+\label{eqn:diffraction_r}
+2 i k_0 \frac{\partial A (r, z)}{\partial z} = \biggl[ \frac{\partial^2}{\partial r^2} + \frac1{r}\frac{\partial}{\partial r} - \frac{m^2}{r^2} \biggr] A(r,z)
+\end{equation}
+The numerical solution of the equation \eqref{eqn:diffraction_r} is associated with a grid approximation of the complex field for each of the coordinates, so we introduce the following grids:
+\begin{itemize}
+\item $r\longrightarrow r_k, \ h_r = r_k - r_{k-1} = \text{const}, \ k = \overline{0, n_r-1}$
+\item $z\longrightarrow z_n, \ h_z = z_n - z_{n-1} \ne \text{const}, \ n = \overline{0, n_z-1}$
+\item $A \longrightarrow A^n_{k, s}, \quad I \longrightarrow I_{k,s}$.
+\end{itemize}
+
+We use the Crank-Nicolson method with a central difference approximation of the derivatives:
+\begin{equation}
+\label{eqn:nikolson1}
+\frac{\partial A}{\partial z} \longrightarrow \frac{\tilde{A}_k^{n+1} - A_k^{n}}{h_z}
+\end{equation}
+\begin{equation}
+\label{eqn:nikolson2}
+\frac{\partial^2 \tilde{A}}{\partial r^2} \longrightarrow \frac1{2} \biggl( \frac{\tilde{A}_{k+1}^{n+1} - 2 A_k^{n+1} + A_{k-1}^{n+1}}{h_r^2} \biggr) +
+\frac1{2} \biggl( \frac{A_{k+1}^{n} - 2 A_k^{n} + A_{k-1}^{n}}{h_r^2} \biggl)
+\end{equation}
+\begin{equation}
+\label{eqn:nikolson3}
+\frac{\partial A}{\partial r} \longrightarrow \frac1{2} \biggl( \frac{A_{k+1}^{n+1} - A_{k-1}^{n+1}}{2h_r} \biggr) +
+\frac1{2} \biggl( \frac{A_{k+1}^{n} - A_{k-1}^{n}}{2h_r} \biggl)
+\end{equation}
+Note that the order of approximation of the numerical scheme is $ O (h_r ^ 2, h_z ^ 2) $. Taking into account the expressions \eqref{eqn:nikolson1} - \eqref{eqn:nikolson3}, we write:
+\begin{multline}
+A_{k+1}^{n+1} \biggl( \frac1{2h_r^2} + \frac1{4 r_k h_r} \biggr) + A_{k}^{n+1} \biggl( -\frac{2 i k_0 \hat{T}_\Omega}{h_z} - \frac1{h_r^2} - \frac{m^2}{r_k^2}\biggr) + A_{k-1}^{n+1} \biggl(  \frac1{2h_r^2} - \frac1{4 r_k h_r} \biggr) =\\= A_{k+1}^{n} \biggl( -\frac1{2h_r^2} - \frac1{4 r_k h_r} \biggr) + A_{k}^{n} \biggl( -\frac{2 i k_0 \hat{T}_\Omega}{h_z} + \frac1{h_r^2} \biggr) + A_{k-1}^{n} \biggl( -\frac1{2h_r^2} + \frac1{4 r_k h_r} \biggr)
+\end{multline}
+The final expression for the grid approximation:
+\begin{gather}
+\alpha_kA_{k+1}^{n+1} - \beta_k A_{k}^{n+1} + \gamma_k A_{k-1}^{n+1} = -\delta_k\\
+\alpha_k = \frac1{2h_r^2} + \frac1{4 r_k h_r}\\
+\beta_k = \frac1{h_r^2} + \frac{2 i k_0 \hat{T}_\Omega}{h_z} + \frac{m^2}{r_k^2}\\
+\gamma_k = \frac1{2h_r^2} - \frac1{4 r_k h_r}\\
+\delta_k = \alpha_kA_{k+1}^{n} - \biggl(\beta^{*}_k - \frac{m^2}{r^2_k} \biggr) A_{k}^{n} + \gamma_k A_{k-1}^{n}
+\end{gather}
+General form of the boundary conditions:
+\begin{gather}
+A_0 = \kappa_{left} A_1 + \mu_{left}\\
+A_{N_r-1} = \kappa_{right} A_{N_r-2} + \mu_{right}
+\end{gather}
+We represent the grid approximation taking into account the boundary conditions in the form of a matrix:
+\begin{equation}
+\label{eqn:3diagonal_maxtrix}
+\begin{pmatrix}
+1 & -\kappa_{left} & 0 & \dots & \dots & \dots & \dots\\
+\gamma_1 & -\beta_1 & \alpha_1 & 0 & \dots & \dots & \dots\\
+0 & \gamma_2 & -\beta_2 & \alpha_2 & 0 & \dots & \dots\\
+\hdotsfor{7}\\
+\hdotsfor{7}\\
+\dots &\dots & 0 & \gamma_{N_r-3} & -\beta_{N_r-3} & \alpha_{N_r-3} & 0\\
+\dots & \dots &\dots & 0 & \gamma_{N_r-2} & -\beta_{N_r-2} & \alpha_{N_r-2}\\
+\dots &\dots &\dots &\dots & 0 & -\kappa_{right} & 1\\
+\end{pmatrix}
+\begin{pmatrix}
+A_0 \\
+A_1 \\
+A_2 \\
+\dots \\
+\dots \\
+A_{N_r-3} \\
+A_{N_r-2} \\
+A_{N_r-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+\mu_{left} \\
+-\delta_1\\
+-\delta_2\\
+\dots \\
+\dots \\
+-\delta_{N_r-3}\\
+-\delta_{N_r-2}\\
+\mu_{right}
+\end{pmatrix}
+\end{equation}
+The system of equations with the tridiagonal matrix \eqref{eqn:3diagonal_maxtrix} was solved by the sweep method.
 
 \end{document}
