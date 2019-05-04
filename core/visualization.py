@@ -2,7 +2,6 @@ from core.functions import *
 
 
 def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
-    fig_size, x_max, y_max, title, ticks, labels, colorbar = None, None, None, None, None, None, None
     if mode in ("xy", "r"):
         fig_size = (12, 10)
         x_max = 250
@@ -11,7 +10,7 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
         ticks = True
         labels = True
         colorbar = True
-    elif mode in ("vortices"):
+    elif mode in ("multimedia"):
         fig_size = (3, 3)
         x_max = 250
         y_max = 250

@@ -13,7 +13,7 @@ class Manager:
         self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir, self.global_results_dir_name,
                                                                   self.prefix)
 
-        if self.prefix == "vortices":
+        if self.prefix == "multimedia":
             self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir,
                                                                       self.global_results_dir_name + "/" + self.multidir_name,
                                                                       prefix=None)

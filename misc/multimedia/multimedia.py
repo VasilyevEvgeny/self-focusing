@@ -12,7 +12,7 @@ def get_data():
     results_dir, results_dir_name = create_multidir(args.global_root_dir, args.global_results_dir_name, args.prefix)
 
     indices = []
-    for idx_noise_percent, noise_percent in enumerate([20]):
+    for idx_noise_percent, noise_percent in enumerate([0, 10, 20]):
         for idx_m, m in enumerate([1, 2]):
 
             print("================================")
@@ -23,6 +23,7 @@ def get_data():
                            distribution_type="vortex",
                            P0_to_Pcr_V=5,
                            m=m,
+                           M=m,
                            noise_percent=noise_percent,
                            lmbda=1800*10**-9,
                            x_0=100*10**-6,
@@ -55,7 +56,7 @@ def get_data():
     return all_files, n_pictures_max, indices, results_dir, args.prefix
 
 
-def process_vortices(all_files, indices, n_pictures_max, path, prefix, fps=10, animation=True, video=True):
+def process_multimedia(all_files, indices, n_pictures_max, path, prefix, fps=10, animation=True, video=True):
     all_files_upd = []
     for idx in range(len(all_files)):
         files = []
@@ -102,4 +103,4 @@ def process_vortices(all_files, indices, n_pictures_max, path, prefix, fps=10, a
 
 
 all_files, n_pictures_max, indices, results_dir, prefix = get_data()
-process_vortices(all_files, indices, n_pictures_max, results_dir, prefix)
+process_multimedia(all_files, indices, n_pictures_max, results_dir, prefix)
