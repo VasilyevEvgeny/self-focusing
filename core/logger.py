@@ -23,9 +23,11 @@ class Logger:
         return res
 
     def log_times(self):
-        with open(self.path + "/time_logs.txt", "w") as f:
+        with open(self.path + "/times.log", "w") as f:
+            f.write("{:40s} | {:15}".format("MODULE NAME", "TIME (hh:mm:ss)\n"))
+            f.write("--------------------------------------------------------------\n")
             for key in self.functions:
-                f.write("{:40s} = {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
+                f.write("{:40s} | {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
 
     def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename = "parameters"):
         tex_file_name = filename + ".tex"
@@ -49,16 +51,15 @@ class Logger:
 
 \\usepackage[table]{xcolor}
 
+\\usepackage{booktabs}
+
 \\renewcommand{\\arraystretch}{1.2}
 \setlength{\\tabcolsep}{0pt}
-
-\setlength\\arrayrulewidth{1.05pt}
 
 \\begin{document}
 \pagestyle{empty}
 \\begin{center}
-\\begin{tabular}{|M{5cm}|M{5cm}|M{5cm}|}
-\hline
+\\begin{tabular}{M{5cm}M{5cm}M{5cm}}
 """
 
 ##########################
@@ -101,10 +102,11 @@ class Logger:
         equation_str = " ".join(equation)
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{EQUATION}} \\tabularnewline
-\hline
-\multicolumn{3}{|M{15cm}|}{\[ %s \]} \\tabularnewline
-\hline
+"""\\midrule[2pt]
+\multicolumn{3}{M{15cm}}{\\textbf{EQUATION}} \\tabularnewline
+\\midrule[2pt]
+\multicolumn{3}{M{15cm}}{\[ %s \]} \\tabularnewline
+\\midrule[2pt]
 """ % equation_str
 
 ##########################
@@ -118,10 +120,10 @@ class Logger:
             initial_condition_str = "A(x,y, z = 0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}"
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{INITIAL CONDITION}} \\tabularnewline
-\hline
-\multicolumn{3}{|M{15cm}|}{\[ %s \]} \\tabularnewline
-\hline
+"""\multicolumn{3}{M{15cm}}{\\textbf{INITIAL CONDITION}} \\tabularnewline
+\\midrule[2pt]
+\multicolumn{3}{M{15cm}}{\[ %s \]} \\tabularnewline
+\\midrule[2pt]
 """ % initial_condition_str
 
 
@@ -139,8 +141,8 @@ class Logger:
             material = "noname"
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{MEDIUM}} \\tabularnewline
-\hline
+"""\multicolumn{3}{M{15cm}}{\\textbf{MEDIUM}} \\tabularnewline
+\\midrule[2pt]
 material & %s & -- \\tabularnewline
 \hline
 $n_0$ & %1.4f & -- \\tabularnewline
@@ -152,7 +154,7 @@ $k_0$ & %.2f & 1/mm \\tabularnewline
 $k_1$ & %.2f & fs/mm \\tabularnewline
 \hline
 $k_2$ & %.2f & fs$^2$/mm \\tabularnewline
-\hline
+\\midrule[2pt]
 """ % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12, beam.medium.k_2 * 10**27)
 
 
@@ -161,8 +163,8 @@ $k_2$ & %.2f & fs$^2$/mm \\tabularnewline
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{BEAM}} \\tabularnewline
-\hline
+"""\multicolumn{3}{M{15cm}}{\\textbf{BEAM}} \\tabularnewline
+\\midrule[2pt]
 distribution & %s & -- \\tabularnewline
 \hline
 """% (beam.distribution_type)
@@ -222,7 +224,7 @@ $I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
         if beam.info == "beam_xy":
             tex_file_data += \
 """C & %.2f & -- \\tabularnewline
-\hline
+\\midrule[2pt]
 """ % (beam.noise_percent / 100)
 
 ##########################
@@ -230,8 +232,8 @@ $I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{GRID}} \\tabularnewline
-\hline
+"""\multicolumn{3}{M{15cm}}{\\textbf{GRID}} \\tabularnewline
+\\midrule[2pt]
 """
         if beam.info == "beam_r":
             tex_file_data += \
@@ -255,7 +257,7 @@ $n_y$ & %d & -- \\tabularnewline
 $h_x$ & %d & $\mu$m \\tabularnewline
 \hline
 $h_y$ & %d & $\mu$m \\tabularnewline
-\hline
+\\midrule[2pt]
 """ % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
        beam.n_x, beam.n_y,
        round(beam.dx * 10 ** 6),
@@ -266,8 +268,8 @@ $h_y$ & %d & $\mu$m \\tabularnewline
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{|M{15cm}|}{\cellcolor{gray!25}\\textbf{TRACK}} \\tabularnewline
-\hline
+"""\multicolumn{3}{M{15cm}}{\\textbf{TRACK}} \\tabularnewline
+\\midrule[2pt]
 $n_z$ & %d & -- \\tabularnewline
 \hline
 $h_z (z=0)$ & %.2f & $\mu$m \\tabularnewline

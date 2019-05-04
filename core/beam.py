@@ -7,7 +7,6 @@ class Beam(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
         self.m_constants = M_Constants()
         self.lmbda = kwargs["lmbda"]
-        #self.omega = 2.0 * pi * self.m_constants.c / self.lmbda
 
         self.medium = Medium(name=kwargs["medium"],
                              lmbda=self.lmbda,
