@@ -30,7 +30,7 @@ def plot_images(**kwargs):
     _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
 
-    n_points = 300
+    n_points = 600
     x_max, y_max = 600.0, 600.0  # micrometers
 
     x, y = np.zeros(n_points), np.zeros(n_points)
@@ -55,7 +55,7 @@ def plot_images(**kwargs):
         if figsize == (3,3):
             bbox = fig.bbox_inches.from_bounds(0.6, 0.5, 2, 2)
         elif figsize == (10,10):
-            bbox = fig.bbox_inches.from_bounds(2.3, 1.7, 5.7, 5.5)
+            bbox = fig.bbox_inches.from_bounds(2.3, 2.0, 5.9, 6.2)
         else:
             raise Exception("Wrong figsize!")
         plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=True)

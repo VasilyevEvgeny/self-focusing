@@ -89,7 +89,7 @@ def process_multimedia(all_files, indices, n_pictures_max, path, prefix, fps=10,
             im = Image.open(all_files_upd[j][i])
             i1, i2 = indices[j]
             composed_im.paste(im, (i1 * width, i2 * height))
-        composed_im.save(results_dir + "/%04d.png" % i, "PNG")
+        composed_im.save(results_dir + "/%04d.png" % i, "PNG", transparent=True)
 
     if animation:
         make_animation(root_dir=path,

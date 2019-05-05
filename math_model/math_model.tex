@@ -8,6 +8,8 @@
 
 \usepackage{animate} 
 
+\usepackage[table]{xcolor}
+
 \usepackage [russian]{babel}
 \usepackage{amssymb,amsmath,latexsym,amsfonts,amsthm}
 
@@ -190,28 +192,26 @@ Depending on the values $M$ and $m$ ($M, m \in \mathbb{N}$), the initial conditi
 \end{itemize}
 Examples:
 \begin{center}
-\begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
-\ & \textbf{Gauss ($M=m=0$)} & \textbf{Ring ($M=1$, $m=0$)} & \textbf{Ring ($M=2$, $m=0$)} \\
-$I(x,y)$ &
-\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=0_large/images/}{0000}{0179} & 
-\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=1_large/images/}{0000}{0179} & 
-\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=2_large/images/}{0000}{0179} \\
+\begin{tabular}{M{1.5cm}M{5cm}M{5cm}M{5cm}}
+\ & \cellcolor{gray!25}\textbf{Gauss ($M=m=0$)} & \cellcolor{gray!25}\textbf{Ring ($M=1$, $m=0$)} & \cellcolor{gray!25}\textbf{Ring ($M=2$, $m=0$)} \\
+\cellcolor{gray!25} $\mathbf{I(x,y)}$ &
+\includegraphics[width=\linewidth]{../resources/intensity_M=0.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
+\includegraphics[width=\linewidth]{../resources/intensity_M=2.png}\\
 \end{tabular}
 \end{center}
 
 \begin{center}
-\begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
-\ & \textbf{Vortex ($M=1$, $m=1$)} & \textbf{Vortex ($M=2$, $m=2$)} & \textbf{Vortex ($M=3$, $m=3$)} \\
-$I(x,y)$ &
-%\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} & 
+\begin{tabular}{M{1.5cm}M{5cm}M{5cm}M{5cm}}
+\ & \cellcolor{gray!25}\textbf{Vortex ($M=1$, $m=1$)} & \cellcolor{gray!25}\textbf{Vortex ($M=2$, $m=2$)} & \cellcolor{gray!25}\textbf{Vortex ($M=3$, $m=3$)} \tabularnewline
+\cellcolor{gray!25}$\mathbf{I(x,y)}$ &
+\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
 \includegraphics[width=\linewidth]{../resources/intensity_M=2.png} & 
 \includegraphics[width=\linewidth]{../resources/intensity_M=3.png} \\
-$\theta(x,y)$ &
-%\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} 
-& 
-%\animategraphics[loop,controls=play]{180}{../resources/m=2/images/}{0000}{0179} 
-& 
-%\animategraphics[loop,controls=play]{180}{../resources/m=3/images/}{0000}{0179}  \\
+\cellcolor{gray!25}$\mathbf{\theta(x,y)}$ &
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/m=1_large/images/}{0000}{0179} & 
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/m=2_large/images/}{0000}{0179} & 
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/m=3_large/images/}{0000}{0179}  \\
 \end{tabular}
 \end{center}
 It should be noted that both the amplitude and phase profiles can be changed by the noise component.

@@ -20,6 +20,7 @@ def plot_images(**kwargs):
     prefix = kwargs["prefix"]
     M = kwargs["M"]
     figsize = kwargs.get("figsize", (10,10))
+    ext = kwargs.get("ext", "png")
 
     _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
@@ -53,7 +54,7 @@ def plot_images(**kwargs):
             bbox = fig.bbox_inches.from_bounds(2.3, 1.7, 5.7, 5.5)
         else:
             raise Exception("Wrong figsize!")
-        plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=False)
+        plt.savefig(res_dir + '/%04d.' % number + ext, bbox_inches=bbox, transparent=True)
         plt.close()
 
     return results_dir
@@ -77,4 +78,4 @@ def process_initial(M, animation=True, video=True):
                    name=prefix)
 
 
-process_initial(M=3)
+process_initial(M=1)
