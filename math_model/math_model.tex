@@ -193,9 +193,9 @@ Examples:
 \begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
 \ & \textbf{Gauss ($M=m=0$)} & \textbf{Ring ($M=1$, $m=0$)} & \textbf{Ring ($M=2$, $m=0$)} \\
 $I(x,y)$ &
-\includegraphics[width=\linewidth]{../resources/intensity_M=0.png} & 
-\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
-\includegraphics[width=\linewidth]{../resources/intensity_M=2.png} \\
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=0_large/images/}{0000}{0179} & 
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=1_large/images/}{0000}{0179} & 
+\animategraphics[width=\linewidth, loop,controls=play]{180}{../resources/M=2_large/images/}{0000}{0179} \\
 \end{tabular}
 \end{center}
 
@@ -203,15 +203,15 @@ $I(x,y)$ &
 \begin{tabular}{M{1cm}M{5cm}M{5cm}M{5cm}}
 \ & \textbf{Vortex ($M=1$, $m=1$)} & \textbf{Vortex ($M=2$, $m=2$)} & \textbf{Vortex ($M=3$, $m=3$)} \\
 $I(x,y)$ &
-\includegraphics[width=\linewidth]{../resources/intensity_M=1.png} & 
+%\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} & 
 \includegraphics[width=\linewidth]{../resources/intensity_M=2.png} & 
 \includegraphics[width=\linewidth]{../resources/intensity_M=3.png} \\
 $\theta(x,y)$ &
-\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} 
+%\animategraphics[loop,controls=play]{180}{../resources/m=1/images/}{0000}{0179} 
 & 
-\animategraphics[loop,controls=play]{180}{../resources/m=2/images/}{0000}{0179} 
+%\animategraphics[loop,controls=play]{180}{../resources/m=2/images/}{0000}{0179} 
 & 
-\animategraphics[loop,controls=play]{180}{../resources/m=3/images/}{0000}{0179}  \\
+%\animategraphics[loop,controls=play]{180}{../resources/m=3/images/}{0000}{0179}  \\
 \end{tabular}
 \end{center}
 It should be noted that both the amplitude and phase profiles can be changed by the noise component.
@@ -224,7 +224,7 @@ The nonlinear equation for the self-focusing of a laser beam \eqref{eqn:final} w
 \label{eqn:system}
 \begin{split}
     2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z}  &= \underbrace{\Delta_\perp A(\mathbf{r},z),}_{\textcolor{red}{\text{\small{diffraction}}}} \\
-    2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z} &= \underbrace{\frac{2 k_0^2}{n_0} n_2 I(\mathbf{r},z) A(\mathbf{r},z).}_{\substack{\text{\textcolor{red}{\small{Kerr's}}}\\\text{\textcolor{red}{\small{nonlinearity}}}}}
+    2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z} &= \underbrace{\frac{2 k_0^2}{n_0} n_2 I(\mathbf{r},z) A(\mathbf{r},z).}_{\substack{\text{\textcolor{red}{\small{Kerr}}}\\\text{\textcolor{red}{\small{nonlinearity}}}}}
 \end{split}
 \right.
 \end{equation}
@@ -234,7 +234,53 @@ The solution of the beam diffraction equation differs depending on the approxima
 
 \subsubsection{$\mathbf{r}\longrightarrow(x,y)$}
 
-smth
+The diffraction equation in general case looks like:
+\begin{equation}
+\label{eqn:diffraction_xy}
+2 i k_0 \frac{\partial A (x, y, z)}{\partial z} = \biggl[ \frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} \biggr] A (x, y, z)
+\end{equation}
+We use the forward Fourier transform for turning to the spatial spectrum:
+\begin{equation}
+\label{eqn:fourier_xy}
+A(x,y,z) = \frac1{\sqrt{2 \pi}}\iint\limits_{-\infty \quad}^{\quad+\infty} \tilde{A}(k_x, k_y, z) \exp \Bigl\{ i (k_x x + k_y y) \Bigr\} dk_x dk_y
+\end{equation}
+After substituting \eqref{eqn:fourier_xy} to \eqref{eqn:diffraction_xy}, we get:
+\begin{equation}
+2 i k_0 \frac{\partial \tilde{A} (k_x, k_y, z)}{\partial z} = -(k_x^2 + k_y^2) \tilde{A}(k_x, k_y, z)
+\end{equation}
+Finally we make up the problem of Cauchy
+\begin{equation}
+\label{eqn:diffraction_xy_cauchy}
+\left\{
+\begin{aligned}
+\frac{\partial \tilde{A} (k_x, k_y, z)}{\partial z} &= R_{diff} \tilde{A} (k_x, k_y, z),\\
+\tilde{A}(k_x, k_y, 0) &= \tilde{A}_0
+\end{aligned}
+\right.
+\end{equation}
+where
+\begin{equation}
+R_{diff} = i\frac{k_x^2 + k_y^2}{2 k_0}.
+\end{equation}
+The analytical solution for \eqref{eqn:diffraction_xy_cauchy} is
+\begin{equation}
+\tilde{A} = \tilde{A_0} \exp\{R_{diff} z\}.
+\end{equation}
+After introducing the following grids:
+\begin{itemize}
+\item $x\longrightarrow x_i, \ h_x = x_{i+1} - x_{i} = \text{const}, \ i = \overline{0, n_x-2}$
+\item $k_x\longrightarrow k_{x_i}, \ h_{k_x} = k_{x_{i+1}} - k_{x_{i}} = \text{const}, \ i = \overline{0, n_x-2}$
+\item $y\longrightarrow y_j, \ h_y = y_{j+1} - y_{j} = \text{const}, \ j = \overline{0, n_y-2}$
+\item $k_y\longrightarrow k_{x_y}, \ h_{k_j} = k_{y_{j+1}} - k_{y_{j}} = \text{const}, \ j = \overline{0, n_y-2}$
+\item $z\longrightarrow z_n, \ h_z = z_{n+1} - z_{n} \ne \text{const}, \ n = \overline{0, n_z-2}$
+\item $\tilde{A} \longrightarrow \tilde{A}^n_{i, j}$
+\end{itemize}
+Knowing spectrum $\tilde{A}^n_{i,j}$ on $n$-th step on $z$, we get $\tilde{A}^{n+1}_{i,j}$:
+\begin{equation}
+\tilde{A}^{n+1}_{i,j} = \tilde{A}^n_{i,j} \exp\{R_{diff} h_z \}
+\end{equation}
+
+
 
 \subsubsection{$\mathbf{r}\longrightarrow r$}
 In axisymmetric approximation diffraction equation looks like:
@@ -244,9 +290,9 @@ In axisymmetric approximation diffraction equation looks like:
 \end{equation}
 The numerical solution of the equation \eqref{eqn:diffraction_r} is associated with a grid approximation of the complex field for each of the coordinates, so we introduce the following grids:
 \begin{itemize}
-\item $r\longrightarrow r_k, \ h_r = r_k - r_{k-1} = \text{const}, \ k = \overline{0, n_r-1}$
-\item $z\longrightarrow z_n, \ h_z = z_n - z_{n-1} \ne \text{const}, \ n = \overline{0, n_z-1}$
-\item $A \longrightarrow A^n_{k, s}, \quad I \longrightarrow I_{k,s}$.
+\item $r\longrightarrow r_k, \ h_r = r_{k+1} - r_{k} = \text{const}, \ k = \overline{0, n_r-2}$
+\item $z\longrightarrow z_n, \ h_z = z_{n+1} - z_{n} \ne \text{const}, \ n = \overline{0, n_z-2}$
+\item $A \longrightarrow A^n_{k, s}$
 \end{itemize}
 
 We use the Crank-Nicolson method with a central difference approximation of the derivatives:
@@ -317,5 +363,30 @@ A_{N_r-1}
 \end{pmatrix}
 \end{equation}
 The system of equations with the tridiagonal matrix \eqref{eqn:3diagonal_maxtrix} was solved by the sweep method.
+
+\subsection{Kerr nonlinearity}
+
+The influence of the Kerr nonlinearity takes into account equally regardless of the dimension of the problem being solved. The equation describing Kerr effect takes the form:
+\begin{equation}
+2 i k_0  \frac{\partial A(\mathbf{r},z) }{\partial z} = \frac{2 k_0^2}{n_0} n_2 I(\mathbf{r},z) A(\mathbf{r},z)
+\end{equation}
+We make up the problem of Cauchy:
+\begin{equation}
+\label{eqn:diffraction_xy_cauchy}
+\left\{
+\begin{aligned}
+ \frac{\partial A(\mathbf{r},z) }{\partial z} &= R_{kerr} A(\mathbf{r},z),\\
+A(\mathbf{r}, 0) &= A_0
+\end{aligned}
+\right.
+\end{equation}
+where
+\begin{equation}
+R_{kerr} = -i\frac{k_0 n_2 I(\mathbf{r},z)}{n_0}
+\end{equation}
+Depending on the approximation, we introduce grids on the corresponding coordinates and get the solution in the form:
+\begin{equation}
+A^{n+1} = A^n \exp\{R_{kerr} h_z \}
+\end{equation}
 
 \end{document}

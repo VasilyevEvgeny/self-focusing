@@ -4,73 +4,68 @@ from core.args import parse_args
 
 
 @jit(nopython=True)
-def calc_phase(arg):
-    while arg >= 2 * pi:
-        arg -= 2 * pi
-
-    return arg
-
-
-@jit(nopython=True)
-def phase_initialization(phase, x, y, n_points, m):
+def intensity_initialization(n_points, x, y, x_0, y_0, M):
+    intensity = np.zeros((n_points, n_points))
     for i in range(n_points):
         for j in range(n_points):
-            phase[i, j] = calc_phase(m * arctan2(y[i], x[j]) + m * pi)
+            intensity[i, j] = ((x[i] / x_0) ** 2 + (y[j] / y_0) ** 2) ** M * \
+                              exp(-((x[i] / x_0) ** 2 + (y[j] / y_0) ** 2))
 
-    return phase
+    return intensity
 
 
 def plot_images(**kwargs):
     global_root_dir = kwargs["global_root_dir"]
     global_results_dir_name = kwargs["global_results_dir_name"]
     prefix = kwargs["prefix"]
-    m = kwargs["m"]
-    figsize = kwargs.get("figsize", (10, 10))
+    M = kwargs["M"]
+    figsize = kwargs.get("figsize", (10,10))
 
     _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
 
     n_points = 300
     x_max, y_max = 600.0, 600.0  # micrometers
+    x_0, y_0 = x_max / 6, y_max / 6
 
     x, y = np.zeros(n_points), np.zeros(n_points)
     for i in range(n_points):
         x[i], y[i] = i * x_max / n_points - x_max / 2, i * y_max / n_points - y_max / 2
 
-    phase = np.zeros((n_points, n_points))
-    phase = phase_initialization(phase, x, y, n_points, m)
+    intensity = intensity_initialization(n_points, x, y, x_0, y_0, M)
 
     xx, yy = np.meshgrid(x, y)
 
     for number, gradus in enumerate(tqdm(range(0, 360, 2))):
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111, projection="3d")
-        ax.plot_surface(xx, yy, phase, cmap="gray", rstride=1, cstride=1, linewidth=0, antialiased=False)
+        ax.plot_surface(xx, yy, intensity, cmap="jet", rstride=1, cstride=1, linewidth=0, antialiased=False)
         ax.view_init(elev=75, azim=int(gradus + 315))
         ax.set_axis_off()
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_zticks([])
-        ax.set_zlim([0, 2*pi+0.1])
+        ax.set_zlim([0, 1.35])
+
         if figsize == (3,3):
             bbox = fig.bbox_inches.from_bounds(0.6, 0.5, 2, 2)
         elif figsize == (10,10):
             bbox = fig.bbox_inches.from_bounds(2.3, 1.7, 5.7, 5.5)
         else:
             raise Exception("Wrong figsize!")
-        plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=True)
+        plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=False)
         plt.close()
 
     return results_dir
 
 
-def process_topological_charge(m, animation=True, video=True):
+def process_initial(M, animation=True, video=True):
     args = parse_args()
 
-    prefix = "m=%d" % m
+    prefix = "M=%d" % M
     results_dir = plot_images(global_root_dir=args.global_root_dir,
                               global_results_dir_name=args.global_results_dir_name,
-                              m=m,
+                              M=M,
                               prefix=prefix)
 
     if animation:
@@ -82,4 +77,4 @@ def process_topological_charge(m, animation=True, video=True):
                    name=prefix)
 
 
-process_topological_charge(m=3)
+process_initial(M=3)
