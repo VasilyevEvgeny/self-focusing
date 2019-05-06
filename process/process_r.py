@@ -9,10 +9,9 @@ from core.libs import *
 args = parse_args()
 
 beam = Beam_R(medium="SiO2",
-              distribution_type="ring",
               P0_to_Pcr_G=5,
-              m=1,
-              M=1,
+              m=0,
+              M=0,
               lmbda=1800*10**-9,
               r_0=100*10**-6,
               n_r=4096)

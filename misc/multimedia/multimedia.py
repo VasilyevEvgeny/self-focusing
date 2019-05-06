@@ -36,7 +36,7 @@ def get_data():
                                     beam=beam,
                                     diffraction=FourierDiffractionExecutor_XY(beam=beam),
                                     kerr_effect=KerrExecutor_XY(beam=beam),
-                                    n_z=2000,
+                                    n_z=500,
                                     dz0=10**-5,
                                     flag_const_dz=True,
                                     dn_print_current_state=50,

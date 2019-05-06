@@ -170,16 +170,12 @@ distribution & %s & -- \\tabularnewline
 \hline
 """% (beam.distribution_type)
 
-        if beam.distribution_type in ("ring", "vortex"):
-            tex_file_data += \
+        tex_file_data += \
 """$M$ & %d & -- \\tabularnewline
 \hline
-""" % (beam.M)
-        if beam.distribution_type == "vortex":
-            tex_file_data += \
-"""$m$ & %d & -- \\tabularnewline
+$m$ & %d & -- \\tabularnewline
 \hline
-""" % (beam.m)
+""" % (beam.M, beam.m)
 
         if beam.info == "beam_r":
             tex_file_data += \

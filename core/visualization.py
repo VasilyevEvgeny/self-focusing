@@ -2,6 +2,7 @@ from core.functions import *
 
 
 def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
+    fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
     if mode in ("xy", "r"):
         fig_size = (12, 10)
         x_max = 250
@@ -10,6 +11,7 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
         ticks = True
         labels = True
         colorbar = True
+        bbox = "tight"
     elif mode in ("multimedia"):
         fig_size = (3, 3)
         x_max = 250
@@ -88,7 +90,16 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
         colorbar.ax.set_yticklabels(ticks_cbar)
         colorbar.ax.tick_params(labelsize=font_size - 10)
 
-    plt.savefig(path + "/%04d.png" % step, bbox_inches="tight")
+    if mode in ("multimedia"):
+        bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
+        if beam.distribution_type == "gauss":
+            m, M = 0, 0
+        else:
+            m, M = beam.m, beam.M
+        C = beam.noise_percent
+        plt.title("$M = {:d}, \ m = {:d}, \ C = {:02d}\%$".format(M, m, C), fontsize=14)
+
+    plt.savefig(path + "/%04d.png" % step, bbox_inches=bbox)
     plt.close()
 
     del arr
