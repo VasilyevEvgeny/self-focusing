@@ -1,21 +1,21 @@
-from core.libs import *
+from numpy import sqrt, pi
 
 
 class Medium:
     def __init__(self, **kwargs):
-        self.m_constants = kwargs["m_constants"]
+        self.m_constants = kwargs['m_constants']
         self.c = self.m_constants.c
-        self.lmbda = kwargs["lmbda"]
-        self.name = kwargs["name"]
+        self.lmbda = kwargs['lmbda']
+        self.name = kwargs['name']
 
         self.n_0, self.k_0, self.k_1, self.k_2, self.n_2 = None, None, None, None, None
-        if self.name == "SiO2":
+        if self.name == 'SiO2':
             self.initialize_SiO2()
             self.n_2 = 3.4 * 10**-20
-        elif self.name == "CaF2":
+        elif self.name == 'CaF2':
             self.initialize_CaF2()
             self.n_2 = 1.92 * 10**-20
-        elif self.name == "LiF":
+        elif self.name == 'LiF':
             self.initialize_LiF()
             self.n_2 = 1.0 * 10 ** -20
 

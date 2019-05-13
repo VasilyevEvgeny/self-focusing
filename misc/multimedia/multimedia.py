@@ -1,10 +1,7 @@
-from core.diffraction import FourierDiffractionExecutor_XY
-from core.kerr_effect import KerrExecutor_XY
-from core.propagation import Propagator
-from core.beam import Beam_XY
-from core.args import parse_args
-from core.functions import create_dir, create_multidir, get_files, make_animation, make_video
-from core.libs import *
+from PIL import Image
+
+from core import parse_args, Beam_XY, GaussianNoise, FourierDiffractionExecutor_XY, KerrExecutor_XY, Propagator, \
+    create_dir, create_multidir, get_files, make_animation, make_video
 
 
 def get_data():
@@ -12,19 +9,23 @@ def get_data():
     results_dir, results_dir_name = create_multidir(args.global_root_dir, args.global_results_dir_name, args.prefix)
 
     indices = []
-    for idx_noise_percent, noise_percent in enumerate([0, 10, 20]):
-        for idx_m, m in enumerate([1, 2]):
+    for idx_col, noise_percent in enumerate([0, 1, 3, 5]):
+        for idx_row, (M, m) in enumerate([(0,0), (1,0), (2,0), (1,1), (2,2)]):
 
-            print("================================")
-            print("noise_percent = %02d" % noise_percent, ", m = %d" % m)
-            print("================================")
+            print("================================================================")
+            print("noise_percent = %02d" % noise_percent, ", M = %d" % M, ", m = %d" % m)
+            print("================================================================")
+
+            noise = GaussianNoise(r_corr_in_meters=30 * 10 ** -6,
+                                  variance=1)
 
             beam = Beam_XY(medium="SiO2",
-                           distribution_type="vortex",
                            P0_to_Pcr_V=5,
+                           P0_to_Pcr_G=5,
+                           M=M,
                            m=m,
-                           M=m,
                            noise_percent=noise_percent,
+                           noise=noise,
                            lmbda=1800*10**-9,
                            x_0=100*10**-6,
                            y_0=100*10**-6,
@@ -36,11 +37,11 @@ def get_data():
                                     beam=beam,
                                     diffraction=FourierDiffractionExecutor_XY(beam=beam),
                                     kerr_effect=KerrExecutor_XY(beam=beam),
-                                    n_z=500,
+                                    n_z=2000,
                                     dz0=10**-5,
                                     flag_const_dz=True,
                                     dn_print_current_state=50,
-                                    dn_plot_beam=100,
+                                    dn_plot_beam=10,
                                     beam_normalization_type="local")
 
             propagator.propagate()
@@ -48,8 +49,7 @@ def get_data():
             del beam
             del propagator
 
-            index = (idx_noise_percent, idx_m)
-            indices.append(index)
+            indices.append((idx_col, idx_row))
 
     all_files, n_pictures_max = get_files(results_dir)
 
@@ -89,7 +89,7 @@ def process_multimedia(all_files, indices, n_pictures_max, path, prefix, fps=10,
             im = Image.open(all_files_upd[j][i])
             i1, i2 = indices[j]
             composed_im.paste(im, (i1 * width, i2 * height))
-        composed_im.save(results_dir + "/%04d.png" % i, "PNG", transparent=True)
+        composed_im.save(results_dir + "/%04d.png" % i, "PNG")
 
     if animation:
         make_animation(root_dir=path,

@@ -1,4 +1,13 @@
-from core.libs import *
+from numpy import sqrt, transpose, zeros, float64
+from numba import jit
+from glob import glob
+from datetime import datetime
+import os
+import shutil
+from time import sleep
+import imageio
+import cv2
+import subprocess
 
 
 def calc_ticks_x(labels, xs):
@@ -23,17 +32,17 @@ def crop_x(arr, xs, x_left, x_right, mode):
         if xs[i] > x_right:
             i_max = i
             break
-    if mode == "x":
-        return np.transpose(np.transpose(arr)[i_min:i_max, :]), i_min, i_max
-    elif mode == "y":
-        return np.transpose(np.transpose(arr)[:, i_min:i_max]), i_min, i_max
+    if mode == 'x':
+        return transpose(transpose(arr)[i_min:i_max, :]), i_min, i_max
+    elif mode == 'y':
+        return transpose(transpose(arr)[:, i_min:i_max]), i_min, i_max
     else:
         raise Exception('Wrong mode in crop_x!')
 
 
 @jit(nopython=True)
 def linear_approximation_complex(x, x1, y1, x2, y2):
-    return complex((y1.real - y2.real) / (x1 - x2) * x + (y2.real * x1 - x2 * y1.real) / (x1 - x2),\
+    return complex((y1.real - y2.real) / (x1 - x2) * x + (y2.real * x1 - x2 * y1.real) / (x1 - x2),
                    (y1.imag - y2.imag) / (x1 - x2) * x + (y2.imag * x1 - x2 * y1.imag) / (x1 - x2))
 
 
@@ -46,7 +55,7 @@ def linear_approximation_real(x, x1, y1, x2, y2):
 def r_to_xy_real(r_slice):
     n_r = len(r_slice)
     n_x, n_y = 2 * n_r, 2 * n_r
-    arr = np.zeros(shape=(n_x, n_y), dtype=np.float64)
+    arr = zeros(shape=(n_x, n_y), dtype=float64)
     for i in range(n_x):
         for j in range(n_y):
             r = sqrt((i - n_x / 2.) ** 2 + (j - n_y / 2.) ** 2)
@@ -58,11 +67,11 @@ def r_to_xy_real(r_slice):
 def get_files(path):
     all_files = []
     n_pictures_max = 0
-    for path in glob(path + "/*"):
+    for path in glob(path + '/*'):
         files = []
         n_pictures = 0
-        for file in glob(path + "/beam/*"):
-            files.append(file.replace("\\", "/"))
+        for file in glob(path + '/beam/*'):
+            files.append(file.replace('\\', '/'))
             n_pictures += 1
 
         all_files.append(files)
@@ -72,20 +81,20 @@ def get_files(path):
 
 
 def make_paths(global_root_dir, global_results_dir_name, prefix):
-    global_results_dir = global_root_dir + "/" + global_results_dir_name
-    datetime_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    global_results_dir = global_root_dir + '/' + global_results_dir_name
+    datetime_string = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     if prefix is None:
         results_dir_name = datetime_string
     else:
-        results_dir_name = prefix + "_" + datetime_string
-    results_dir = global_results_dir + "/" + results_dir_name
+        results_dir_name = prefix + '_' + datetime_string
+    results_dir = global_results_dir + '/' + results_dir_name
 
     return global_results_dir, results_dir, results_dir_name
 
 
 def create_dir(**kwargs):
-    path = kwargs["path"]
-    dir_name = kwargs.get("dir_name", "images")
+    path = kwargs['path']
+    dir_name = kwargs.get('dir_name', 'images')
 
     res_path = path + '/' + dir_name
 
@@ -106,22 +115,22 @@ def create_multidir(global_root_dir, global_results_dir_name, prefix):
     return results_dir, results_dir_name
 
 
-def make_animation(root_dir, name, images_dir="images", fps=10):
+def make_animation(root_dir, name, images_dir='images', fps=10):
     images_for_animation = []
-    for file in glob(root_dir + "/" + images_dir + "/*"):
+    for file in glob(root_dir + '/' + images_dir + '/*'):
         images_for_animation.append(imageio.imread(file))
-    imageio.mimsave(root_dir + "/" + name + ".gif", images_for_animation, fps=fps)
+    imageio.mimsave(root_dir + '/' + name + '.gif', images_for_animation, fps=fps)
 
 
-def make_video(root_dir, name, images_dir="images", fps=10):
+def make_video(root_dir, name, images_dir='images', fps=10):
     images_for_video = []
-    for file in glob(root_dir + "/" + images_dir + "/*"):
+    for file in glob(root_dir + '/' + images_dir + '/*'):
         images_for_video.append(cv2.imread(file))
 
     height, width, leyers = images_for_video[0].shape
 
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    video = cv2.VideoWriter(root_dir + "/" + name + ".avi", fourcc, fps, (width, height))
+    video = cv2.VideoWriter(root_dir + '/' + name + '.avi', fourcc, fps, (width, height))
 
     for img in images_for_video:
         video.write(cv2.resize(img, (width, height)))
@@ -132,24 +141,24 @@ def make_video(root_dir, name, images_dir="images", fps=10):
 
 def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
     path_list = (tex_file_path.replace('\\', '/')).split('/')
-    path, filename = "/".join(path_list[:-1]), path_list[-1].split('.')[0]
+    path, filename = '/'.join(path_list[:-1]), path_list[-1].split('.')[0]
 
     try:
         subprocess.check_output(
-            ["pdflatex", "-quiet", "-interaction=nonstopmode", tex_file_path, "-output-directory", path])
+            ['pdflatex', '-quiet', '-interaction=nonstopmode', tex_file_path, '-output-directory', path])
     except:
-        Exception("Wrong pdflatex compilation!")
+        Exception('Wrong pdflatex compilation!')
 
     if delete_tmp_files:
         for ext in ['aux', 'log', 'out', 'fls', 'fdb_latexmk', 'dvi']:
             try:
-                file = path + "/" + filename + "." + ext
+                file = path + '/' + filename + '.' + ext
                 os.remove(file)
             except:
                 pass
 
     if delete_tex_file:
         try:
-            os.remove(path + "/" + filename + ".tex")
+            os.remove(path + '/' + filename + '.tex')
         except:
             pass

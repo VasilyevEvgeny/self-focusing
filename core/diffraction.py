@@ -1,9 +1,13 @@
-from core.libs import *
+import abc
+from multiprocessing import cpu_count
+from numpy import exp, conj, zeros, complex64
+from numba import jit
+from pyfftw.builders import fft2, ifft2
 
 
 class DiffractionExecutor(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
-        self.beam = kwargs["beam"]
+        self.beam = kwargs['beam']
 
     @abc.abstractmethod
     def info(self):
@@ -18,7 +22,7 @@ class FourierDiffractionExecutor_XY(DiffractionExecutor):
 
     @property
     def info(self):
-        return "fourier_diffraction_executor_xy"
+        return 'fourier_diffraction_executor_xy'
 
     @staticmethod
     @jit(nopython=True)
@@ -48,10 +52,10 @@ class SweepDiffractionExecutor_R(DiffractionExecutor):
         self.c2 = 1.0 / (4.0 * self.beam.dr)
         self.c3 = 2j * self.beam.medium.k_0
 
-        self.alpha = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
-        self.beta = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
-        self.gamma = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
-        self.vx = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
+        self.alpha = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.beta = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.gamma = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.vx = zeros(shape=(self.beam.n_r,), dtype=complex64)
 
         for i in range(1, self.beam.n_r - 1):
             self.alpha[i] = self.c1 + self.c2 / self.beam.rs[i]
@@ -61,13 +65,13 @@ class SweepDiffractionExecutor_R(DiffractionExecutor):
         self.kappa_left, self.mu_left, self.kappa_right, self.mu_right = \
             1.0, 0.0, 0.0, 0.0
 
-        self.delta = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
-        self.xi = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
-        self.eta = np.zeros(shape=(self.beam.n_r,), dtype=np.complex64)
+        self.delta = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.xi = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.eta = zeros(shape=(self.beam.n_r,), dtype=complex64)
 
     @property
     def info(self):
-        return "sweep_diffraction_executor_r"
+        return 'sweep_diffraction_executor_r'
 
     @staticmethod
     @jit(nopython=True)

@@ -1,11 +1,12 @@
-from core.libs import *
-from core.functions import make_paths
+import os
+
+from .functions import make_paths
 
 
 class Manager:
     def __init__(self, **kwargs):
-        self.args = kwargs["args"]
-        self.multidir_name = kwargs.get("multidir_name", None)
+        self.args = kwargs['args']
+        self.multidir_name = kwargs.get('multidir_name', None)
         self.global_root_dir = self.args.global_root_dir
         self.global_results_dir_name = self.args.global_results_dir_name
         self.prefix = self.args.prefix
@@ -13,13 +14,13 @@ class Manager:
         self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir, self.global_results_dir_name,
                                                                   self.prefix)
 
-        if self.prefix == "multimedia":
+        if self.prefix == 'multimedia':
             self.global_results_dir, self.results_dir, _ = make_paths(self.global_root_dir,
-                                                                      self.global_results_dir_name + "/" + self.multidir_name,
+                                                                      self.global_results_dir_name + '/' + self.multidir_name,
                                                                       prefix=None)
 
-        self.track_dir = self.results_dir + "/track"
-        self.beam_dir = self.results_dir + "/beam"
+        self.track_dir = self.results_dir + '/track'
+        self.beam_dir = self.results_dir + '/beam'
 
     @staticmethod
     def create_dir(path):

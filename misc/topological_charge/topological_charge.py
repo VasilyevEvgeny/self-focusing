@@ -1,6 +1,11 @@
-from core.libs import *
-from core.functions import create_dir, make_paths, make_animation, make_video
-from core.args import parse_args
+from numba import jit
+from numpy import pi, arctan2, zeros, meshgrid
+from tqdm import tqdm
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+from core import create_dir, make_paths, make_animation, make_video, parse_args
+
 
 
 @jit(nopython=True)
@@ -33,14 +38,14 @@ def plot_images(**kwargs):
     n_points = 600
     x_max, y_max = 600.0, 600.0  # micrometers
 
-    x, y = np.zeros(n_points), np.zeros(n_points)
+    x, y = zeros(n_points), zeros(n_points)
     for i in range(n_points):
         x[i], y[i] = i * x_max / n_points - x_max / 2, i * y_max / n_points - y_max / 2
 
-    phase = np.zeros((n_points, n_points))
+    phase = zeros((n_points, n_points))
     phase = phase_initialization(phase, x, y, n_points, m)
 
-    xx, yy = np.meshgrid(x, y)
+    xx, yy = meshgrid(x, y)
 
     for number, gradus in enumerate(tqdm(range(0, 360, 2))):
         fig = plt.figure(figsize=figsize)

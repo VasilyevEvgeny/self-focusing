@@ -1,9 +1,4 @@
-from core.diffraction import SweepDiffractionExecutor_R
-from core.kerr_effect import KerrExecutor_R
-from core.propagation import Propagator
-from core.beam import Beam_R
-from core.args import parse_args
-from core.libs import *
+from core import Beam_R, SweepDiffractionExecutor_R, KerrExecutor_R, Propagator, parse_args
 
 
 args = parse_args()

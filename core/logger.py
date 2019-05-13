@@ -1,12 +1,16 @@
-from core.libs import *
-from core.functions import compile_to_pdf
+from collections import OrderedDict
+from time import time
+from datetime import timedelta
+from xlsxwriter import Workbook
+
+from .functions import compile_to_pdf
 
 
 class Logger:
     def __init__(self, **kwargs):
-        self.path = kwargs["path"]
-        self.diffraction = kwargs["diffraction"]
-        self.kerr_effect = kwargs["kerr_effect"]
+        self.path = kwargs['path']
+        self.diffraction = kwargs['diffraction']
+        self.kerr_effect = kwargs['kerr_effect']
 
         self.functions = OrderedDict()
 
@@ -24,15 +28,15 @@ class Logger:
         return res
 
     def log_times(self):
-        with open(self.path + "/times.log", "w") as f:
-            f.write("{:40s} | {:15}".format("MODULE", "TIME (hh:mm:ss)\n"))
-            f.write("--------------------------------------------------------------\n")
+        with open(self.path + '/times.log', 'w') as f:
+            f.write('{:40s} | {:15}'.format('MODULE', 'TIME (hh:mm:ss)\n'))
+            f.write('--------------------------------------------------------------\n')
             for key in self.functions:
-                f.write("{:40s} | {:10}\n".format(key, str(timedelta(seconds=self.functions[key]))))
+                f.write('{:40s} | {:10}\n'.format(key, str(timedelta(seconds=self.functions[key]))))
 
-    def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename = "parameters"):
-        tex_file_name = filename + ".tex"
-        tex_file_path = self.path + "/" + tex_file_name
+    def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename='parameters'):
+        tex_file_name = filename + '.tex'
+        tex_file_path = self.path + '/' + tex_file_name
 
 ##########################
 # BEGIN
@@ -42,7 +46,7 @@ class Logger:
 #
 
         tex_file_data = \
-"""\documentclass[10pt]{extarticle}
+'''\documentclass[10pt]{extarticle}
 
 \\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
 
@@ -61,31 +65,31 @@ class Logger:
 \pagestyle{empty}
 \\begin{center}
 \\begin{tabular}{M{5cm}M{5cm}M{5cm}}
-"""
+'''
 
 ##########################
 # EQUATION
 ##########################
-        left_r_str = "2 i k_0 \\frac{\partial A(r,z)}{\partial z}"
-        left_xy_str = "2 i k_0 \\frac{\partial A(x,y,z)}{\partial z}"
+        left_r_str = '2 i k_0 \\frac{\partial A(r,z)}{\partial z}'
+        left_xy_str = '2 i k_0 \\frac{\partial A(x,y,z)}{\partial z}'
 
-        if beam.distribution_type == "vortex":
-            diffraction_r_str = "\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} - \\frac{m^2}{r^2} \\biggr] A(r,z)"
+        if beam.distribution_type == 'vortex':
+            diffraction_r_str = '\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} - \\frac{m^2}{r^2} \\biggr] A(r,z)'
         else:
-            diffraction_r_str = "\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} \\biggr] A(r,z)"
-        diffraction_xy_str = "\\biggl[ \\frac{\partial^2}{\partial x^2} + \\frac{\partial^2}{\partial y^2} \\biggr] A(x,y,z)"
+            diffraction_r_str = '\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} \\biggr] A(r,z)'
+        diffraction_xy_str = '\\biggl[ \\frac{\partial^2}{\partial x^2} + \\frac{\partial^2}{\partial y^2} \\biggr] A(x,y,z)'
 
-        kerr_r_str = "\\frac{2 k_0^2}{n_0} n_2 I(r,z) A(r,z)"
-        kerr_xy_str = "\\frac{2 k_0^2}{n_0} n_2 I(x,y,z) A(x,y,z)"
+        kerr_r_str = '\\frac{2 k_0^2}{n_0} n_2 I(r,z) A(r,z)'
+        kerr_xy_str = '\\frac{2 k_0^2}{n_0} n_2 I(x,y,z) A(x,y,z)'
 
         equation = []
-        if beam.info == "beam_r":
+        if beam.info == 'beam_r':
             equation.append(left_r_str)
             if self.diffraction is not None:
                 equation.append(diffraction_r_str)
             if self.kerr_effect is not None:
                 equation.append(kerr_r_str)
-        elif beam.info == "beam_xy":
+        elif beam.info == 'beam_xy':
             equation.append(left_xy_str)
             if self.diffraction is not None:
                 equation.append(diffraction_xy_str)
@@ -94,55 +98,55 @@ class Logger:
 
         eq_length = len(equation)
         if eq_length == 1:
-            equation.append("= 0")
+            equation.append('= 0')
         elif eq_length == 2:
-            equation = equation[:1] + ["="] + equation[1:]
+            equation = equation[:1] + ['='] + equation[1:]
         elif eq_length == 3:
-            equation = equation[:1] + ["="] + equation[1:2] + ["+"] + equation[2:]
+            equation = equation[:1] + ['='] + equation[1:2] + ['+'] + equation[2:]
 
-        equation_str = " ".join(equation)
+        equation_str = ' '.join(equation)
 
         tex_file_data += \
-"""\\midrule[2pt]
+'''\\midrule[2pt]
 \multicolumn{3}{M{15cm}}{\\textbf{EQUATION}} \\tabularnewline
 \\midrule[2pt]
 \multicolumn{3}{M{15cm}}{\[ %s \]} \\tabularnewline
 \\midrule[2pt]
-""" % equation_str
+''' % equation_str
 
 ##########################
 # INITIAL CONDITION
 ##########################
 
         initial_condition_str = None
-        if beam.info == "beam_r":
-            initial_condition_str = "A(r,0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}"
-        elif beam.info == "beam_xy":
-            initial_condition_str = "A(x,y,0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}"
+        if beam.info == 'beam_r':
+            initial_condition_str = 'A(r,0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}'
+        elif beam.info == 'beam_xy':
+            initial_condition_str = 'A(x,y,0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}'
 
         tex_file_data += \
-"""\multicolumn{3}{M{15cm}}{\\textbf{INITIAL CONDITION}} \\tabularnewline
+'''\multicolumn{3}{M{15cm}}{\\textbf{INITIAL CONDITION}} \\tabularnewline
 \\midrule[2pt]
 \multicolumn{3}{M{15cm}}{\[ %s \]} \\tabularnewline
 \\midrule[2pt]
-""" % initial_condition_str
+''' % initial_condition_str
 
 
     ##########################
     # MEDIUM
     ##########################
 
-        if beam.medium.info == "SiO2":
-            material = "SiO$_2$"
-        elif beam.medium.info == "CaF2":
-            material = "CaF$_2$"
-        elif beam.medium.info == "LiF":
-            material = "LiF"
+        if beam.medium.info == 'SiO2':
+            material = 'SiO$_2$'
+        elif beam.medium.info == 'CaF2':
+            material = 'CaF$_2$'
+        elif beam.medium.info == 'LiF':
+            material = 'LiF'
         else:
-            material = "noname"
+            material = 'noname'
 
         tex_file_data += \
-"""\multicolumn{3}{M{15cm}}{\\textbf{MEDIUM}} \\tabularnewline
+'''\multicolumn{3}{M{15cm}}{\\textbf{MEDIUM}} \\tabularnewline
 \\midrule[2pt]
 material & %s & -- \\tabularnewline
 \hline
@@ -156,7 +160,7 @@ $k_1$ & %.2f & fs/mm \\tabularnewline
 \hline
 $k_2$ & %.2f & fs$^2$/mm \\tabularnewline
 \\midrule[2pt]
-""" % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12, beam.medium.k_2 * 10**27)
+''' % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12, beam.medium.k_2 * 10**27)
 
 
 ##########################
@@ -164,86 +168,86 @@ $k_2$ & %.2f & fs$^2$/mm \\tabularnewline
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{M{15cm}}{\\textbf{BEAM}} \\tabularnewline
+'''\multicolumn{3}{M{15cm}}{\\textbf{BEAM}} \\tabularnewline
 \\midrule[2pt]
 distribution & %s & -- \\tabularnewline
 \hline
-"""% (beam.distribution_type)
+'''% (beam.distribution_type)
 
         tex_file_data += \
-"""$M$ & %d & -- \\tabularnewline
+'''$M$ & %d & -- \\tabularnewline
 \hline
 $m$ & %d & -- \\tabularnewline
 \hline
-""" % (beam.M, beam.m)
+''' % (beam.M, beam.m)
 
-        if beam.info == "beam_r":
+        if beam.info == 'beam_r':
             tex_file_data += \
-"""$r_0$ & %d & $\mu$m \\tabularnewline
+'''$r_0$ & %d & $\mu$m \\tabularnewline
 \hline
-""" % (round(beam.r_0 * 10**6))
+''' % (round(beam.r_0 * 10**6))
 
-        elif beam.info == "beam_xy":
+        elif beam.info == 'beam_xy':
             tex_file_data += \
-"""$x_0$ & %d & $\mu$m \\tabularnewline
+'''$x_0$ & %d & $\mu$m \\tabularnewline
 \hline
 $y_0$ & %d & $\mu$m \\tabularnewline
 \hline
-""" % (round(beam.x_0 * 10 ** 6), round(beam.y_0 * 10 ** 6))
+''' % (round(beam.x_0 * 10 ** 6), round(beam.y_0 * 10 ** 6))
 
         tex_file_data += \
-"""
+'''
 $\lambda$ & %d & nm \\tabularnewline
 \hline
 $z_{diff}$ & %2.4f & cm \\tabularnewline
 \hline
-""" % (beam.lmbda * 10**9, beam.z_diff * 10**2)
+''' % (beam.lmbda * 10**9, beam.z_diff * 10**2)
 
-        if beam.distribution_type == "gauss" or beam.distribution_type == "ring":
+        if beam.distribution_type == 'gauss' or beam.distribution_type == 'ring':
             tex_file_data += \
-"""$P_0 / P_G$ & %.2f & -- \\tabularnewline
+'''$P_0 / P_G$ & %.2f & -- \\tabularnewline
 \hline
-""" % (beam.P0_to_Pcr_G)
+''' % (beam.P0_to_Pcr_G)
 
-        if beam.distribution_type == "vortex":
+        if beam.distribution_type == 'vortex':
             tex_file_data += \
-"""$P_0 / P_V$ & %.2f & -- \\tabularnewline
+'''$P_0 / P_V$ & %.2f & -- \\tabularnewline
 \hline
-""" % (beam.P0_to_Pcr_V)
+''' % (beam.P0_to_Pcr_V)
 
         tex_file_data += \
-"""$P_0$ & %.2f & MW \\tabularnewline
+'''$P_0$ & %.2f & MW \\tabularnewline
 \hline
 $I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
 \hline
-""" % (beam.p_0 * 10**-6, beam.i_0 * 10**-16)
+''' % (beam.p_0 * 10**-6, beam.i_0 * 10**-16)
 
-        if beam.info == "beam_xy":
+        if beam.info == 'beam_xy':
             tex_file_data += \
-"""C & %.2f & -- \\tabularnewline
+'''C & %.2f & -- \\tabularnewline
 \\midrule[2pt]
-""" % (beam.noise_percent / 100)
+''' % (beam.noise_percent / 100)
 
 ##########################
 # GRID
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{M{15cm}}{\\textbf{GRID}} \\tabularnewline
+'''\multicolumn{3}{M{15cm}}{\\textbf{GRID}} \\tabularnewline
 \\midrule[2pt]
-"""
-        if beam.info == "beam_r":
+'''
+        if beam.info == 'beam_r':
             tex_file_data += \
-"""$r_{max}$ & % d & $\mu$m \\tabularnewline
+'''$r_{max}$ & % d & $\mu$m \\tabularnewline
 \hline
 $n_r$ & % d & -- \\tabularnewline
 \hline
 $h_r$ & % d & $\mu$m \\tabularnewline
 \hline
-""" % (round(beam.r_max * 10**6), beam.n_r, round(beam.dr * 10**6))
-        elif beam.info == "beam_xy":
+''' % (round(beam.r_max * 10**6), beam.n_r, round(beam.dr * 10**6))
+        elif beam.info == 'beam_xy':
             tex_file_data += \
-"""$x_{max}$ & %d & $\mu$m \\tabularnewline
+'''$x_{max}$ & %d & $\mu$m \\tabularnewline
 \hline
 $y_{max}$ & %d & $\mu$m \\tabularnewline
 \hline
@@ -255,7 +259,7 @@ $h_x$ & %d & $\mu$m \\tabularnewline
 \hline
 $h_y$ & %d & $\mu$m \\tabularnewline
 \\midrule[2pt]
-""" % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
+''' % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
        beam.n_x, beam.n_y,
        round(beam.dx * 10 ** 6),
        round(beam.dy * 10 ** 6))
@@ -265,7 +269,7 @@ $h_y$ & %d & $\mu$m \\tabularnewline
 ##########################
 
         tex_file_data += \
-"""\multicolumn{3}{M{15cm}}{\\textbf{TRACK}} \\tabularnewline
+'''\multicolumn{3}{M{15cm}}{\\textbf{TRACK}} \\tabularnewline
 \\midrule[2pt]
 $n_z$ & %d & -- \\tabularnewline
 \hline
@@ -273,39 +277,39 @@ $h_z (z=0)$ & %.2f & $\mu$m \\tabularnewline
 \hline
 $I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
 \hline
-""" % (n_z, dz0 * 10**6, max_intensity_to_stop * 10**-16)
+''' % (n_z, dz0 * 10**6, max_intensity_to_stop * 10**-16)
 
 ##########################
 # END
 ##########################
 
         tex_file_data += \
-"""\end{tabular}
+'''\end{tabular}
 \end{center}
 \end{document}
-"""
+'''
 
-        with open(self.path + "/" + tex_file_name, "w") as f:
+        with open(tex_file_path, 'w') as f:
             f.write(tex_file_data)
 
-        compile_to_pdf(self.path + "/" + tex_file_name, delete_tex_file=True)
+        compile_to_pdf(tex_file_path, delete_tex_file=True)
 
     @staticmethod
     def print_current_state(n_step, states, states_columns):
         if n_step == 0:
-            print("      |   %s   |    %s   |  %s |  %s |" % (states_columns[0],
+            print('      |   %s   |    %s   |  %s |  %s |' % (states_columns[0],
                                                          states_columns[1],
                                                          states_columns[2],
                                                          states_columns[3]))
-        output_string = "{:04d} {:11.6f} {:13e} {:11.6f} {:17e}".format(n_step,
+        output_string = '{:04d} {:11.6f} {:13e} {:11.6f} {:17e}'.format(n_step,
                                                                       states[n_step, 0],
                                                                       states[n_step, 1],
                                                                       states[n_step, 2],
                                                                       states[n_step, 3])
         print(output_string)
 
-    def log_track(self, states_arr, states_columns, filename="propagation.xlsx"):
-        filename = self.path + "/" + filename
+    def log_track(self, states_arr, states_columns, filename='propagation.xlsx'):
+        filename = self.path + '/' + filename
 
         workbook = Workbook(filename)
 

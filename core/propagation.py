@@ -1,40 +1,42 @@
-from core.libs import *
-from core.visualization import plot_beam, plot_track, plot_noise_field, plot_autocorrelations
-from core.logger import Logger
-from core.manager import Manager
+from numpy import zeros, multiply
+from numba import jit
+
+from .visualization import plot_beam, plot_track, plot_noise_field, plot_autocorrelations
+from .logger import Logger
+from .manager import Manager
 
 
 class Propagator:
     def __init__(self, **kwargs):
-        self.beam = kwargs["beam"]
-        self.diffraction = kwargs.get("diffraction", None)
-        self.kerr_effect = kwargs.get("kerr_effect", None)
+        self.beam = kwargs['beam']
+        self.diffraction = kwargs.get('diffraction', None)
+        self.kerr_effect = kwargs.get('kerr_effect', None)
 
-        self.args = kwargs["args"]
-        self.multidir_name = kwargs.get("multidir_name", None)
+        self.args = kwargs['args']
+        self.multidir_name = kwargs.get('multidir_name', None)
         self.manager = Manager(args=self.args, multidir_name=self.multidir_name)
         self.logger = Logger(diffraction=self.diffraction,
                              kerr_effect=self.kerr_effect,
                              path=self.manager.results_dir)
 
-        self.n_z = kwargs["n_z"]
-        self.flag_const_dz = kwargs["flag_const_dz"]
+        self.n_z = kwargs['n_z']
+        self.flag_const_dz = kwargs['flag_const_dz']
 
-        self.dn_print_current_state = kwargs.get("dn_print_current_state", None)
+        self.dn_print_current_state = kwargs.get('dn_print_current_state', None)
         self.flag_print_beam = True if self.dn_print_current_state else False
 
-        self.dn_plot_beam = kwargs.get("dn_plot_beam", None)
+        self.dn_plot_beam = kwargs.get('dn_plot_beam', None)
         self.flag_print_track = True if self.dn_plot_beam else False
         if self.dn_plot_beam:
-            self.beam_normalization_type = kwargs["beam_normalization_type"]
+            self.beam_normalization_type = kwargs['beam_normalization_type']
 
         self.z = 0.0
-        self.dz = kwargs["dz0"]
+        self.dz = kwargs['dz0']
 
         self.max_intensity_to_stop = 10**17
 
-        self.states_columns = ["z, m", "dz, m", "i_max / i_0", "i_max, W / m^2"]
-        self.states_arr = np.zeros(shape=(self.n_z + 1, 4))
+        self.states_columns = ['z, m', 'dz, m', 'i_max / i_0', 'i_max, W / m^2']
+        self.states_arr = zeros(shape=(self.n_z + 1, 4))
 
     @staticmethod
     @jit(nopython=True)
@@ -66,7 +68,7 @@ class Propagator:
         self.states_arr = self.states_arr[:row_max, :]
 
     def apply_phase_noise_screen_to_field(self):
-        self.beam.field = np.multiply(self.beam.field, self.beam.phase_noise_screen)
+        self.beam.field = multiply(self.beam.field, self.beam.phase_noise_screen)
 
     def propagate(self):
         self.manager.create_global_results_dir()
@@ -76,7 +78,7 @@ class Propagator:
 
         self.logger.save_initial_parameters(self.beam, self.n_z, self.dz, self.max_intensity_to_stop)
 
-        if self.beam.info == "beam_xy" and self.beam.noise_percent:
+        if self.beam.info == 'beam_xy' and self.beam.noise_percent:
             plot_noise_field(self.beam, self.manager.results_dir)
             plot_autocorrelations(self.beam, self.manager.results_dir)
 
@@ -115,7 +117,7 @@ class Propagator:
         self.logger.measure_time(self.logger.log_track, [self.states_arr, self.states_columns])
 
         if self.flag_print_track:
-            parameter_index = self.states_columns.index("i_max / i_0")
+            parameter_index = self.states_columns.index('i_max / i_0')
             self.logger.measure_time(plot_track, [self.states_arr, parameter_index,
                                                   self.manager.track_dir])
 
