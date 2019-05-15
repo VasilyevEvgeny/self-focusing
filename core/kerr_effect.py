@@ -5,8 +5,8 @@ from numpy import exp, multiply
 
 class KerrExecutor(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
-        self.beam = kwargs['beam']
-        self.nonlin_phase_const = -1j * self.beam.medium.k_0 * self.beam.medium.n_2 * self.beam.i_0 / self.beam.medium.n_0
+        self._beam = kwargs['beam']
+        self._nonlin_phase_const = -1j * self._beam.medium.k_0 * self._beam.medium.n_2 * self._beam.i_0 / self._beam.medium.n_0
 
     @abc.abstractmethod
     def info(self):
@@ -18,7 +18,7 @@ class KerrExecutor(metaclass=abc.ABCMeta):
         return multiply(field, exp(current_nonlin_phase * intensity))
 
     def process_kerr_effect(self, dz):
-        self.beam.field = self.phase_increment(self.beam.field, self.beam.intensity, self.nonlin_phase_const * dz)
+        self._beam._field = self.phase_increment(self._beam._field, self._beam.intensity, self._nonlin_phase_const * dz)
 
 
 class KerrExecutor_R(KerrExecutor):

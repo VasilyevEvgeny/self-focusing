@@ -7,7 +7,7 @@ from pyfftw.builders import fft2, ifft2
 
 class DiffractionExecutor(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
-        self.beam = kwargs['beam']
+        self._beam = kwargs['beam']
 
     @abc.abstractmethod
     def info(self):
@@ -36,38 +36,38 @@ class FourierDiffractionExecutor_XY(DiffractionExecutor):
         return field_fft
 
     def process_diffraction(self, dz, n_jobs=max_number_of_cpus):
-        current_lin_phase = 0.5j * dz / self.beam.medium.k_0
-        fft_obj = fft2(self.beam.field, threads=n_jobs)
-        field_fft = self.phase_increment(fft_obj(), self.beam.n_x, self.beam.n_y, self.beam.k_xs,
-                                          self.beam.k_ys, current_lin_phase)
+        current_lin_phase = 0.5j * dz / self._beam.medium.k_0
+        fft_obj = fft2(self._beam._field, threads=n_jobs)
+        field_fft = self.phase_increment(fft_obj(), self._beam.n_x, self._beam.n_y, self._beam.k_xs,
+                                         self._beam.k_ys, current_lin_phase)
         ifft_obj = ifft2(field_fft, threads=n_jobs)
-        self.beam.field = ifft_obj()
+        self._beam._field = ifft_obj()
 
 
 class SweepDiffractionExecutor_R(DiffractionExecutor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.c1 = 1.0 / (2.0 * self.beam.dr ** 2)
-        self.c2 = 1.0 / (4.0 * self.beam.dr)
-        self.c3 = 2j * self.beam.medium.k_0
+        self.c1 = 1.0 / (2.0 * self._beam.dr ** 2)
+        self.c2 = 1.0 / (4.0 * self._beam.dr)
+        self.c3 = 2j * self._beam.medium.k_0
 
-        self.alpha = zeros(shape=(self.beam.n_r,), dtype=complex64)
-        self.beta = zeros(shape=(self.beam.n_r,), dtype=complex64)
-        self.gamma = zeros(shape=(self.beam.n_r,), dtype=complex64)
-        self.vx = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.alpha = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.beta = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.gamma = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.vx = zeros(shape=(self._beam.n_r,), dtype=complex64)
 
-        for i in range(1, self.beam.n_r - 1):
-            self.alpha[i] = self.c1 + self.c2 / self.beam.rs[i]
-            self.gamma[i] = self.c1 - self.c2 / self.beam.rs[i]
-            self.vx[i] = (self.beam.m / self.beam.rs[i]) ** 2
+        for i in range(1, self._beam.n_r - 1):
+            self.alpha[i] = self.c1 + self.c2 / self._beam.rs[i]
+            self.gamma[i] = self.c1 - self.c2 / self._beam.rs[i]
+            self.vx[i] = (self._beam.m / self._beam.rs[i]) ** 2
 
         self.kappa_left, self.mu_left, self.kappa_right, self.mu_right = \
             1.0, 0.0, 0.0, 0.0
 
-        self.delta = zeros(shape=(self.beam.n_r,), dtype=complex64)
-        self.xi = zeros(shape=(self.beam.n_r,), dtype=complex64)
-        self.eta = zeros(shape=(self.beam.n_r,), dtype=complex64)
+        self.delta = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.xi = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.eta = zeros(shape=(self._beam.n_r,), dtype=complex64)
 
     @property
     def info(self):
@@ -96,6 +96,6 @@ class SweepDiffractionExecutor_R(DiffractionExecutor):
         return field
 
     def process_diffraction(self, dz):
-        self.beam.field = self.fast_process(self.beam.field, self.beam.n_r, dz, self.c1,
-                                            self.c3, self.alpha, self.beta, self.gamma, self.delta, self.xi, self.eta,
-                                            self.vx, self.kappa_left, self.mu_left, self.kappa_right, self.mu_right)
+        self._beam._field = self.fast_process(self._beam._field, self._beam.n_r, dz, self.c1,
+                                              self.c3, self.alpha, self.beta, self.gamma, self.delta, self.xi, self.eta,
+                                              self.vx, self.kappa_left, self.mu_left, self.kappa_right, self.mu_right)

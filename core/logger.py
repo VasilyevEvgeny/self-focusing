@@ -8,11 +8,11 @@ from .functions import compile_to_pdf
 
 class Logger:
     def __init__(self, **kwargs):
-        self.path = kwargs['path']
-        self.diffraction = kwargs['diffraction']
-        self.kerr_effect = kwargs['kerr_effect']
+        self.__path = kwargs['path']
+        self.__diffraction = kwargs['diffraction']
+        self.__kerr_effect = kwargs['kerr_effect']
 
-        self.functions = OrderedDict()
+        self.__functions = OrderedDict()
 
     def measure_time(self, function, args):
         t_start = time()
@@ -20,23 +20,23 @@ class Logger:
         t_end = time()
         duration = t_end - t_start
         function_name = function.__name__
-        if function_name in self.functions.keys():
-            self.functions[function_name] += duration
+        if function_name in self.__functions.keys():
+            self.__functions[function_name] += duration
         else:
-            self.functions.update({function_name: 0.0})
+            self.__functions.update({function_name: 0.0})
 
         return res
 
     def log_times(self):
-        with open(self.path + '/times.log', 'w') as f:
+        with open(self.__path + '/times.log', 'w') as f:
             f.write('{:40s} | {:15}'.format('MODULE', 'TIME (hh:mm:ss)\n'))
             f.write('--------------------------------------------------------------\n')
-            for key in self.functions:
-                f.write('{:40s} | {:10}\n'.format(key, str(timedelta(seconds=self.functions[key]))))
+            for key in self.__functions:
+                f.write('{:40s} | {:10}\n'.format(key, str(timedelta(seconds=self.__functions[key]))))
 
     def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename='parameters'):
         tex_file_name = filename + '.tex'
-        tex_file_path = self.path + '/' + tex_file_name
+        tex_file_path = self.__path + '/' + tex_file_name
 
 ##########################
 # BEGIN
@@ -85,15 +85,15 @@ class Logger:
         equation = []
         if beam.info == 'beam_r':
             equation.append(left_r_str)
-            if self.diffraction is not None:
+            if self.__diffraction is not None:
                 equation.append(diffraction_r_str)
-            if self.kerr_effect is not None:
+            if self.__kerr_effect is not None:
                 equation.append(kerr_r_str)
         elif beam.info == 'beam_xy':
             equation.append(left_xy_str)
-            if self.diffraction is not None:
+            if self.__diffraction is not None:
                 equation.append(diffraction_xy_str)
-            if self.kerr_effect is not None:
+            if self.__kerr_effect is not None:
                 equation.append(kerr_xy_str)
 
         eq_length = len(equation)
@@ -207,13 +207,13 @@ $z_{diff}$ & %2.4f & cm \\tabularnewline
             tex_file_data += \
 '''$P_0 / P_G$ & %.2f & -- \\tabularnewline
 \hline
-''' % (beam.P0_to_Pcr_G)
+''' % (beam.p_0_to_p_G)
 
         if beam.distribution_type == 'vortex':
             tex_file_data += \
 '''$P_0 / P_V$ & %.2f & -- \\tabularnewline
 \hline
-''' % (beam.P0_to_Pcr_V)
+''' % (beam.p_0_to_p_V)
 
         tex_file_data += \
 '''$P_0$ & %.2f & MW \\tabularnewline
@@ -309,7 +309,7 @@ $I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
         print(output_string)
 
     def log_track(self, states_arr, states_columns, filename='propagation.xlsx'):
-        filename = self.path + '/' + filename
+        filename = self.__path + '/' + filename
 
         workbook = Workbook(filename)
 

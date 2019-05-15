@@ -3,25 +3,47 @@ from numpy import sqrt, pi
 
 class Medium:
     def __init__(self, **kwargs):
-        self.m_constants = kwargs['m_constants']
-        self.c = self.m_constants.c
-        self.lmbda = kwargs['lmbda']
-        self.name = kwargs['name']
+        self.__m_constants = kwargs['m_constants']
+        self.__c = self.__m_constants.c
+        self.__lmbda = kwargs['lmbda']
+        self.__name = kwargs['name']
 
-        self.n_0, self.k_0, self.k_1, self.k_2, self.n_2 = None, None, None, None, None
-        if self.name == 'SiO2':
+        self.__n_0, self.__k_0, self.__k_1, self.__k_2, self.__n_2 = None, None, None, None, None
+        if self.__name == 'SiO2':
             self.initialize_SiO2()
-            self.n_2 = 3.4 * 10**-20
-        elif self.name == 'CaF2':
+            self.__n_2 = 3.4 * 10**-20
+        elif self.__name == 'CaF2':
             self.initialize_CaF2()
-            self.n_2 = 1.92 * 10**-20
-        elif self.name == 'LiF':
+            self.__n_2 = 1.92 * 10**-20
+        elif self.__name == 'LiF':
             self.initialize_LiF()
-            self.n_2 = 1.0 * 10 ** -20
+            self.__n_2 = 1.0 * 10 ** -20
+        else:
+            raise Exception('Wrong name!')
 
     @property
     def info(self):
-        return self.name
+        return self.__name
+
+    @property
+    def n_0(self):
+        return self.__n_0
+
+    @property
+    def k_0(self):
+        return self.__k_0
+
+    @property
+    def k_1(self):
+        return self.__k_1
+
+    @property
+    def k_2(self):
+        return self.__k_2
+
+    @property
+    def n_2(self):
+        return self.__n_2
 
     @staticmethod
     def calculate_n(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3):
@@ -62,13 +84,13 @@ class Medium:
                (-omega ** 2 / omega_3 ** 2 + 1) + 1))
 
     def initialize_parameters(self, lambda_1, lambda_2, lambda_3, C_1, C_2, C_3):
-        omega_1, omega_2, omega_3 = 2. * pi * self.c / lambda_1, 2. * pi * self.c / lambda_2, 2. * pi * self.c / lambda_3
-        omega = 2 * pi * self.c / self.lmbda
+        omega_1, omega_2, omega_3 = 2. * pi * self.__c / lambda_1, 2. * pi * self.__c / lambda_2, 2. * pi * self.__c / lambda_3
+        omega = 2 * pi * self.__c / self.__lmbda
 
-        self.n_0 = self.calculate_n(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3)
-        self.k_0 = self.calculate_k_0(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.c)
-        self.k_1 = self.calculate_k_1(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.c)
-        self.k_2 = self.calculate_k_2(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.c)
+        self.__n_0 = self.calculate_n(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3)
+        self.__k_0 = self.calculate_k_0(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.__c)
+        self.__k_1 = self.calculate_k_1(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.__c)
+        self.__k_2 = self.calculate_k_2(omega, C_1, C_2, C_3, omega_1, omega_2, omega_3, self.__c)
 
     def initialize_SiO2(self):
         C_1 = 0.6961663000

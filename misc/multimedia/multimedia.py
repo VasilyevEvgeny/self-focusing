@@ -20,8 +20,8 @@ def get_data():
                                   variance=1)
 
             beam = Beam_XY(medium="SiO2",
-                           P0_to_Pcr_V=5,
-                           P0_to_Pcr_G=5,
+                           p_0_to_p_V=5,
+                           p_0_to_p_G=5,
                            M=M,
                            m=m,
                            noise_percent=noise_percent,
