@@ -3,7 +3,7 @@ from core import Beam_XY, GaussianNoise, FourierDiffractionExecutor_XY, KerrExec
 
 args = parse_args()
 
-noise = GaussianNoise(r_corr_in_meters=30*10**-6,
+noise = GaussianNoise(r_corr_in_meters=10*10**-6,
                       variance=1)
 
 beam = Beam_XY(medium='SiO2',
@@ -22,7 +22,7 @@ propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=FourierDiffractionExecutor_XY(beam=beam),
                         kerr_effect=KerrExecutor_XY(beam=beam),
-                        n_z=10,
+                        n_z=1,
                         dz0=10**-5,
                         flag_const_dz=False,
                         dn_print_current_state=50,

@@ -1,7 +1,7 @@
 from numpy import zeros, multiply
 from numba import jit
 
-from .visualization import plot_beam, plot_track, plot_noise_field, plot_autocorrelations
+from .visualization import plot_beam, plot_track, plot_noise
 from .logger import Logger
 from .manager import Manager
 
@@ -79,8 +79,7 @@ class Propagator:
         self.__logger.save_initial_parameters(self.__beam, self.__n_z, self.dz, self.max_intensity_to_stop)
 
         if self.__beam.info == 'beam_xy' and self.__beam.noise_percent:
-            plot_noise_field(self.__beam, self.__manager.results_dir)
-            plot_autocorrelations(self.__beam, self.__manager.results_dir)
+            plot_noise(self.__beam, self.__manager.results_dir)
 
         for n_step in range(int(self.__n_z) + 1):
             if n_step:

@@ -40,7 +40,7 @@ class Beam_XY(Beam):
         self.__noise.process()
 
         self._field = self.initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max, self.__dx, self.__dy,
-                                           self.__n_x, self.__n_y, self.__noise_percent, self.__noise.noise_field_norm)
+                                           self.__n_x, self.__n_y, self.__noise_percent, self.__noise.noise_field)
 
         self._i_0 = self.calculate_i0()
         self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2

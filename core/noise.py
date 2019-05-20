@@ -12,26 +12,22 @@ class Noise(metaclass=abc.ABCMeta):
         self._r_corr_in_points = None
 
         self._n_x, self._n_y, self._dx, self._dy = None, None, None, None
-        self._noise_field, self._noise_field_real, self._noise_field_imag, self._noise_field_norm, self._noise_field_summ = \
-            None, None, None, None, None
+        self._noise_field, self._noise_field_real, self._noise_field_imag = None, None, None
 
-        self._autocorr_x, self._autocorr_y = None, None
+        self._autocorr_real_x, self._autocorr_real_y, self._autocorr_imag_x, self._autocorr_imag_y = \
+            None, None, None, None
 
     @property
     def r_corr_in_meters(self):
         return self._r_corr_in_meters
 
     @property
-    def noise_field_summ(self):
-        return self._noise_field_summ
-
-    @property
-    def noise_field_norm(self):
-        return self._noise_field_norm
+    def noise_field(self):
+        return self._noise_field
 
     @property
     def autocorrs(self):
-        return self._autocorr_x, self._autocorr_y
+        return self._autocorr_real_x, self._autocorr_real_y, self._autocorr_imag_x, self._autocorr_imag_y
 
     def initialize(self, **params):
         self._n_x = params['n_x']
@@ -47,23 +43,25 @@ class Noise(metaclass=abc.ABCMeta):
 
     @staticmethod
     def calculate_autocorr(noise, n_iter, n, type):
-        autocorr = zeros(shape=(2 * n - 1,), dtype=float64)
+        autocorr = zeros(shape=(n,), dtype=float64)
         for i in range(n_iter):
             if type == 'x':
-                autocorr += correlate(noise[:, i], noise[:, i], mode='full')
+                autocorr += correlate(noise[i, :], noise[i, :], mode='same')
             elif type == 'y':
-                autocorr += correlate(noise[i, :], noise[i, :], mode='full')
+                autocorr += correlate(noise[:, i], noise[:, i], mode='same')
             else:
                 raise Exception('Wrong type!')
             autocorr /= n_iter
 
         return autocorr
 
-    def calculate_autocorrelations(self, noise_field_summ, n_x, n_y):
-        autocorr_x = self.calculate_autocorr(noise_field_summ, n_y, n_x, 'x')
-        autocorr_y = self.calculate_autocorr(noise_field_summ, n_x, n_y, 'y')
+    def calculate_autocorrelations(self, field_real, field_imag, n_x, n_y):
+        autocorr_real_x = self.calculate_autocorr(field_real, n_x, n_y, 'x')
+        autocorr_real_y = self.calculate_autocorr(field_real, n_y, n_x, 'y')
+        autocorr_imag_x = self.calculate_autocorr(field_imag, n_x, n_y, 'x')
+        autocorr_imag_y = self.calculate_autocorr(field_imag, n_y, n_x, 'y')
 
-        return autocorr_x, autocorr_y
+        return autocorr_real_x, autocorr_real_y, autocorr_imag_x, autocorr_imag_y
 
 
 class GaussianNoise(Noise):
@@ -78,24 +76,26 @@ class GaussianNoise(Noise):
 
     @property
     def variance_real(self):
-        return var(self._noise_field_summ)
+        return var(self._noise_field_real)
+
+    @property
+    def variance_imag(self):
+        return var(self._noise_field_imag)
 
     @staticmethod
     @jit(nopython=True)
     def generate_protoarray(n_x, n_y, variance, r_corr_in_points):
-        n_rows = n_x
-        n_cols = n_y
-        proto = zeros(shape=(n_rows, n_cols), dtype=complex64)
+        proto = zeros(shape=(n_x, n_y), dtype=complex64)
 
-        scale = r_corr_in_points / max(n_rows, n_cols)
+        scale = r_corr_in_points / max(n_x, n_y)
         cf = scale * sqrt(pi * variance)
         d = 0.5 * (pi * scale) ** 2
-        amplitude = sqrt(22)
+        amplitude = sqrt(12)
 
-        for i in range(n_rows):
-            for j in range(n_cols):
-                a, b = amplitude * (random.random() - 0.5), amplitude * (random.random() - 0.5)
-                gauss = cf * exp(-d * (i ** 2 + j ** 2))
+        for i in range(n_x):
+            for j in range(n_y):
+                a, b = amplitude * (random.random()-0.5), amplitude * (random.random()-0.5)
+                gauss = cf * exp(-d * ((i-n_x//2) ** 2 + (j-n_y//2) ** 2))
                 proto[i, j] = a * gauss + 1j * b * gauss
 
         return proto
@@ -114,17 +114,13 @@ class GaussianNoise(Noise):
     def initialize_noise_arrays(noise_field, n_x, n_y):
         real_part = zeros(shape=(n_x, n_y), dtype=float64)
         imag_part = zeros(shape=(n_x, n_y), dtype=float64)
-        norm = zeros(shape=(n_x, n_y), dtype=float64)
-        summ = zeros(shape=(n_x, n_y), dtype=float64)
 
         for i in range(n_x):
             for j in range(n_y):
                 real_part[i, j] = noise_field[i, j].real
                 imag_part[i, j] = noise_field[i, j].imag
-                norm[i, j] = (noise_field[i, j] * noise_field[i, j].conjugate()).real
-                summ[i, j] = noise_field[i, j].real + noise_field[i, j].imag
 
-        return real_part, imag_part, norm, summ
+        return real_part, imag_part
 
     def process(self):
         proto = self.generate_protoarray(self._n_x, self._n_y, self.__variance_expected, self._r_corr_in_points)
@@ -133,8 +129,8 @@ class GaussianNoise(Noise):
         proto_fft_normalized = self.normalize_after_fft(proto_fft_obj())
 
         self._noise_field = proto_fft_normalized
-        self._noise_field_real, self._noise_field_imag, self._noise_field_norm, self._noise_field_summ = \
+        self._noise_field_real, self._noise_field_imag = \
             self.initialize_noise_arrays(self._noise_field, self._n_x, self._n_y)
 
-        self._autocorr_x, self._autocorr_y = \
-            self.calculate_autocorrelations(self._noise_field_summ, self._n_x, self._n_y)
+        self._autocorr_real_x, self._autocorr_real_y, self._autocorr_imag_x, self._autocorr_imag_y = \
+            self.calculate_autocorrelations(self._noise_field_real, self._noise_field_imag, self._n_x, self._n_y)

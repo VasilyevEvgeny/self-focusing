@@ -1,5 +1,6 @@
 from numpy import transpose
 from matplotlib import pyplot as plt
+from matplotlib import rc
 from pylab import contourf
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
@@ -109,96 +110,116 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
     del arr
 
 
-def plot_noise_field(beam, path):
+def plot_noise(beam, path):
+    xx_s = [(i * beam.dx - 0.5 * beam.x_max) * 10**6 for i in range(beam.n_x)]
+    yy_s = [(i * beam.dy - 0.5 * beam.y_max) * 10**6 for i in range(beam.n_y)]
+
+    r_corr = beam.noise.r_corr_in_meters * 10 ** 6
+    variance_expected = beam.noise.variance_expected
+    autocorr_real_x, autocorr_real_y, autocorr_imag_x, autocorr_imag_y = beam.noise.autocorrs
+
+    field_real, field_imag = beam.noise._noise_field_real, beam.noise._noise_field_imag
+
+    font_size = 20
+    fig = plt.figure(figsize=(20, 15))
+    grid = plt.GridSpec(4, 2, hspace=0.7, wspace=0.2)
+
     x_left = -400 * 10 ** -6
     x_right = 400 * 10 ** -6
     y_left = -400 * 10 ** -6
     y_right = 400 * 10 ** -6
-
-    arr = beam.noise.noise_field_norm
     xs, ys = beam.xs, beam.ys
 
-    arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
-    arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
+    field_real, x_idx_left, x_idx_right = crop_x(field_real, xs, x_left, x_right, mode='x')
+    field_real, y_idx_left, y_idx_right = crop_x(field_real, ys, y_left, y_right, mode='y')
+    field_real = transpose(field_real)
 
-    arr = transpose(arr)
+    field_imag, x_idx_left, x_idx_right = crop_x(field_imag, xs, x_left, x_right, mode='x')
+    field_imag, y_idx_left, y_idx_right = crop_x(field_imag, ys, y_left, y_right, mode='y')
+    field_imag = transpose(field_imag)
 
     xs = xs[x_idx_left:x_idx_right]
     ys = ys[y_idx_left:y_idx_right]
-
-    font_size = 50
-    fig, ax = plt.subplots(figsize=(12, 10))
-
-    plt.contourf(arr, cmap='gray', levels=100)
 
     x_labels = ['-200', '0', '+200']
     y_labels = ['-200', '0', '+200']
     x_ticks = calc_ticks_x(x_labels, xs)
     y_ticks = calc_ticks_x(y_labels, ys)
-    plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
-    plt.xlabel('x, $\mathbf{\mu}$m', fontsize=font_size, fontweight='bold')
-    plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
-    plt.ylabel('y, $\mathbf{\mu}$m', fontsize=font_size, fontweight='bold')
 
-    ax.grid(color='red', linestyle='--', linewidth=2, alpha=0.5)
-    ax.set_aspect('equal')
+    ax_fr = fig.add_subplot(grid[:2, 0])
+    ax_fr.contourf(field_real, cmap='gray', levels=50)
+    ax_fr.set_xticks(x_ticks)
+    ax_fr.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight='bold')
+    ax_fr.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fr.set_yticks(y_ticks)
+    ax_fr.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight='bold')
+    ax_fr.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fr.grid(color='red', linestyle='--', linewidth=2, alpha=0.5)
+    ax_fr.set_aspect('equal')
+    ax_fr.set_title('$\mathbf{\sigma^2_{real}}$ = %.2f\n' % beam.noise.variance_real, fontsize=font_size, fontweight='bold')
 
-    plt.savefig(path + '/noise_field_norm.png', bbox_inches='tight')
+    ax_fi = fig.add_subplot(grid[:2, 1])
+    ax_fi.contourf(field_imag, cmap='gray', levels=50)
+    ax_fi.set_xticks(x_ticks)
+    ax_fi.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight='bold')
+    ax_fi.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fi.set_yticks(y_ticks)
+    ax_fi.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight='bold')
+    ax_fi.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fi.grid(color='red', linestyle='--', linewidth=2, alpha=0.5)
+    ax_fi.set_aspect('equal')
+    ax_fi.set_title('$\mathbf{\sigma^2_{imag}}$ = %.2f\n' % beam.noise.variance_imag, fontsize=font_size,
+                    fontweight='bold')
+
+    rc('font', weight='bold', size=font_size-5)
+
+    x_min, x_max = 0, 5 * r_corr
+    y_min, y_max = -0.15 * variance_expected, variance_expected * 1.15
+
+    ax_rx = fig.add_subplot(grid[2, 0])
+    ax_rx.plot(yy_s, autocorr_real_x, color='red', linewidth=5, zorder=2)
+    ax_rx.axvline(r_corr, linestyle='solid', color='black', linewidth=3, zorder=1)
+    ax_rx.grid(linewidth=1, linestyle='dotted')
+    ax_rx.set_xlim(x_min, x_max)
+    ax_rx.set_ylim(y_min, y_max)
+    ax_rx.set_title('\n$\mathbf{R^x_{real}}$', fontsize=font_size, fontweight='bold')
+    ax_rx.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+
+    ax_ix = fig.add_subplot(grid[2, 1])
+    ax_ix.plot(yy_s, autocorr_imag_x, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
+    ax_ix.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
+    ax_ix.grid(linewidth=1, linestyle="dotted")
+    ax_ix.set_xlim(x_min, x_max)
+    ax_ix.set_ylim(y_min, y_max)
+    ax_ix.set_title('\n$\mathbf{R^x_{imag}}$', fontsize=font_size, fontweight='bold')
+    ax_ix.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+
+    ax_ry = fig.add_subplot(grid[3, 0])
+    ax_ry.plot(xx_s, autocorr_real_y, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
+    ax_ry.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
+    ax_ry.grid(linewidth=1, linestyle="dotted")
+    ax_ry.set_xlim(x_min, x_max)
+    ax_ry.set_ylim(y_min, y_max)
+    ax_ry.set_title('\n$\mathbf{R^y_{real}}$', fontsize=font_size, fontweight='bold')
+    ax_ry.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+
+    ax_iy = fig.add_subplot(grid[3, 1])
+    ax_iy.plot(xx_s, autocorr_imag_y, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
+    ax_iy.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
+    ax_iy.grid(linewidth=1, linestyle="dotted")
+    ax_iy.set_xlim(x_min, x_max)
+    ax_iy.set_ylim(y_min, y_max)
+    ax_iy.set_title('\n$\mathbf{R^y_{imag}}$', fontsize=font_size, fontweight='bold')
+    ax_iy.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+
+    fig.suptitle('Complex Gaussian noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
+                 (variance_expected, round(r_corr)), fontsize=font_size, fontweight='bold')
+
+    plt.savefig(path + '/noise.png', bbox_inches='tight')
     plt.close()
 
-    del arr
-
-
-def plot_autocorrelations(beam, path):
-    xx_s = [(i * beam.dx - beam.x_max) * 10**6 for i in range(2 * beam.n_x - 1)]
-    yy_s = [(i * beam.dy - beam.y_max) * 10**6 for i in range(2 * beam.n_y - 1)]
-
-    r_corr = beam.noise.r_corr_in_meters * 10 ** 6
-
-    autocorr_x, autocorr_y = beam.noise.autocorrs
-    example_profile_x, example_profile_y = beam.noise.noise_field_summ[beam.n_x//2,:], \
-                                           beam.noise.noise_field_summ[:,beam.n_y//2]
-
-    font_size = 20
-    fig = plt.figure(figsize=(20, 15))
-    grid = plt.GridSpec(2, 2, hspace=0.1, wspace=0.1)
-
-    ax_rx = fig.add_subplot(grid[0, 0])
-    ax_rx.plot(xx_s, autocorr_x, color='red', linewidth=1, label='$\\bar{K}_x$')
-    ax_rx.set_xlim(-0.5 * r_corr, 3.5 * r_corr)
-
-    ax_ry = fig.add_subplot(grid[0, 1])
-    ax_ry.plot(yy_s, autocorr_y, color='red', linewidth=1, label='$\\bar{K}_x$')
-    ax_ry.set_xlim(-0.5 * r_corr, 3.5 * r_corr)
-
-    ax_x = fig.add_subplot(grid[1, 0])
-    ax_x.plot(beam.xs, example_profile_x, color='black', linewidth=1, label='$\\bar{K}_x$')
-
-    ax_y = fig.add_subplot(grid[1, 1])
-    ax_y.plot(beam.ys, example_profile_y, color='black', linewidth=1, label='$\\bar{K}_x$')
-
-    #plt.plot(beam.autocorrelation_y, color='blue', linewidth=5, alpha=0.5, label='$\\bar{K}_y$')
-
-    #plt.axvline((idx_left_x * beam.dx - beam.x_max) * 10**6, color='red', linewidth=2, linestyle='dotted')
-    #plt.axvline((idx_right_x * beam.dx) * 10**6, color='red', linewidth=2, linestyle='dotted')
-    #plt.axvline((idx_left_y * beam.dy - beam.y_max) * 10 ** 6, color='blue', linewidth=2, linestyle='dotted')
-    #plt.axvline((idx_right_y * beam.dy) * 10 ** 6, color='blue', linewidth=2, linestyle='dotted')
-
-    #plt.xticks(fontsize=font_size)
-    #plt.yticks(fontsize=font_size)
-
-    fig.suptitle('$\mathbf{\sigma_{expected}}$ = %.2f\n$\mathbf{\sigma_{real}}$       = %.2f' %
-                 (beam.noise.variance_expected, beam.noise.variance_real), fontsize=font_size, fontweight='bold')
-
-    #plt.xlabel('$\mathbf{\Delta}$, мкм', fontsize=font_size, fontweight='bold')
-    #plt.ylabel('$\mathbf{\\bar{K}}$', fontsize=font_size, fontweight='bold')
-
-    #plt.grid(linestyle='dotted', linewidth=2, alpha=0.5)
-
-    #plt.legend(bbox_to_anchor=(0., 1.05, 1., .102), fontsize=font_size, loc='center', ncol=2)
-
-    plt.savefig(path + '/autocorrelations.png', bbox_inches='tight')
-    plt.close()
+    rc('font', weight='normal', size=12)
+    del field_real, field_imag
 
 
 def plot_track(states_arr, parameter_index, path):

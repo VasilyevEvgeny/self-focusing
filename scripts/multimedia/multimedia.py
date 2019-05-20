@@ -10,7 +10,7 @@ def get_data():
 
     indices = []
     for idx_col, noise_percent in enumerate([0, 1, 3, 5]):
-        for idx_row, (M, m) in enumerate([(0,0), (1,0), (2,0), (1,1), (2,2)]):
+        for idx_row, (M, m) in enumerate([(0, 0), (1, 0), (2, 0), (1, 1), (2, 2)]):
 
             print("================================================================")
             print("noise_percent = %02d" % noise_percent, ", M = %d" % M, ", m = %d" % m)
