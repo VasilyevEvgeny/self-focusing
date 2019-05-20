@@ -37,7 +37,7 @@ class Beam(metaclass=abc.ABCMeta):
             self._p_0 = self.__p_0_to_p_G * self.__p_G
         elif self._distribution_type == 'vortex':
             self.__p_V = self.calculate_p_V()
-            self.__p_0_to_p_V = kwargs['P0_to_Pcr_V']
+            self.__p_0_to_p_V = kwargs['p_0_to_p_V']
             self._p_0 = self.__p_0_to_p_V * self.__p_V
         else:
             raise Exception('Wrong distribution type: "%s".' % self._distribution_type)
@@ -83,6 +83,10 @@ class Beam(metaclass=abc.ABCMeta):
     @property
     def p_0_to_p_G(self):
         return self.__p_0_to_p_G
+
+    @property
+    def p_0_to_p_V(self):
+        return self.__p_0_to_p_V
 
     @property
     def p_0(self):

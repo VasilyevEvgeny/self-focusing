@@ -16,7 +16,7 @@ def get_data():
             print("noise_percent = %02d" % noise_percent, ", M = %d" % M, ", m = %d" % m)
             print("================================================================")
 
-            noise = GaussianNoise(r_corr_in_meters=30 * 10 ** -6,
+            noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
                                   variance=1)
 
             beam = Beam_XY(medium="SiO2",
