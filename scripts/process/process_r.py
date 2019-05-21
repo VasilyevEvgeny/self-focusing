@@ -3,7 +3,7 @@ from core import Beam_R, SweepDiffractionExecutor_R, KerrExecutor_R, Propagator,
 
 args = parse_args()
 
-beam = Beam_R(medium="SiO2",
+beam = Beam_R(medium='SiO2',
               p_0_to_p_G=5,
               m=0,
               M=0,
@@ -20,6 +20,6 @@ propagator = Propagator(args=args,
                         flag_const_dz=True,
                         dn_print_current_state=50,
                         dn_plot_beam=50,
-                        beam_normalization_type="local")
+                        beam_normalization_type='local')
 
 propagator.propagate()

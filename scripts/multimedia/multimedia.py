@@ -12,14 +12,14 @@ def get_data():
     for idx_col, noise_percent in enumerate([0, 1, 3, 5]):
         for idx_row, (M, m) in enumerate([(0, 0), (1, 0), (2, 0), (1, 1), (2, 2)]):
 
-            print("================================================================")
-            print("noise_percent = %02d" % noise_percent, ", M = %d" % M, ", m = %d" % m)
-            print("================================================================")
+            print('================================================================')
+            print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
+            print('================================================================')
 
             noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
                                   variance=1)
 
-            beam = Beam_XY(medium="SiO2",
+            beam = Beam_XY(medium='SiO2',
                            p_0_to_p_V=5,
                            p_0_to_p_G=5,
                            M=M,
@@ -42,7 +42,7 @@ def get_data():
                                     flag_const_dz=True,
                                     dn_print_current_state=50,
                                     dn_plot_beam=10,
-                                    beam_normalization_type="local")
+                                    beam_normalization_type='local')
 
             propagator.propagate()
 
@@ -89,7 +89,7 @@ def process_multimedia(all_files, indices, n_pictures_max, path, prefix, fps=10,
             im = Image.open(all_files_upd[j][i])
             i1, i2 = indices[j]
             composed_im.paste(im, (i1 * width, i2 * height))
-        composed_im.save(results_dir + "/%04d.png" % i, "PNG")
+        composed_im.save(results_dir + '/%04d.png' % i, 'PNG')
 
     if animation:
         make_animation(root_dir=path,

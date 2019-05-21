@@ -26,11 +26,11 @@ def phase_initialization(phase, x, y, n_points, m):
 
 
 def plot_images(**kwargs):
-    global_root_dir = kwargs["global_root_dir"]
-    global_results_dir_name = kwargs["global_results_dir_name"]
-    prefix = kwargs["prefix"]
-    m = kwargs["m"]
-    figsize = kwargs.get("figsize", (10, 10))
+    global_root_dir = kwargs['global_root_dir']
+    global_results_dir_name = kwargs['global_results_dir_name']
+    prefix = kwargs['prefix']
+    m = kwargs['m']
+    figsize = kwargs.get('figsize', (10, 10))
 
     _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
     res_dir = create_dir(path=results_dir)
@@ -49,8 +49,8 @@ def plot_images(**kwargs):
 
     for number, gradus in enumerate(tqdm(range(0, 360, 2))):
         fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection="3d")
-        ax.plot_surface(xx, yy, phase, cmap="gray", rstride=1, cstride=1, linewidth=0, antialiased=False)
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot_surface(xx, yy, phase, cmap='gray', rstride=1, cstride=1, linewidth=0, antialiased=False)
         ax.view_init(elev=75, azim=int(gradus + 315))
         ax.set_axis_off()
         ax.set_xticks([])
@@ -62,7 +62,7 @@ def plot_images(**kwargs):
         elif figsize == (10,10):
             bbox = fig.bbox_inches.from_bounds(2.3, 2.0, 5.9, 6.2)
         else:
-            raise Exception("Wrong figsize!")
+            raise Exception('Wrong figsize!')
         plt.savefig(res_dir + '/%04d.png' % number, bbox_inches=bbox, transparent=True)
         plt.close()
 
@@ -72,7 +72,7 @@ def plot_images(**kwargs):
 def process_topological_charge(m, animation=True, video=True):
     args = parse_args()
 
-    prefix = "m=%d" % m
+    prefix = 'm=%d' % m
     results_dir = plot_images(global_root_dir=args.global_root_dir,
                               global_results_dir_name=args.global_results_dir_name,
                               m=m,
