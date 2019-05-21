@@ -6,6 +6,7 @@ from core.medium import Medium
 from core.m_constants import M_Constants
 
 
+
 class Beam(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
         self.__m_constants = M_Constants()
