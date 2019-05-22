@@ -14,7 +14,7 @@ class DiffractionExecutor(metaclass=abc.ABCMeta):
         """Information about DiffractionExecutor type"""
 
 
-class FourierDiffractionExecutor_XY(DiffractionExecutor):
+class FourierDiffractionExecutorXY(DiffractionExecutor):
     max_number_of_cpus = cpu_count()
 
     def __init__(self, **kwargs):
@@ -44,30 +44,79 @@ class FourierDiffractionExecutor_XY(DiffractionExecutor):
         self._beam._field = ifft_obj()
 
 
-class SweepDiffractionExecutor_R(DiffractionExecutor):
+class SweepDiffractionExecutorX(DiffractionExecutor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.c1 = 1.0 / (2.0 * self._beam.dr ** 2)
-        self.c2 = 1.0 / (4.0 * self._beam.dr)
-        self.c3 = 2j * self._beam.medium.k_0
+        self.__c1 = 1.0 / (2.0 * self._beam.dx ** 2)
+        self.__c2 = 2j * self._beam.medium.k_0
 
-        self.alpha = zeros(shape=(self._beam.n_r,), dtype=complex64)
-        self.beta = zeros(shape=(self._beam.n_r,), dtype=complex64)
-        self.gamma = zeros(shape=(self._beam.n_r,), dtype=complex64)
-        self.vx = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__alpha = self.__c1
+        self.__gamma = self.__c1
+
+        self.__kappa_left, self.__mu_left, self.__kappa_right, self.__mu_right = \
+            0.0, 0.0, 0.0, 0.0
+
+        self.__delta = zeros(shape=(self._beam.n_x,), dtype=complex64)
+        self.__xi = zeros(shape=(self._beam.n_x,), dtype=complex64)
+        self.__eta = zeros(shape=(self._beam.n_x,), dtype=complex64)
+
+    @property
+    def info(self):
+        return 'sweep_diffraction_executor_x'
+
+    @staticmethod
+    @jit(nopython=True)
+    def fast_process(field, n_x, dz, c1, c2, alpha, gamma, delta, xi, eta,
+                     kappa_left, mu_left, kappa_right, mu_right):
+        xi[1], eta[1] = kappa_left, mu_left
+        for i in range(1, n_x - 1):
+            beta = 2.0 * c1 + c2 / dz
+            delta[i] = alpha * field[i + 1] - \
+                       conj(beta) * field[i] + \
+                       gamma * field[i - 1]
+            xi[i + 1] = alpha / (beta - gamma * xi[i])
+            eta[i + 1] = (delta[i] + gamma * eta[i]) / \
+                         (beta - gamma * xi[i])
+
+        field[n_x - 1] = (mu_right + kappa_right * eta[n_x - 1]) / \
+                         (1.0 - kappa_right * xi[n_x - 1])
+
+        for j in range(n_x - 1, 0, -1):
+            field[j - 1] = xi[j] * field[j] + eta[j]
+
+        return field
+
+    def process_diffraction(self, dz):
+        self._beam._field = self.fast_process(self._beam._field, self._beam.n_x, dz, self.__c1,
+                                              self.__c2, self.__alpha, self.__gamma, self.__delta, self.__xi, self.__eta,
+                                              self.__kappa_left, self.__mu_left, self.__kappa_right, self.__mu_right)
+
+
+class SweepDiffractionExecutorR(DiffractionExecutor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.__c1 = 1.0 / (2.0 * self._beam.dr ** 2)
+        self.__c2 = 1.0 / (4.0 * self._beam.dr)
+        self.__c3 = 2j * self._beam.medium.k_0
+
+        self.__alpha = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__beta = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__gamma = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__vx = zeros(shape=(self._beam.n_r,), dtype=complex64)
 
         for i in range(1, self._beam.n_r - 1):
-            self.alpha[i] = self.c1 + self.c2 / self._beam.rs[i]
-            self.gamma[i] = self.c1 - self.c2 / self._beam.rs[i]
-            self.vx[i] = (self._beam.m / self._beam.rs[i]) ** 2
+            self.__alpha[i] = self.__c1 + self.__c2 / self._beam.rs[i]
+            self.__gamma[i] = self.__c1 - self.__c2 / self._beam.rs[i]
+            self.__vx[i] = (self._beam.m / self._beam.rs[i]) ** 2
 
-        self.kappa_left, self.mu_left, self.kappa_right, self.mu_right = \
+        self.__kappa_left, self.__mu_left, self.__kappa_right, self.__mu_right = \
             1.0, 0.0, 0.0, 0.0
 
-        self.delta = zeros(shape=(self._beam.n_r,), dtype=complex64)
-        self.xi = zeros(shape=(self._beam.n_r,), dtype=complex64)
-        self.eta = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__delta = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__xi = zeros(shape=(self._beam.n_r,), dtype=complex64)
+        self.__eta = zeros(shape=(self._beam.n_r,), dtype=complex64)
 
     @property
     def info(self):
@@ -96,6 +145,7 @@ class SweepDiffractionExecutor_R(DiffractionExecutor):
         return field
 
     def process_diffraction(self, dz):
-        self._beam._field = self.fast_process(self._beam._field, self._beam.n_r, dz, self.c1,
-                                              self.c3, self.alpha, self.beta, self.gamma, self.delta, self.xi, self.eta,
-                                              self.vx, self.kappa_left, self.mu_left, self.kappa_right, self.mu_right)
+        self._beam._field = self.fast_process(self._beam._field, self._beam.n_r, dz, self.__c1,
+                                              self.__c3, self.__alpha, self.__beta, self.__gamma, self.__delta,
+                                              self.__xi, self.__eta, self.__vx, self.__kappa_left, self.__mu_left,
+                                              self.__kappa_right, self.__mu_right)

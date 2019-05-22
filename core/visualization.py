@@ -6,7 +6,59 @@ from pylab import contourf
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
 
-def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
+def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization):
+    fig_size, x_max, ticks, labels, title, bbox = None, None, None, None, None, None
+    if mode in ('x', 'r', 'xy'):
+        fig_size = (12, 10)
+        x_max = 250
+        title = False
+        ticks = True
+        labels = True
+        bbox = 'tight'
+    elif mode == 'multimedia':
+        fig_size = (3, 3)
+        x_max = 250
+        title = False
+        ticks = False
+        labels = False
+
+    font_size = 40
+    plt.figure(figsize=fig_size)
+    plt.plot(beam.intensity, color='black', linewidth=5)
+
+    if title:
+        plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm', fontsize=font_size-10)
+
+    if ticks:
+        x_labels = ['-150', '0', '+150']
+        x_ticks = calc_ticks_x(x_labels, beam.xs)
+        plt.xticks(x_ticks, x_labels, fontsize=font_size-10)
+
+        if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
+            max_intensity_value = plot_beam_normalization
+            levels_plot = 7
+            di = max_intensity_value / levels_plot
+            y_ticks = [i * di for i in range(levels_plot + 1)]
+            y_labels = ['%02.02f' % round(e, 2) for e in y_ticks]
+            plt.yticks(y_ticks, y_labels, fontsize=font_size - 10)
+            percent = 0.15
+            plt.ylim([-percent, (1 + percent) * max_intensity_value])
+        elif plot_beam_normalization == 'local':
+            plt.yticks(fontsize=font_size - 10)
+
+    x_max_ticks = calc_ticks_x([str(-x_max), str(x_max)], beam.xs)
+    plt.xlim(x_max_ticks)
+
+    if labels:
+        plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+        plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight='bold')
+
+    plt.grid(linestyle='dotted', linewidth=2, alpha=0.5)
+    plt.savefig(path + '/%04d.png' % step, bbox_inches='tight')
+    plt.close()
+
+
+def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
     fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
     if mode in ('xy', 'r'):
         fig_size = (12, 10)
@@ -17,7 +69,7 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
         labels = True
         colorbar = True
         bbox = 'tight'
-    elif mode in ('multimedia'):
+    elif mode == 'multimedia':
         fig_size = (3, 3)
         x_max = 250
         y_max = 250
@@ -50,11 +102,11 @@ def plot_beam(mode, beam, z, step, path, plot_beam_normalization):
 
     n_plot_levels = 100
     max_intensity_value = None
-    if type(plot_beam_normalization) == float:
+    if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
         max_intensity_value = plot_beam_normalization
     elif plot_beam_normalization == 'local':
         max_intensity_value = beam.i_max
-    di = max_intensity_value / (n_plot_levels)
+    di = max_intensity_value / n_plot_levels
     levels_plot = [i * di for i in range(n_plot_levels + 1)]
 
     fig, ax = plt.subplots(figsize=fig_size)

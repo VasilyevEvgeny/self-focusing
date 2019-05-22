@@ -48,7 +48,7 @@ class Logger:
         tex_file_data = \
 '''\documentclass[10pt]{extarticle}
 
-\\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\\usepackage[left=2cm, right=2cm, top=1cm, bottom=1cm]{geometry}
 
 \\usepackage{array}
 \\newcolumntype{P}[1]{>{\centering\\arraybackslash}p{#1}}
@@ -70,20 +70,29 @@ class Logger:
 ##########################
 # EQUATION
 ##########################
+        left_x_str = '2 i k_0 \\frac{\partial A(x,z)}{\partial z}'
         left_r_str = '2 i k_0 \\frac{\partial A(r,z)}{\partial z}'
         left_xy_str = '2 i k_0 \\frac{\partial A(x,y,z)}{\partial z}'
 
+        diffraction_x_str = '\\frac{\partial^2 A(x,z)}{\partial x^2}'
         if beam.distribution_type == 'vortex':
             diffraction_r_str = '\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} - \\frac{m^2}{r^2} \\biggr] A(r,z)'
         else:
             diffraction_r_str = '\\biggl[ \\frac{\partial^2}{\partial r^2} + \\frac1{r}\\frac{\partial}{\partial r} \\biggr] A(r,z)'
         diffraction_xy_str = '\\biggl[ \\frac{\partial^2}{\partial x^2} + \\frac{\partial^2}{\partial y^2} \\biggr] A(x,y,z)'
 
+        kerr_x_str = '\\frac{2 k_0^2}{n_0} n_2 I(x,z) A(x,z)'
         kerr_r_str = '\\frac{2 k_0^2}{n_0} n_2 I(r,z) A(r,z)'
         kerr_xy_str = '\\frac{2 k_0^2}{n_0} n_2 I(x,y,z) A(x,y,z)'
 
         equation = []
-        if beam.info == 'beam_r':
+        if beam.info == 'beam_x':
+            equation.append(left_x_str)
+            if self.__diffraction is not None:
+                equation.append(diffraction_x_str)
+            if self.__kerr_effect is not None:
+                equation.append(kerr_x_str)
+        elif beam.info == 'beam_r':
             equation.append(left_r_str)
             if self.__diffraction is not None:
                 equation.append(diffraction_r_str)
@@ -119,7 +128,9 @@ class Logger:
 ##########################
 
         initial_condition_str = None
-        if beam.info == 'beam_r':
+        if beam.info == 'beam_x':
+            initial_condition_str = 'A(x,0) = A_0 \\biggl( \\frac{x}{x_0} \\biggr)^M \exp \\biggl\{ -\\frac{x^2}{2x_0^2} \\biggr\}'
+        elif beam.info == 'beam_r':
             initial_condition_str = 'A(r,0) = A_0 \\biggl( \\frac{r}{r_0} \\biggr)^M \exp \\biggl\{ -\\frac{r^2}{2r_0^2} \\biggr\}'
         elif beam.info == 'beam_xy':
             initial_condition_str = 'A(x,y,0) = \\biggl(1 + C \\xi(x,y)\\biggr)A_0 \\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)^{M/2}\exp\\biggl\{-\\frac1{2}\\biggl(\\frac{x^2}{x_0^2}+\\frac{y^2}{y_0^2}\\biggr)\\biggr\}\exp\\biggl\{i m \\varphi(x,y)\\biggr\}'
@@ -177,16 +188,24 @@ distribution & %s & -- \\tabularnewline
         tex_file_data += \
 '''$M$ & %d & -- \\tabularnewline
 \hline
-$m$ & %d & -- \\tabularnewline
-\hline
-''' % (beam.M, beam.m)
+''' % (beam.M)
 
-        if beam.info == 'beam_r':
+        if beam.info in ('beam_r', 'beam_xy'):
+            tex_file_data += \
+'''$m$ & %d & -- \\tabularnewline
+\hline
+''' % (beam.m)
+
+        if beam.info == 'beam_x':
+            tex_file_data += \
+'''$x_0$ & %d & $\mu$m \\tabularnewline
+\hline
+''' % (round(beam.x_0 * 10 ** 6))
+        elif beam.info == 'beam_r':
             tex_file_data += \
 '''$r_0$ & %d & $\mu$m \\tabularnewline
 \hline
 ''' % (round(beam.r_0 * 10**6))
-
         elif beam.info == 'beam_xy':
             tex_file_data += \
 '''$x_0$ & %d & $\mu$m \\tabularnewline
@@ -203,30 +222,39 @@ $z_{diff}$ & %2.4f & cm \\tabularnewline
 \hline
 ''' % (beam.lmbda * 10**9, beam.z_diff * 10**2)
 
-        if beam.distribution_type == 'gauss' or beam.distribution_type == 'ring':
-            tex_file_data += \
+        if beam.info in ('beam_r', 'beam_xy'):
+            if beam.distribution_type == 'gauss' or beam.distribution_type == 'ring':
+                tex_file_data += \
 '''$P_0 / P_G$ & %.2f & -- \\tabularnewline
 \hline
-''' % (beam.p_0_to_p_G)
+''' % (beam.p_0_to_p_gauss)
 
-        if beam.distribution_type == 'vortex':
-            tex_file_data += \
+            if beam.distribution_type == 'vortex':
+                tex_file_data += \
 '''$P_0 / P_V$ & %.2f & -- \\tabularnewline
 \hline
-''' % (beam.p_0_to_p_V)
+''' % (beam.p_0_to_p_vortex)
 
-        tex_file_data += \
+            if beam.info in ('beam_r', 'beam_xy'):
+                tex_file_data += \
 '''$P_0$ & %.2f & MW \\tabularnewline
 \hline
-$I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
+''' % (beam.p_0 * 10**-6)
+
+        tex_file_data += \
+'''$I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
 \hline
-''' % (beam.p_0 * 10**-6, beam.i_0 * 10**-16)
+$R_{kerr}$ & %.2f & -- \\tabularnewline
+''' % (beam.i_0 * 10**-16, beam.r_kerr)
 
         if beam.info == 'beam_xy':
             tex_file_data += \
-'''C & %.2f & -- \\tabularnewline
-\\midrule[2pt]
+'''\hline
+C & %.2f & -- \\tabularnewline
 ''' % (beam.noise_percent / 100)
+
+        tex_file_data += \
+'''\\midrule[2pt]'''
 
 ##########################
 # GRID
@@ -236,14 +264,22 @@ $I_0$ & %.4f & TW/cm$^2$ \\tabularnewline
 '''\multicolumn{3}{M{15cm}}{\\textbf{GRID}} \\tabularnewline
 \\midrule[2pt]
 '''
-        if beam.info == 'beam_r':
+
+        if beam.info == 'beam_x':
+            tex_file_data += \
+'''$x_{max}$ & % d & $\mu$m \\tabularnewline
+\hline
+$n_x$ & %d & -- \\tabularnewline
+\hline
+$h_x$ & %.2f & $\mu$m \\tabularnewline
+''' % (round(beam.x_max * 10 ** 6), beam.n_x, round(beam.dx * 10 ** 6))
+        elif beam.info == 'beam_r':
             tex_file_data += \
 '''$r_{max}$ & % d & $\mu$m \\tabularnewline
 \hline
-$n_r$ & % d & -- \\tabularnewline
+$n_r$ & %d & -- \\tabularnewline
 \hline
-$h_r$ & % d & $\mu$m \\tabularnewline
-\hline
+$h_r$ & %.2f & $\mu$m \\tabularnewline
 ''' % (round(beam.r_max * 10**6), beam.n_r, round(beam.dr * 10**6))
         elif beam.info == 'beam_xy':
             tex_file_data += \
@@ -255,14 +291,16 @@ $n_x$ & %d & -- \\tabularnewline
 \hline
 $n_y$ & %d & -- \\tabularnewline
 \hline
-$h_x$ & %d & $\mu$m \\tabularnewline
+$h_x$ & %.2f & $\mu$m \\tabularnewline
 \hline
-$h_y$ & %d & $\mu$m \\tabularnewline
-\\midrule[2pt]
+$h_y$ & %.2f & $\mu$m \\tabularnewline
 ''' % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
        beam.n_x, beam.n_y,
        round(beam.dx * 10 ** 6),
        round(beam.dy * 10 ** 6))
+
+        tex_file_data += \
+'''\\midrule[2pt]'''
 
 ##########################
 # TRACK

@@ -1,6 +1,6 @@
 from PIL import Image
 
-from core import parse_args, Beam_XY, GaussianNoise, FourierDiffractionExecutor_XY, KerrExecutor_XY, Propagator, \
+from core import parse_args, BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, \
     create_dir, create_multidir, get_files, make_animation, make_video
 
 
@@ -19,7 +19,7 @@ def get_data():
             noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
                                   variance=1)
 
-            beam = Beam_XY(medium='SiO2',
+            beam = BeamXY(medium='SiO2',
                            p_0_to_p_V=5,
                            p_0_to_p_G=5,
                            M=M,
@@ -35,8 +35,8 @@ def get_data():
             propagator = Propagator(args=args,
                                     multidir_name=results_dir_name,
                                     beam=beam,
-                                    diffraction=FourierDiffractionExecutor_XY(beam=beam),
-                                    kerr_effect=KerrExecutor_XY(beam=beam),
+                                    diffraction=FourierDiffractionExecutorXY(beam=beam),
+                                    kerr_effect=KerrExecutorXY(beam=beam),
                                     n_z=2000,
                                     dz0=10**-5,
                                     flag_const_dz=True,

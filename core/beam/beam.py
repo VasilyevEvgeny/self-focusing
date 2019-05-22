@@ -1,10 +1,7 @@
 import abc
-from numpy import pi
-from scipy.special import gamma
 
 from core.medium import Medium
 from core.m_constants import M_Constants
-
 
 
 class Beam(metaclass=abc.ABCMeta):
@@ -16,38 +13,12 @@ class Beam(metaclass=abc.ABCMeta):
                               lmbda=self._lmbda,
                               m_constants=self.__m_constants)
 
-        self.__p_G = self.calculate_p_G()
-
         self._M = kwargs['M']
-        self._m = kwargs['m']
-        if self._m == 0:
-            if self._M == 0:
-                self._distribution_type = 'gauss'
-            else:
-                self._distribution_type = 'ring'
-        else:
-            if self._M == 0:
-                raise Exception('Gauss with vortex phase is a wrong initial mode!')
-            self._distribution_type = 'vortex'
 
-        if self._distribution_type == 'gauss':
-            self.__p_0_to_p_G = kwargs['p_0_to_p_G']
-            self._p_0 = self.__p_0_to_p_G * self.__p_G
-        elif self._distribution_type == 'ring':
-            self.__p_0_to_p_G = kwargs['p_0_to_p_G']
-            self._p_0 = self.__p_0_to_p_G * self.__p_G
-        elif self._distribution_type == 'vortex':
-            self.__p_V = self.calculate_p_V()
-            self.__p_0_to_p_V = kwargs['p_0_to_p_V']
-            self._p_0 = self.__p_0_to_p_V * self.__p_V
-        else:
-            raise Exception('Wrong distribution type: "%s".' % self._distribution_type)
+        self._distribution_type = None
 
-        self._field, self._intensity, self._i_max, self._i_0, self._z_diff = None, None, None, None, None
-
-    @abc.abstractmethod
-    def info(self):
-        """Information about beam"""
+        self._field, self._intensity, self._i_max, self._i_0, self._z_diff, self._r_kerr = \
+            None, None, None, None, None, None
 
     @property
     def medium(self):
@@ -60,10 +31,6 @@ class Beam(metaclass=abc.ABCMeta):
     @property
     def distribution_type(self):
         return self._distribution_type
-
-    @property
-    def m(self):
-        return self._m
 
     @property
     def M(self):
@@ -82,23 +49,9 @@ class Beam(metaclass=abc.ABCMeta):
         return self._intensity
 
     @property
-    def p_0_to_p_G(self):
-        return self.__p_0_to_p_G
-
-    @property
-    def p_0_to_p_V(self):
-        return self.__p_0_to_p_V
-
-    @property
-    def p_0(self):
-        return self._p_0
-
-    @property
     def z_diff(self):
         return self._z_diff
 
-    def calculate_p_G(self):
-        return 3.77 * self._lmbda ** 2 / (8 * pi * self._medium.n_0 * self._medium.n_2)
-
-    def calculate_p_V(self):
-        return self.__p_G * 2**(2 * self._m + 1) * gamma(self._m + 1) * gamma(self._m + 2) / (2 * gamma(2 * self._m + 1))
+    @property
+    def r_kerr(self):
+        return self._r_kerr

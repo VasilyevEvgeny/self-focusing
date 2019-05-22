@@ -3,10 +3,10 @@ from numpy import max as maximum
 from scipy.special import gamma
 from numba import jit
 
-from .beam import Beam
+from .beam_3d import Beam3D
 
 
-class Beam_R(Beam):
+class BeamR(Beam3D):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -20,6 +20,8 @@ class Beam_R(Beam):
 
         self._i_0 = self.calculate_i0()
         self._z_diff = self._medium.k_0 * self.__r_0**2
+
+        self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
 
         self.update_intensity()
 

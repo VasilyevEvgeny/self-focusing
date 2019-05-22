@@ -1,7 +1,7 @@
 from numpy import zeros, multiply
 from numba import jit
 
-from .visualization import plot_beam, plot_track, plot_noise
+from .visualization import plot_beam_2d, plot_beam_3d, plot_track, plot_noise
 from .logger import Logger
 from .manager import Manager
 
@@ -27,13 +27,13 @@ class Propagator:
 
         self.__dn_plot_beam = kwargs.get('dn_plot_beam', None)
         self.__flag_print_track = True if self.__dn_plot_beam else False
-        if self.__dn_plot_beam:
+        if self.__dn_plot_beam :#and self.__beam.info != 'beam_x':
             self.beam_normalization_type = kwargs['beam_normalization_type']
 
         self.z = 0.0
         self.dz = kwargs['dz0']
 
-        self.max_intensity_to_stop = 10**17
+        self.max_intensity_to_stop = 10**18
 
         self.states_columns = ['z, m', 'dz, m', 'i_max / i_0', 'i_max, W / m^2']
         self.states_arr = zeros(shape=(self.__n_z + 1, 4))
@@ -95,8 +95,8 @@ class Propagator:
 
                 if not self.__flag_const_dz:
                     self.dz = self.__logger.measure_time(self.update_dz, [self.__beam.medium.k_0, self.__beam.medium.n_0,
-                                                                        self.__beam.medium.n_2, self.__beam.i_max,
-                                                                        self.__beam.i_0, self.dz])
+                                                                          self.__beam.medium.n_2, self.__beam.i_max,
+                                                                          self.__beam.i_0, self.dz])
 
             self.__logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
                                                                 self.__beam.i_max, self.__beam.i_0])
@@ -106,8 +106,12 @@ class Propagator:
                                                                            self.states_columns])
 
             if (not (n_step % self.__dn_plot_beam)) and self.__flag_print_beam:
-                self.__logger.measure_time(plot_beam, [self.__args.prefix, self.__beam, self.z, n_step, self.__manager.beam_dir,
-                                                     self.beam_normalization_type])
+                if self.__beam.info == 'beam_x':
+                    self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.z, n_step,
+                                                              self.__manager.beam_dir, self.beam_normalization_type])
+                elif self.__beam.info in ('beam_r', 'beam_xy'):
+                    self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.z, n_step,
+                                                              self.__manager.beam_dir, self.beam_normalization_type])
 
             if self.__beam.i_max * self.__beam.i_0 > self.max_intensity_to_stop:
                 break

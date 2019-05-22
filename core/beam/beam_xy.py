@@ -3,10 +3,10 @@ from numpy import max as maximum
 from scipy.special import gamma
 from numba import jit
 
-from .beam import Beam
+from .beam_3d import Beam3D
 
 
-class Beam_XY(Beam):
+class BeamXY(Beam3D):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -39,11 +39,14 @@ class Beam_XY(Beam):
                                 dy=self.__dy)
         self.__noise.process()
 
-        self._field = self.initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max, self.__dx, self.__dy,
-                                           self.__n_x, self.__n_y, self.__noise_percent, self.__noise.noise_field)
+        self._field = self.initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max,
+                                            self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
+                                            self.__noise.noise_field)
 
         self._i_0 = self.calculate_i0()
         self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
+
+        self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
 
         self.update_intensity()
 

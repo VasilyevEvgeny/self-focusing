@@ -6,7 +6,7 @@ from numpy import exp, multiply
 class KerrExecutor(metaclass=abc.ABCMeta):
     def __init__(self, **kwargs):
         self._beam = kwargs['beam']
-        self._nonlin_phase_const = -1j * self._beam.medium.k_0 * self._beam.medium.n_2 * self._beam.i_0 / self._beam.medium.n_0
+        self._nonlin_phase_const = -0.5j * self._beam.r_kerr / self._beam.z_diff
 
     @abc.abstractmethod
     def info(self):
@@ -21,7 +21,16 @@ class KerrExecutor(metaclass=abc.ABCMeta):
         self._beam._field = self.phase_increment(self._beam._field, self._beam.intensity, self._nonlin_phase_const * dz)
 
 
-class KerrExecutor_R(KerrExecutor):
+class KerrExecutorX(KerrExecutor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def info(self):
+        return 'kerr_executor_x'
+
+
+class KerrExecutorR(KerrExecutor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -30,7 +39,7 @@ class KerrExecutor_R(KerrExecutor):
         return 'kerr_executor_r'
 
 
-class KerrExecutor_XY(KerrExecutor):
+class KerrExecutorXY(KerrExecutor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
