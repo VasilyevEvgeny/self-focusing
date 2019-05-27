@@ -15,10 +15,8 @@ class Beam(metaclass=abc.ABCMeta):
 
         self._M = kwargs['M']
 
-        self._distribution_type = None
-
-        self._field, self._intensity, self._i_max, self._i_0, self._z_diff, self._r_kerr = \
-            None, None, None, None, None, None
+        self._distribution_type, self._field, self._intensity, self._i_max, self._i_0, self._z_diff, self._r_kerr = \
+            None, None, None, None, None, None, None
 
     @property
     def medium(self):

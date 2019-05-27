@@ -11,16 +11,20 @@ class Manager:
         self.__global_results_dir_name = self.__args.global_results_dir_name
         self.__prefix = self.__args.prefix
 
-        self.global_results_dir, self.results_dir, _ = make_paths(self.__global_root_dir, self.__global_results_dir_name,
+        self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir, self.__global_results_dir_name,
                                                                   self.__prefix)
 
         if self.__prefix == 'multimedia':
-            self.global_results_dir, self.results_dir, _ = make_paths(self.__global_root_dir,
+            self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir,
                                                                       self.__global_results_dir_name + '/' + self.__multidir_name,
                                                                       prefix=None)
 
         self.__track_dir = self.results_dir + '/track'
         self.__beam_dir = self.results_dir + '/beam'
+
+    @property
+    def results_dir(self):
+        return self.__results_dir
 
     @staticmethod
     def create_dir(path):
@@ -28,10 +32,10 @@ class Manager:
             os.makedirs(path)
 
     def create_global_results_dir(self):
-        self.create_dir(self.global_results_dir)
+        self.create_dir(self.__global_results_dir)
 
     def create_results_dir(self):
-        self.create_dir(self.results_dir)
+        self.create_dir(self.__results_dir)
 
     def create_track_dir(self):
         self.create_dir(self.__track_dir)

@@ -7,3 +7,5 @@ imageio
 opencv-python
 xlsxwriter
 tqdm
+pandas
+xlrd

@@ -3,19 +3,19 @@ from core import BeamX, SweepDiffractionExecutorX, KerrExecutorX, Propagator, pa
 
 args = parse_args()
 
-beam = BeamX(medium='SiO2',
+beam = BeamX(medium='LiF',
              M=1,
              half=True,
              lmbda=1800*10**-9,
-             x_0=100*10**-6,
+             x_0=92*10**-6,
              n_x=4096,
-             r_kerr=75.0)
+             r_kerr=75.40)
 
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutorX(beam=beam),
                         kerr_effect=KerrExecutorX(beam=beam),
-                        n_z=2000,
+                        n_z=500,
                         dz0=beam.z_diff/1000,
                         flag_const_dz=True,
                         dn_print_current_state=10,

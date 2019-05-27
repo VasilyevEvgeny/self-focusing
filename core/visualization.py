@@ -6,21 +6,21 @@ from pylab import contourf
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
 
-def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization):
+def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_normalization_to_x0=True):
     fig_size, x_max, ticks, labels, title, bbox = None, None, None, None, None, None
-    if mode in ('x', 'r', 'xy'):
+    if mode == 'multimedia':
+        fig_size = (3, 3)
+        x_max = 250
+        title = False
+        ticks = False
+        labels = False
+    else:
         fig_size = (12, 10)
         x_max = 250
         title = False
         ticks = True
         labels = True
         bbox = 'tight'
-    elif mode == 'multimedia':
-        fig_size = (3, 3)
-        x_max = 250
-        title = False
-        ticks = False
-        labels = False
 
     font_size = 40
     plt.figure(figsize=fig_size)
@@ -30,9 +30,18 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization):
         plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm', fontsize=font_size-10)
 
     if ticks:
-        x_labels = ['-150', '0', '+150']
-        x_ticks = calc_ticks_x(x_labels, beam.xs)
-        plt.xticks(x_ticks, x_labels, fontsize=font_size-10)
+
+        if x_ticks_normalization_to_x0:
+            n_ticks = 11
+            x_tickslabels = [ str(i - n_ticks // 2) for i in range(n_ticks) ]
+            points_in_x0 = int(beam.x_0 / beam.dx)
+            center = int(0.5 * beam.n_x)
+            x_ticks = [ center + (i - n_ticks//2) * points_in_x0 for i in range(n_ticks) ]
+            plt.xticks(x_ticks, x_tickslabels, fontsize=font_size-10)
+        else:
+            x_labels = ['-150', '0', '+150']
+            x_ticks = calc_ticks_x(x_labels, beam.xs)
+            plt.xticks(x_ticks, x_labels, fontsize=font_size-10)
 
         if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
             max_intensity_value = plot_beam_normalization
@@ -50,7 +59,10 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization):
     plt.xlim(x_max_ticks)
 
     if labels:
-        plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+        if x_ticks_normalization_to_x0:
+            plt.xlabel('$\mathbf{x \ / \ x_0}$', fontsize=font_size, fontweight='bold')
+        else:
+            plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
         plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight='bold')
 
     plt.grid(linestyle='dotted', linewidth=2, alpha=0.5)

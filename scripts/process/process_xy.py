@@ -6,7 +6,7 @@ args = parse_args()
 noise = GaussianNoise(r_corr_in_meters=10*10**-6,
                       variance=1)
 
-beam = BeamXY(medium='SiO2',
+beam = BeamXY(medium='LiF',
               p_0_to_p_vortex=5,
               m=1,
               M=1,

@@ -12,7 +12,13 @@ class Logger:
         self.__diffraction = kwargs['diffraction']
         self.__kerr_effect = kwargs['kerr_effect']
 
+        self.__track_filename = self.__path + '/propagation.xlsx'
+
         self.__functions = OrderedDict()
+
+    @property
+    def track_filename(self):
+        return self.__track_filename
 
     def measure_time(self, function, args):
         t_start = time()
@@ -346,10 +352,8 @@ $I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
                                                                       states[n_step, 3])
         print(output_string)
 
-    def log_track(self, states_arr, states_columns, filename='propagation.xlsx'):
-        filename = self.__path + '/' + filename
-
-        workbook = Workbook(filename)
+    def log_track(self, states_arr, states_columns):
+        workbook = Workbook(self.__track_filename)
 
         worksheet = workbook.add_worksheet()
         bold = workbook.add_format({'bold': True, 'align': 'center'})

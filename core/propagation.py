@@ -26,8 +26,8 @@ class Propagator:
         self.__flag_print_beam = True if self.__dn_print_current_state else False
 
         self.__dn_plot_beam = kwargs.get('dn_plot_beam', None)
-        self.__flag_print_track = True if self.__dn_plot_beam else False
-        if self.__dn_plot_beam :#and self.__beam.info != 'beam_x':
+        self.__flag_print_track = kwargs.get('print_track', True)
+        if self.__dn_plot_beam:
             self.beam_normalization_type = kwargs['beam_normalization_type']
 
         self.z = 0.0
@@ -37,6 +37,19 @@ class Propagator:
 
         self.states_columns = ['z, m', 'dz, m', 'i_max / i_0', 'i_max, W / m^2']
         self.states_arr = zeros(shape=(self.__n_z + 1, 4))
+
+    @property
+    def beam(self):
+        return self.__beam
+
+    @property
+    def logger(self):
+        return self.__logger
+
+    @property
+    def manager(self):
+        return self.__manager
+
 
     @staticmethod
     @jit(nopython=True)
@@ -99,19 +112,21 @@ class Propagator:
                                                                           self.__beam.i_0, self.dz])
 
             self.__logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
-                                                                self.__beam.i_max, self.__beam.i_0])
+                                                                  self.__beam.i_max, self.__beam.i_0])
 
-            if not n_step % self.__dn_print_current_state:
-                self.__logger.measure_time(self.__logger.print_current_state, [n_step, self.states_arr,
-                                                                           self.states_columns])
+            if self.__dn_print_current_state:
+                if not n_step % self.__dn_print_current_state:
+                    self.__logger.measure_time(self.__logger.print_current_state, [n_step, self.states_arr,
+                                                                                   self.states_columns])
 
-            if (not (n_step % self.__dn_plot_beam)) and self.__flag_print_beam:
-                if self.__beam.info == 'beam_x':
-                    self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.z, n_step,
-                                                              self.__manager.beam_dir, self.beam_normalization_type])
-                elif self.__beam.info in ('beam_r', 'beam_xy'):
-                    self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.z, n_step,
-                                                              self.__manager.beam_dir, self.beam_normalization_type])
+            if self.__dn_plot_beam:
+                if (not (n_step % self.__dn_plot_beam)) and self.__flag_print_beam:
+                    if self.__beam.info == 'beam_x':
+                        self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.z, n_step,
+                                                                  self.__manager.beam_dir, self.beam_normalization_type])
+                    elif self.__beam.info in ('beam_r', 'beam_xy'):
+                        self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.z, n_step,
+                                                                  self.__manager.beam_dir, self.beam_normalization_type])
 
             if self.__beam.i_max * self.__beam.i_0 > self.max_intensity_to_stop:
                 break
@@ -122,6 +137,8 @@ class Propagator:
         if self.__flag_print_track:
             parameter_index = self.states_columns.index('i_max / i_0')
             self.__logger.measure_time(plot_track, [self.states_arr, parameter_index,
-                                                  self.__manager.track_dir])
+                                                    self.__manager.track_dir])
 
         self.__logger.log_times()
+
+        return

@@ -77,6 +77,6 @@ class BeamX(Beam2D):
         arr = zeros(shape=(n_x,), dtype=complex64)
         for i in range(n_x):
             x = i * dx - 0.5 * x_max
-            arr[i] = (heaviside(-x, 0) * (1 - half) + heaviside(x, 0)) * (x / x_0) ** M * exp(-0.5 * (x / x_0) ** 2)
+            arr[i] = ((heaviside(-x, 0) * (1 - half) + heaviside(x, 0)) * (x / x_0)) ** M * exp(-0.5 * (x / x_0) ** 2)
 
         return arr
