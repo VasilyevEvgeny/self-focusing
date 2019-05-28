@@ -24,14 +24,14 @@ class Beam3D(Beam):
             self._distribution_type = 'vortex'
 
         if self._distribution_type == 'gauss':
-            self.__p_0_to_p_gauss = kwargs['p_0_to_p_gauss']
+            self.__p_0_to_p_gauss = kwargs.get('p_0_to_p_gauss', 1.0)
             self._p_0 = self.__p_0_to_p_gauss * self.__p_gauss
         elif self._distribution_type == 'ring':
-            self.__p_0_to_p_gauss = kwargs['p_0_to_p_gauss']
+            self.__p_0_to_p_gauss = kwargs.get('p_0_to_p_gauss', 1.0)
             self._p_0 = self.__p_0_to_p_gauss * self.__p_gauss
         elif self._distribution_type == 'vortex':
             self.__p_vortex = self.calculate_p_vortex()
-            self.__p_0_to_p_vortex = kwargs['p_0_to_p_vortex']
+            self.__p_0_to_p_vortex = kwargs.get('p_0_to_p_vortex', 1.0)
             self._p_0 = self.__p_0_to_p_vortex * self.__p_vortex
         else:
             raise Exception('Wrong distribution type: "%s".' % self._distribution_type)

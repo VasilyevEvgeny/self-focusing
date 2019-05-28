@@ -9,7 +9,7 @@ beam = BeamX(medium='LiF',
              lmbda=1800*10**-9,
              x_0=92*10**-6,
              n_x=4096,
-             r_kerr=75.40)
+             r_kerr=50.0)
 
 propagator = Propagator(args=args,
                         beam=beam,

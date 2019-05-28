@@ -30,7 +30,7 @@ class BeamX(Beam2D):
 
         self._z_diff = self.medium.k_0 * self.__x_0 ** 2
 
-        self._r_kerr = kwargs['r_kerr']
+        self._r_kerr = kwargs.get('r_kerr', 100)
         self._i_0 = 0.5 * self._r_kerr * self.medium.n_0 / (self.medium.k_0 * self.medium.n_2 * self._z_diff)
 
         self.update_intensity()

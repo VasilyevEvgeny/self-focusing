@@ -50,7 +50,6 @@ class Propagator:
     def manager(self):
         return self.__manager
 
-
     @staticmethod
     @jit(nopython=True)
     def flush_current_state(states_arr, n_step, z, dz, i_max, i_0):
@@ -140,5 +139,3 @@ class Propagator:
                                                     self.__manager.track_dir])
 
         self.__logger.log_times()
-
-        return

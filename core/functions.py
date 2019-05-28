@@ -22,6 +22,7 @@ def xlsx_to_df(path_to_xlsx, normalize_z_to=10**2, normalize_i_to=10**17):
 
     return df
 
+
 def calc_ticks_x(labels, xs):
     ticks = []
     nxt = 0

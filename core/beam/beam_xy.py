@@ -31,17 +31,20 @@ class BeamXY(Beam3D):
         self.__k_xs = [i * self.__dk_x if i < self.__n_x / 2 else (i - self.__n_x) * self.__dk_x for i in range(self.__n_x)]
         self.__k_ys = [i * self.__dk_y if i < self.__n_y / 2 else (i - self.__n_y) * self.__dk_y for i in range(self.__n_y)]
 
-        self.__noise_percent = kwargs['noise_percent']
-        self.__noise = kwargs['noise']
-        self.__noise.initialize(n_x=self.__n_x,
-                                n_y=self.__n_y,
-                                dx=self.__dx,
-                                dy=self.__dy)
-        self.__noise.process()
+        self.__noise_percent = kwargs.get('noise_percent', 0.0)
+        self.__noise_field = zeros(shape=(self.__n_x, self.__n_y))
+        if self.__noise_percent:
+            self.__noise = kwargs['noise']
+            self.__noise.initialize(n_x=self.__n_x,
+                                    n_y=self.__n_y,
+                                    dx=self.__dx,
+                                    dy=self.__dy)
+            self.__noise.process()
+            self.__noise_field = self.__noise.noise_field
 
         self._field = self.initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max,
                                             self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
-                                            self.__noise.noise_field)
+                                            self.__noise_field)
 
         self._i_0 = self.calculate_i0()
         self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
