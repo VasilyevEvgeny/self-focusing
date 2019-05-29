@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase
 import abc
 from matplotlib import pyplot as plt
 from numpy import sqrt, arctan, exp
@@ -9,7 +9,7 @@ from core import Medium, M_Constants
 from argparse import Namespace
 
 
-class TestDiffraction(unittest.TestCase, metaclass=abc.ABCMeta):
+class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -74,9 +74,9 @@ class TestDiffraction(unittest.TestCase, metaclass=abc.ABCMeta):
         plt.yticks(fontsize=font_size-5)
 
         if self._language == 'english':
-            x_label = '$\mathbf{z \ / \ z_{diff}}$, cm'
+            x_label = '$\mathbf{z \ / \ z_{diff}}$'
         else:
-            x_label = '$\mathbf{z \ / \ z_{diff}}$, см'
+            x_label = '$\mathbf{z \ / \ z_{диф}}$'
         plt.xlabel(x_label, fontsize=font_size, fontweight=font_weight)
         plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight=font_weight)
 

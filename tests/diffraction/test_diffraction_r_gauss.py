@@ -5,8 +5,8 @@ NAME = 'diffraction_r_gauss'
 
 
 class TestDiffractionRGauss(TestDiffraction):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args_, **kwargs):
+        super().__init__(*args_, **kwargs)
 
         self.add_prefix(NAME)
 

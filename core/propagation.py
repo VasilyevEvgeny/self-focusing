@@ -30,13 +30,13 @@ class Propagator:
         if self.__dn_plot_beam:
             self.beam_normalization_type = kwargs['beam_normalization_type']
 
-        self.z = 0.0
-        self.dz = kwargs['dz0']
+        self.__z = 0.0
+        self.__dz = kwargs['dz0']
 
-        self.max_intensity_to_stop = 10**18
+        self.__max_intensity_to_stop = kwargs.get('max_intensity_to_stop', 10**17)
 
-        self.states_columns = ['z, m', 'dz, m', 'i_max / i_0', 'i_max, W / m^2']
-        self.states_arr = zeros(shape=(self.__n_z + 1, 4))
+        self.__states_columns = ['z, m', 'dz, m', 'i_max / i_0', 'i_max, W / m^2']
+        self.__states_arr = zeros(shape=(self.__n_z + 1, 4))
 
     @property
     def beam(self):
@@ -49,6 +49,10 @@ class Propagator:
     @property
     def manager(self):
         return self.__manager
+
+    @property
+    def z(self):
+        return self.__z
 
     @staticmethod
     @jit(nopython=True)
@@ -69,15 +73,15 @@ class Propagator:
 
     def crop_states_arr(self):
         row_max = 0
-        for i in range(self.states_arr.shape[0] - 1, 0, -1):
-            if self.states_arr[i][0] != 0 and \
-                    self.states_arr[i][1] != 0 and \
-                    self.states_arr[i][2] != 0 and \
-                    self.states_arr[i][3] != 0:
+        for i in range(self.__states_arr.shape[0] - 1, 0, -1):
+            if self.__states_arr[i][0] != 0 and \
+                    self.__states_arr[i][1] != 0 and \
+                    self.__states_arr[i][2] != 0 and \
+                    self.__states_arr[i][3] != 0:
                 row_max = i + 1
                 break
 
-        self.states_arr = self.states_arr[:row_max, :]
+        self.__states_arr = self.__states_arr[:row_max, :]
 
     def apply_phase_noise_screen_to_field(self):
         self.__beam.field = multiply(self.__beam.field, self.__beam.phase_noise_screen)
@@ -88,7 +92,7 @@ class Propagator:
         self.__manager.create_track_dir()
         self.__manager.create_beam_dir()
 
-        self.__logger.save_initial_parameters(self.__beam, self.__n_z, self.dz, self.max_intensity_to_stop)
+        self.__logger.save_initial_parameters(self.__beam, self.__n_z, self.__dz, self.__max_intensity_to_stop)
 
         if self.__beam.info == 'beam_xy' and self.__beam.noise_percent:
             plot_noise(self.__beam, self.__manager.results_dir)
@@ -96,46 +100,46 @@ class Propagator:
         for n_step in range(int(self.__n_z) + 1):
             if n_step:
                 if self.__diffraction:
-                    self.__logger.measure_time(self.__diffraction.process_diffraction, [self.dz])
+                    self.__logger.measure_time(self.__diffraction.process_diffraction, [self.__dz])
 
                 if self.__kerr_effect:
-                    self.__logger.measure_time(self.__kerr_effect.process_kerr_effect, [self.dz])
+                    self.__logger.measure_time(self.__kerr_effect.process_kerr_effect, [self.__dz])
 
                 self.__logger.measure_time(self.__beam.update_intensity, [])
 
-                self.z += self.dz
+                self.__z += self.__dz
 
                 if not self.__flag_const_dz:
-                    self.dz = self.__logger.measure_time(self.update_dz, [self.__beam.medium.k_0, self.__beam.medium.n_0,
+                    self.__dz = self.__logger.measure_time(self.update_dz, [self.__beam.medium.k_0, self.__beam.medium.n_0,
                                                                           self.__beam.medium.n_2, self.__beam.i_max,
-                                                                          self.__beam.i_0, self.dz])
+                                                                          self.__beam.i_0, self.__dz])
 
-            self.__logger.measure_time(self.flush_current_state, [self.states_arr, n_step, self.z, self.dz,
+            self.__logger.measure_time(self.flush_current_state, [self.__states_arr, n_step, self.__z, self.__dz,
                                                                   self.__beam.i_max, self.__beam.i_0])
 
             if self.__dn_print_current_state:
                 if not n_step % self.__dn_print_current_state:
-                    self.__logger.measure_time(self.__logger.print_current_state, [n_step, self.states_arr,
-                                                                                   self.states_columns])
+                    self.__logger.measure_time(self.__logger.print_current_state, [n_step, self.__states_arr,
+                                                                                   self.__states_columns])
 
             if self.__dn_plot_beam:
                 if (not (n_step % self.__dn_plot_beam)) and self.__flag_print_beam:
                     if self.__beam.info == 'beam_x':
-                        self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.z, n_step,
+                        self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.__z, n_step,
                                                                   self.__manager.beam_dir, self.beam_normalization_type])
                     elif self.__beam.info in ('beam_r', 'beam_xy'):
-                        self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.z, n_step,
+                        self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.__z, n_step,
                                                                   self.__manager.beam_dir, self.beam_normalization_type])
 
-            if self.__beam.i_max * self.__beam.i_0 > self.max_intensity_to_stop:
+            if self.__beam.i_max * self.__beam.i_0 > self.__max_intensity_to_stop:
                 break
 
         self.__logger.measure_time(self.crop_states_arr, [])
-        self.__logger.measure_time(self.__logger.log_track, [self.states_arr, self.states_columns])
+        self.__logger.measure_time(self.__logger.log_track, [self.__states_arr, self.__states_columns])
 
         if self.__flag_print_track:
-            parameter_index = self.states_columns.index('i_max / i_0')
-            self.__logger.measure_time(plot_track, [self.states_arr, parameter_index,
+            parameter_index = self.__states_columns.index('i_max / i_0')
+            self.__logger.measure_time(plot_track, [self.__states_arr, parameter_index,
                                                     self.__manager.track_dir])
 
         self.__logger.log_times()

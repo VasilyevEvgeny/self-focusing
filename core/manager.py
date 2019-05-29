@@ -14,7 +14,7 @@ class Manager:
         self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir, self.__global_results_dir_name,
                                                                   self.__prefix)
 
-        if self.__prefix == 'multimedia':
+        if self.__multidir_name:
             self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir,
                                                                       self.__global_results_dir_name + '/' + self.__multidir_name,
                                                                       prefix=None)

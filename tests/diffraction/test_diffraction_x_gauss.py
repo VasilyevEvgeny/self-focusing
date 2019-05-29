@@ -1,14 +1,14 @@
 from numpy import sqrt
 
-from core import BeamX, Propagator, SweepDiffractionExecutorX, KerrExecutorX, xlsx_to_df
+from core import BeamX, Propagator, SweepDiffractionExecutorX, xlsx_to_df
 from tests.diffraction.test_diffraction import TestDiffraction
 
 NAME = 'diffraction_x_gauss'
 
 
 class TestDiffractionXGauss(TestDiffraction):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args_, **kwargs):
+        super().__init__(*args_, **kwargs)
 
         self.add_prefix(NAME)
 
