@@ -2,8 +2,7 @@ from unittest import TestCase
 import abc
 from argparse import Namespace
 from numpy.random import randint, choice
-from numpy import sqrt, array, zeros
-from numpy import max as maximum
+from numpy import sqrt, array, zeros, linspace
 from matplotlib import pyplot as plt
 
 from core import M_Constants, Medium
@@ -23,17 +22,18 @@ class TestMarburger(TestCase, metaclass=abc.ABCMeta):
                               lmbda=self._lmbda,
                               m_constants=self.__m_constants)
 
-        self._n_z = 10000
+        self._n_z = None
 
         self._eps = None
         self._png_name = None
 
-        self._p_rel_min = 2
-        self._p_rel_max = 10
-        self._p_rels = [p_rel for p_rel in range(self._p_rel_min, self._p_rel_max + 1, 1)]
+        self.__p_rel_min = 2
+        self.__p_rel_max = 10
+        self.__p_rels_for_true = linspace(self.__p_rel_min, self.__p_rel_max, 1000)
+        self._p_rels_for_pred = array([p_rel for p_rel in range(self.__p_rel_min, self.__p_rel_max + 1, 1)])
 
-        self._z_fil_rel_true = self.calculate_z_fil_rel_true()
-        self._z_fil_rel_pred = zeros(shape=self._z_fil_rel_true.shape)
+        self.__z_fil_rel_true = self.calculate_z_fil_rel_true()
+        self._z_fil_rel_pred = zeros(shape=self._p_rels_for_pred.shape)
 
         self._flag_plot = True
         self._language = 'english'
@@ -42,16 +42,22 @@ class TestMarburger(TestCase, metaclass=abc.ABCMeta):
         d = vars(self._args)
         d['prefix'] = 'test_' + name
 
-    def calculate_z_fil_rel_true(self):
+    @staticmethod
+    def marburger(p_rel):
+        return 0.367 / sqrt((sqrt(p_rel) - 0.852)**2 - 0.0219)
+
+    def calculate_z_fil_rel_true(self, ):
         z_fil_rel_trues = []
-        for p_rel in range(self._p_rel_min, self._p_rel_max+1, 1):
-            z_fil_rel_trues.append(0.367 / sqrt((sqrt(p_rel) - 0.852)**2 - 0.0219))
+        for p_rel in self.__p_rels_for_true:
+            z_fil_rel_trues.append(self.marburger(p_rel))
 
         return array(z_fil_rel_trues)
 
     def check(self):
-        for i in range(len(self._p_rels)):
-            self.assertLess(abs(self._z_fil_rel_pred[i] - self._z_fil_rel_true[i]) / self._z_fil_rel_true[i], self._eps)
+        for i in range(len(self._p_rels_for_pred)):
+            p_rel = self._p_rels_for_pred[i]
+            z_fil_rel_true = self.marburger(p_rel)
+            self.assertLess(abs(self._z_fil_rel_pred[i] - z_fil_rel_true) / z_fil_rel_true, self._eps)
 
     @abc.abstractmethod
     def process(self):
@@ -62,16 +68,17 @@ class TestMarburger(TestCase, metaclass=abc.ABCMeta):
         font_weight = 'bold'
         plt.figure(figsize=(15, 10))
         if self._language == 'english':
-            label_numerical = 'Numerical\nmodeling'
-            label_analytics = 'Analytics'
+            label_numerical = 'Numerical modeling'
+            label_analytics = 'Marburger formula'
         else:
-            label_numerical = 'Численное\nмоделирование'
-            label_analytics = 'Аналитическая\nформула'
-        plt.plot(self._p_rels, self._z_fil_rel_true, color='blue', linewidth=30, label=label_analytics)
-        plt.scatter(self._p_rels, self._z_fil_rel_pred, color='red', linewidth=10, label=label_numerical)
-        plt.xticks(fontsize=font_size-5)
+            label_numerical = 'Численное моделирование'
+            label_analytics = 'Формула Марбургера'
+        plt.plot(self.__p_rels_for_true, self.__z_fil_rel_true, color='blue', linewidth=10, label=label_analytics,
+                 alpha=0.5)
+        plt.scatter(self._p_rels_for_pred, self._z_fil_rel_pred, color='red', linewidth=10, label=label_numerical)
+        plt.xticks(self._p_rels_for_pred, fontsize=font_size-5)
         plt.yticks(fontsize=font_size-5)
-
+        plt.xlim([1.5, 10.5])
         plt.xlabel('$\mathbf{P \ / \ P_{cr}}$', fontsize=font_size, fontweight=font_weight)
         if self._language == 'english':
             y_label = '$\mathbf{z \ / \ z_{diff}}$'
@@ -84,4 +91,3 @@ class TestMarburger(TestCase, metaclass=abc.ABCMeta):
 
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight')
         plt.close()
-

@@ -1,7 +1,8 @@
-# from tests.diffraction.test_diffraction_x_gauss import TestDiffractionXGauss
-# from tests.diffraction.test_diffraction_r_gauss import TestDiffractionRGauss
-# from tests.diffraction.test_diffraction_xy_gauss import TestDiffractionXYGauss
-# from tests.diffraction.test_diffraction_r_vortex import TestDiffractionRVortex
-# from tests.diffraction.test_diffraction_xy_vortex import TestDiffractionXYVortex
+from tests.diffraction.test_diffraction_x_gauss import TestDiffractionXGauss
+from tests.diffraction.test_diffraction_r_gauss import TestDiffractionRGauss
+from tests.diffraction.test_diffraction_xy_gauss import TestDiffractionXYGauss
+from tests.diffraction.test_diffraction_r_vortex import TestDiffractionRVortex
+from tests.diffraction.test_diffraction_xy_vortex import TestDiffractionXYVortex
 
 from tests.marburger.test_marburger_r import TestMarburgerR
+from tests.marburger.test_marburger_xy import TestMarburgerXY
