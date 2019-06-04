@@ -13,7 +13,8 @@ class TestMarburger(TestCase, metaclass=abc.ABCMeta):
         super().__init__(*args, **kwargs)
 
         self._args = Namespace(global_root_dir='L:/Vasilyev',
-                               global_results_dir_name='Self-focusing_results')
+                               global_results_dir_name='Self-focusing_results',
+                               insert_datetime=True)
 
         self._lmbda = randint(400, 3001) * 10**-9
         self._radius = randint(30, 151) * 10**-6

@@ -10,13 +10,13 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_nor
     fig_size, x_max, ticks, labels, title, bbox = None, None, None, None, None, None
     if mode == 'multimedia':
         fig_size = (3, 3)
-        x_max = 250
+        x_max = 400
         title = False
         ticks = False
         labels = False
     else:
         fig_size = (12, 10)
-        x_max = 250
+        x_max = 400
         title = False
         ticks = True
         labels = True
@@ -72,7 +72,15 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_nor
 
 def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
     fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
-    if mode in ('xy', 'r'):
+    if mode == 'multimedia':
+        fig_size = (3, 3)
+        x_max = 250
+        y_max = 250
+        title = False
+        ticks = False
+        labels = False
+        colorbar = False
+    else:
         fig_size = (12, 10)
         x_max = 250
         y_max = 250
@@ -81,14 +89,6 @@ def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
         labels = True
         colorbar = True
         bbox = 'tight'
-    elif mode == 'multimedia':
-        fig_size = (3, 3)
-        x_max = 250
-        y_max = 250
-        title = False
-        ticks = False
-        labels = False
-        colorbar = False
 
     x_left = -x_max * 10 ** -6
     x_right = x_max * 10 ** -6

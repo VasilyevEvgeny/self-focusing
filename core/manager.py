@@ -10,14 +10,19 @@ class Manager:
         self.__global_root_dir = self.__args.global_root_dir
         self.__global_results_dir_name = self.__args.global_results_dir_name
         self.__prefix = self.__args.prefix
+        self.__insert_datetime = self.__args.insert_datetime
 
-        self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir, self.__global_results_dir_name,
-                                                                  self.__prefix)
+        self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir,
+                                                                      self.__global_results_dir_name,
+                                                                      self.__prefix,
+                                                                      insert_datetime=self.__insert_datetime)
 
         if self.__multidir_name:
             self.__global_results_dir, self.__results_dir, _ = make_paths(self.__global_root_dir,
-                                                                      self.__global_results_dir_name + '/' + self.__multidir_name,
-                                                                      prefix=None)
+                                                                          self.__global_results_dir_name +
+                                                                          '/' + self.__multidir_name,
+                                                                          prefix=None,
+                                                                          insert_datetime=self.__insert_datetime)
 
         self.__track_dir = self.results_dir + '/track'
         self.__beam_dir = self.results_dir + '/beam'

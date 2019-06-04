@@ -16,7 +16,7 @@ class TestMarburgerR(TestMarburger):
 
         self._n_z = 10000
 
-        self._eps = 0.2
+        self._eps = 0.25
         self._png_name = NAME
 
     def process(self):

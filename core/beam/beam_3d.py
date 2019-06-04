@@ -1,15 +1,14 @@
 import abc
-from numpy import pi
-from scipy.special import gamma
 
 from .beam import Beam
+from core.functions import calculate_p_gauss, calculate_p_vortex
 
 
 class Beam3D(Beam):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.__p_gauss = self.calculate_p_gauss()
+        self.__p_gauss = calculate_p_gauss(self._lmbda, self._medium.n_0, self._medium.n_2)
 
         self._m = kwargs['m']
 
@@ -30,7 +29,7 @@ class Beam3D(Beam):
             self.__p_0_to_p_gauss = kwargs.get('p_0_to_p_gauss', 1.0)
             self._p_0 = self.__p_0_to_p_gauss * self.__p_gauss
         elif self._distribution_type == 'vortex':
-            self.__p_vortex = self.calculate_p_vortex()
+            self.__p_vortex = calculate_p_vortex(self._m, self.__p_gauss)
             self.__p_0_to_p_vortex = kwargs.get('p_0_to_p_vortex', 1.0)
             self._p_0 = self.__p_0_to_p_vortex * self.__p_vortex
         else:
@@ -55,10 +54,3 @@ class Beam3D(Beam):
     @property
     def p_0(self):
         return self._p_0
-
-    def calculate_p_gauss(self):
-        return 3.77 * self._lmbda ** 2 / (8 * pi * self._medium.n_0 * self._medium.n_2)
-
-    def calculate_p_vortex(self):
-        return self.__p_gauss * 2**(2 * self._m + 1) * gamma(self._m + 1) * gamma(self._m + 2) / \
-               (2 * gamma(2 * self._m + 1))

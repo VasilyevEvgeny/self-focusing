@@ -1,4 +1,5 @@
-from numpy import sqrt, transpose, zeros, float64
+from numpy import sqrt, transpose, zeros, float64, pi
+from scipy.special import gamma
 from numba import jit
 from glob import glob
 from datetime import datetime
@@ -93,13 +94,22 @@ def get_files(path):
     return all_files, n_pictures_max
 
 
-def make_paths(global_root_dir, global_results_dir_name, prefix):
+def make_paths(global_root_dir, global_results_dir_name, prefix, insert_datetime=True):
     global_results_dir = global_root_dir + '/' + global_results_dir_name
-    datetime_string = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+    if insert_datetime:
+        datetime_string = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    else:
+        datetime_string = ''
+
     if prefix is None:
         results_dir_name = datetime_string
     else:
-        results_dir_name = prefix + '_' + datetime_string
+        if datetime_string:
+            results_dir_name = prefix + '_' + datetime_string
+        else:
+            results_dir_name = prefix
+
     results_dir = global_results_dir + '/' + results_dir_name
 
     return global_results_dir, results_dir, results_dir_name
@@ -175,3 +185,12 @@ def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
             os.remove(path + '/' + filename + '.tex')
         except:
             pass
+
+
+def calculate_p_gauss(lmbda, n_0, n_2):
+    return 3.77 * lmbda ** 2 / (8 * pi * n_0 * n_2)
+
+
+def calculate_p_vortex(m, p_gauss):
+    return p_gauss * 2**(2 * m + 1) * gamma(m + 1) * gamma(m + 2) / \
+           (2 * gamma(2 * m + 1))

@@ -1,0 +1,7 @@
+from .test_diffraction_x_gauss import TestDiffractionXGauss
+
+from .test_diffraction_r_gauss import TestDiffractionRGauss
+from .test_diffraction_r_vortex import TestDiffractionRVortex
+
+from .test_diffraction_xy_gauss import TestDiffractionXYGauss
+from .test_diffraction_xy_vortex import TestDiffractionXYVortex
