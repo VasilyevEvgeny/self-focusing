@@ -50,7 +50,7 @@ class TestMarburgerXY(TestMarburger):
             del beam
             del propagator
 
-    def test_diffraction_xy_gauss(self):
+    def test_marburger_xy(self):
         self.process()
         self.check()
 
