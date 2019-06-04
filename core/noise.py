@@ -1,7 +1,8 @@
 import abc
 from pyfftw.builders import ifft2
 from numpy import sqrt, pi, exp, zeros, float64, complex64, correlate, var
-from numpy import random
+from numpy import random, mean
+from numpy import max as maximum
 from numpy.fft import fftshift
 from numba import jit
 
@@ -39,7 +40,7 @@ class Noise(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def process(self):
-        """Generates noise field and autocorrelation functions"""
+        """Generates gaussian_noise field and autocorrelation functions"""
 
     @staticmethod
     def calculate_autocorr(noise, n_iter, n, type):
@@ -62,6 +63,22 @@ class Noise(metaclass=abc.ABCMeta):
         autocorr_imag_y = self.calculate_autocorr(field_imag, n_y, n_x, 'y')
 
         return autocorr_real_x, autocorr_real_y, autocorr_imag_x, autocorr_imag_y
+
+    @staticmethod
+    def find_r_corr_index(arr):
+        n = len(arr)
+        th = arr[n // 2] * exp(-1.0)
+        for i in range(n // 2, n, 1):
+            if arr[i] < th:
+                return i - n // 2
+
+    def calculate_r_corr(self):
+        r_corr_real_x = self._dx * self.find_r_corr_index(self._autocorr_real_x)
+        r_corr_real_y = self._dy * self.find_r_corr_index(self._autocorr_real_y)
+        r_corr_imag_x = self._dx * self.find_r_corr_index(self._autocorr_imag_x)
+        r_corr_imag_y = self._dy * self.find_r_corr_index(self._autocorr_imag_y)
+
+        return mean([r_corr_real_x, r_corr_real_y, r_corr_imag_x, r_corr_imag_y])
 
 
 class GaussianNoise(Noise):

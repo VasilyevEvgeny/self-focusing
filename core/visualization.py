@@ -276,10 +276,10 @@ def plot_noise(beam, path):
     ax_iy.set_title('\n$\mathbf{R^y_{imag}}$', fontsize=font_size, fontweight='bold')
     ax_iy.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
 
-    fig.suptitle('Complex Gaussian noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
+    fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
                  (variance_expected, round(r_corr)), fontsize=font_size, fontweight='bold')
 
-    plt.savefig(path + '/noise.png', bbox_inches='tight')
+    plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight')
     plt.close()
 
     rc('font', weight='normal', size=12)

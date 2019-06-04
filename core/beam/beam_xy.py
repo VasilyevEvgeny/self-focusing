@@ -34,7 +34,7 @@ class BeamXY(Beam3D):
         self.__noise_percent = kwargs.get('noise_percent', 0.0)
         self.__noise_field = zeros(shape=(self.__n_x, self.__n_y))
         if self.__noise_percent:
-            self.__noise = kwargs['noise']
+            self.__noise = kwargs['gaussian_noise']
             self.__noise.initialize(n_x=self.__n_x,
                                     n_y=self.__n_y,
                                     dx=self.__dx,
