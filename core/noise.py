@@ -6,7 +6,7 @@ from numpy.fft import fftshift
 from numba import jit
 
 
-class Noise(metaclass=ABCMeta):
+class ComplexNoise(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self._variance_expected = kwargs.get('variance', 1)
 
@@ -105,7 +105,7 @@ class Noise(metaclass=ABCMeta):
         return mean([r_corr_real_x, r_corr_real_y, r_corr_imag_x, r_corr_imag_y])
 
 
-class GaussianNoise(Noise):
+class GaussianNoise(ComplexNoise):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
