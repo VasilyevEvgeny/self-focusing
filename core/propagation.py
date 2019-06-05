@@ -1,7 +1,7 @@
 from numpy import zeros, multiply
 from numba import jit
 
-from .visualization import plot_beam_2d, plot_beam_3d, plot_track, plot_noise
+from .visualization import plot_beam_2d, plot_beam_3d_flat, plot_beam_3d_volume, plot_track, plot_noise
 from .logger import Logger
 from .manager import Manager
 
@@ -29,7 +29,9 @@ class Propagator:
         self.__dn_plot_beam = kwargs.get('dn_plot_beam', None)
         self.__flag_print_track = kwargs.get('print_track', True)
         if self.__dn_plot_beam:
-            self.__beam_normalization_type = kwargs['beam_normalization_type']
+            self.__beam_in_3D = kwargs.get('beam_in_3D', False)
+            if not self.__beam_in_3D:
+                self.__beam_normalization_type = kwargs['beam_normalization_type']
 
         self.__z = 0.0
         self.__dz = kwargs['dz0']
@@ -121,8 +123,14 @@ class Propagator:
                     self.__logger.measure_time(plot_beam_2d, [self.__args.prefix, self.__beam, self.__z, n_step,
                                                               self.__manager.beam_dir, self.__beam_normalization_type])
                 elif self.__beam.info in ('beam_r', 'beam_xy'):
-                    self.__logger.measure_time(plot_beam_3d, [self.__args.prefix, self.__beam, self.__z, n_step,
-                                                              self.__manager.beam_dir, self.__beam_normalization_type])
+                    if self.__beam_in_3D:
+                        self.__logger.measure_time(plot_beam_3d_volume, [self.__args.prefix, self.__beam,
+                                                                         self.__z, n_step,
+                                                                         self.__manager.beam_dir])
+                    else:
+                        self.__logger.measure_time(plot_beam_3d_flat, [self.__args.prefix, self.__beam, self.__z, n_step,
+                                                                       self.__manager.beam_dir,
+                                                                       self.__beam_normalization_type])
 
             if self.__beam.i_max * self.__beam.i_0 > self.__max_intensity_to_stop:
                 break

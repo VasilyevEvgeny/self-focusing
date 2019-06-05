@@ -1,6 +1,7 @@
-from numpy import transpose
+from numpy import transpose, meshgrid
 from matplotlib import pyplot as plt
 from matplotlib import rc
+from mpl_toolkits.mplot3d import Axes3D
 from pylab import contourf
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
@@ -70,9 +71,9 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_nor
     plt.close()
 
 
-def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
+def plot_beam_3d_flat(mode, beam, z, step, path, plot_beam_normalization):
     fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
-    if mode == 'multimedia':
+    if 'multimedia' in mode:
         fig_size = (3, 3)
         x_max = 250
         y_max = 250
@@ -159,7 +160,7 @@ def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
         colorbar.ax.set_yticklabels(ticks_cbar)
         colorbar.ax.tick_params(labelsize=font_size - 10)
 
-    if mode in ('multimedia'):
+    if 'multimedia' in mode:
         bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
         if beam.distribution_type == 'gauss':
             m, M = 0, 0
@@ -167,6 +168,109 @@ def plot_beam_3d(mode, beam, z, step, path, plot_beam_normalization):
             m, M = beam.m, beam.M
         C = beam.noise_percent
         plt.title('$M = {:d}, \ m = {:d}, \ C = {:02d}\%$'.format(M, m, C), fontsize=14)
+
+    plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
+    plt.close()
+
+    del arr
+
+
+def plot_beam_3d_volume(mode, beam, z, step, path):
+    fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
+    # if 'multimedia' in mode:
+    #     fig_size = (3, 3)
+    #     x_max = 250
+    #     y_max = 250
+    #     title = False
+    #     ticks = False
+    #     labels = False
+    # else:
+    fig_size = (12, 10)
+    x_max = 250
+    y_max = 250
+    title = False
+    ticks = True
+    labels = True
+    bbox = 'tight'
+
+    x_left = -x_max * 10 ** -6
+    x_right = x_max * 10 ** -6
+    y_left = -y_max * 10 ** -6
+    y_right = y_max * 10 ** -6
+
+    arr, xs, ys = None, None, None
+    if beam.info == 'beam_r':
+        arr = r_to_xy_real(beam.intensity)
+        xs = [-e for e in beam.rs][::-1][:-1] + beam.rs
+        ys = xs
+    elif beam.info == 'beam_xy':
+        arr = beam.intensity
+        xs, ys = beam.xs, beam.ys
+
+    arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
+    arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
+
+    arr = transpose(arr)
+
+    xs = xs[x_idx_left:x_idx_right]
+    ys = ys[y_idx_left:y_idx_right]
+
+    xx, yy = meshgrid(xs, ys)
+
+    # n_plot_levels = 100
+    # max_intensity_value = None
+    # if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
+    #     max_intensity_value = plot_beam_normalization
+    # elif plot_beam_normalization == 'local':
+    #     max_intensity_value = beam.i_max
+    # di = max_intensity_value / n_plot_levels
+    # levels_plot = [i * di for i in range(n_plot_levels + 1)]
+
+    font_size=40
+    fig = plt.figure(figsize=fig_size)
+    ax = fig.add_subplot(111, projection='3d')
+
+    levels_plot = [i * 0.1 for i in range(100)]
+    ax.plot_surface(xx, yy, arr, cmap='jet', rstride=1, cstride=1, antialiased=False,
+                    vmin=levels_plot[0], vmax=levels_plot[-1])
+
+    ax.view_init(elev=50, azim=345)
+    ax.set_zlim([levels_plot[0], levels_plot[-1]])
+
+    if ticks:
+        x_labels = ['-150', '0', '+150']
+        y_labels = ['-150', '0', '+150']
+        x_ticks = calc_ticks_x(x_labels, xs)
+        y_ticks = calc_ticks_x(y_labels, ys)
+        plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
+        plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
+    else:
+        plt.xticks([])
+        plt.yticks([])
+
+    zticks = [0, 5, 10]
+    ax.set_zticks(zticks)
+
+    if labels:
+        plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+        plt.ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+
+    if title:
+        i_max = beam.i_max * beam.i_0
+        plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
+                  fontsize=font_size - 10)
+
+    ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
+    #ax.set_aspect('equal')
+
+    # if 'multimedia' in mode:
+    #     bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
+    #     if beam.distribution_type == 'gauss':
+    #         m, M = 0, 0
+    #     else:
+    #         m, M = beam.m, beam.M
+    #     C = beam.noise_percent
+    #     plt.title('$M = {:d}, \ m = {:d}, \ C = {:02d}\%$'.format(M, m, C), fontsize=14)
 
     plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
     plt.close()

@@ -11,4 +11,4 @@ from .manager import Manager
 from .medium import Medium
 from .noise import GaussianNoise
 from .propagation import Propagator
-from .visualization import plot_beam_2d, plot_beam_3d, plot_track, plot_noise
+from .visualization import plot_beam_2d, plot_beam_3d_flat, plot_beam_3d_volume, plot_track, plot_noise
