@@ -42,11 +42,11 @@ class BeamXY(Beam3D):
             self.__noise.process()
             self.__noise_field = self.__noise.noise_field
 
-        self._field = self.initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max,
+        self._field = self.__initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max,
                                             self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
                                             self.__noise_field)
 
-        self._i_0 = self.calculate_i0()
+        self._i_0 = self.__calculate_i0()
         self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
 
         self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
@@ -122,12 +122,12 @@ class BeamXY(Beam3D):
         return self.__noise
 
     def update_intensity(self):
-        self._intensity = self.field_to_intensity(self._field, self.__n_x, self.__n_y)
+        self._intensity = self.__field_to_intensity(self._field, self.__n_x, self.__n_y)
         self._i_max = maximum(self._intensity)
 
     @staticmethod
     @jit(nopython=True)
-    def field_to_intensity(field, n_x, n_y):
+    def __field_to_intensity(field, n_x, n_y):
         intensity = zeros(shape=(n_x, n_y), dtype=float64)
         for i in range(n_x):
             for j in range(n_y):
@@ -137,7 +137,7 @@ class BeamXY(Beam3D):
 
     @staticmethod
     @jit(nopython=True)
-    def calculate_intensity_intergral(field, n_x, n_y, dx, dy):
+    def __calculate_intensity_intergral(field, n_x, n_y, dx, dy):
         intensity_intergral = 0.0
         for i in range(n_x):
             for j in range(n_y):
@@ -145,15 +145,15 @@ class BeamXY(Beam3D):
 
         return intensity_intergral
 
-    def calculate_i0(self):
+    def __calculate_i0(self):
         if self.__noise_percent == 0.0 and self.__x_0 == self.__y_0:
             return self._p_0 / (pi * self.__x_0**2 * gamma(self._m+1))
         else:
-            return self._p_0 / self.calculate_intensity_intergral(self._field, self.__n_x, self.__n_y, self.__dx, self.__dy)
+            return self._p_0 / self.__calculate_intensity_intergral(self._field, self.__n_x, self.__n_y, self.__dx, self.__dy)
 
     @staticmethod
     @jit(nopython=False)
-    def initialize_field(M, m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
+    def __initialize_field(M, m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
         arr = zeros(shape=(n_x, n_y), dtype=complex64)
         for i in range(n_x):
             for j in range(n_y):

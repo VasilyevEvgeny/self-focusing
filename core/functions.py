@@ -192,5 +192,4 @@ def calculate_p_gauss(lmbda, n_0, n_2):
 
 
 def calculate_p_vortex(m, p_gauss):
-    return p_gauss * 2**(2 * m + 1) * gamma(m + 1) * gamma(m + 2) / \
-           (2 * gamma(2 * m + 1))
+    return p_gauss * 2**(2 * m + 1) * gamma(m + 1) * gamma(m + 2) / (2 * gamma(2 * m + 1))

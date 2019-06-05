@@ -1,21 +1,25 @@
-import abc
+from abc import ABCMeta, abstractmethod
 from multiprocessing import cpu_count
 from numpy import exp, conj, zeros, complex64
 from numba import jit
 from pyfftw.builders import fft2, ifft2
 
 
-class DiffractionExecutor(metaclass=abc.ABCMeta):
+class DiffractionExecutor(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self._beam = kwargs['beam']
 
-    @abc.abstractmethod
+    @abstractmethod
     def info(self):
         """Information about DiffractionExecutor type"""
 
+    @abstractmethod
+    def process_diffraction(self, dz):
+        """process_diffraction"""
+
 
 class FourierDiffractionExecutorXY(DiffractionExecutor):
-    max_number_of_cpus = cpu_count()
+    MAX_NUMBER_OF_CPUS = cpu_count()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -26,7 +30,7 @@ class FourierDiffractionExecutorXY(DiffractionExecutor):
 
     @staticmethod
     @jit(nopython=True)
-    def phase_increment(field_fft, n_x, n_y, k_xs, k_ys, current_lin_phase):
+    def __phase_increment(field_fft, n_x, n_y, k_xs, k_ys, current_lin_phase):
         for i in range(n_x):
             field_fft[i, :] *= exp(current_lin_phase * k_xs[i] ** 2)
 
@@ -35,11 +39,11 @@ class FourierDiffractionExecutorXY(DiffractionExecutor):
 
         return field_fft
 
-    def process_diffraction(self, dz, n_jobs=max_number_of_cpus):
+    def process_diffraction(self, dz, n_jobs=MAX_NUMBER_OF_CPUS):
         current_lin_phase = 0.5j * dz / self._beam.medium.k_0
         fft_obj = fft2(self._beam._field, threads=n_jobs)
-        field_fft = self.phase_increment(fft_obj(), self._beam.n_x, self._beam.n_y, self._beam.k_xs,
-                                         self._beam.k_ys, current_lin_phase)
+        field_fft = self.__phase_increment(fft_obj(), self._beam.n_x, self._beam.n_y, self._beam.k_xs,
+                                           self._beam.k_ys, current_lin_phase)
         ifft_obj = ifft2(field_fft, threads=n_jobs)
         self._beam._field = ifft_obj()
 
@@ -67,7 +71,7 @@ class SweepDiffractionExecutorX(DiffractionExecutor):
 
     @staticmethod
     @jit(nopython=True)
-    def fast_process(field, n_x, dz, c1, c2, alpha, gamma, delta, xi, eta,
+    def __fast_process(field, n_x, dz, c1, c2, alpha, gamma, delta, xi, eta,
                      kappa_left, mu_left, kappa_right, mu_right):
         xi[1], eta[1] = kappa_left, mu_left
         for i in range(1, n_x - 1):
@@ -88,9 +92,10 @@ class SweepDiffractionExecutorX(DiffractionExecutor):
         return field
 
     def process_diffraction(self, dz):
-        self._beam._field = self.fast_process(self._beam._field, self._beam.n_x, dz, self.__c1,
-                                              self.__c2, self.__alpha, self.__gamma, self.__delta, self.__xi, self.__eta,
-                                              self.__kappa_left, self.__mu_left, self.__kappa_right, self.__mu_right)
+        self._beam._field = self.__fast_process(self._beam._field, self._beam.n_x, dz, self.__c1,
+                                                self.__c2, self.__alpha, self.__gamma, self.__delta, self.__xi,
+                                                self.__eta, self.__kappa_left, self.__mu_left, self.__kappa_right,
+                                                self.__mu_right)
 
 
 class SweepDiffractionExecutorR(DiffractionExecutor):
@@ -124,7 +129,7 @@ class SweepDiffractionExecutorR(DiffractionExecutor):
 
     @staticmethod
     @jit(nopython=True)
-    def fast_process(field, n_r, dz, c1, c3, alpha, beta, gamma, delta, xi, eta, vx,
+    def __fast_process(field, n_r, dz, c1, c3, alpha, beta, gamma, delta, xi, eta, vx,
                      kappa_left, mu_left, kappa_right, mu_right):
         xi[1], eta[1] = kappa_left, mu_left
         for i in range(1, n_r - 1):
@@ -145,7 +150,7 @@ class SweepDiffractionExecutorR(DiffractionExecutor):
         return field
 
     def process_diffraction(self, dz):
-        self._beam._field = self.fast_process(self._beam._field, self._beam.n_r, dz, self.__c1,
-                                              self.__c3, self.__alpha, self.__beta, self.__gamma, self.__delta,
-                                              self.__xi, self.__eta, self.__vx, self.__kappa_left, self.__mu_left,
-                                              self.__kappa_right, self.__mu_right)
+        self._beam._field = self.__fast_process(self._beam._field, self._beam.n_r, dz, self.__c1,
+                                                self.__c3, self.__alpha, self.__beta, self.__gamma, self.__delta,
+                                                self.__xi, self.__eta, self.__vx, self.__kappa_left, self.__mu_left,
+                                                self.__kappa_right, self.__mu_right)

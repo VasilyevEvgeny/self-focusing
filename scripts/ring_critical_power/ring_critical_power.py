@@ -4,7 +4,7 @@ from numpy import array, zeros
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
 
-from core import M_Constants, Medium, parse_args
+from core import MathConstants, Medium, parse_args
 
 
 class RingCriticalPower(metaclass=abc.ABCMeta):
@@ -15,7 +15,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
 
         self._lmbda = randint(400, 3001) * 10**-9
         self._radius = randint(30, 151) * 10**-6
-        self.__m_constants = M_Constants()
+        self.__m_constants = MathConstants()
         self._medium = Medium(name=choice(['SiO2', 'CaF2', 'LiF']),
                               lmbda=self._lmbda,
                               m_constants=self.__m_constants)
@@ -40,7 +40,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         self._flag_plot = True
         self._language = 'english'
 
-    def add_prefix(self, name):
+    def _add_prefix(self, name):
         d = vars(self._args)
         d['prefix'] = 'test_' + name
 
@@ -48,7 +48,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
     def process(self):
         """Numerical solution"""
 
-    def plot_propagation(self, dfs, path_to_save_plot, m):
+    def _plot_propagation(self, dfs, path_to_save_plot, m):
         font_size = 40
         font_weight = 'bold'
         plt.figure(figsize=(15,10))
@@ -78,7 +78,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         plt.savefig(path_to_save_plot + '/i_max(z)_M=%d.png' % m, bbox_inches='tight')
         plt.close()
 
-    def plot(self, path_to_save_plot):
+    def _plot(self, path_to_save_plot):
 
         font_size = 40
         font_weight = 'bold'

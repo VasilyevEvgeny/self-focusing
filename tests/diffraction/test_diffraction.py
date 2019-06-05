@@ -5,7 +5,7 @@ from numpy import sqrt, arctan, exp
 from numpy.linalg import norm
 from numpy import max as maximum
 from numpy.random import randint, choice
-from core import Medium, M_Constants
+from core import Medium, MathConstants
 from argparse import Namespace
 
 
@@ -19,7 +19,7 @@ class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
 
         self._lmbda = randint(400, 3001) * 10**-9
         self._radius = randint(30, 151) * 10**-6
-        self.__m_constants = M_Constants()
+        self.__m_constants = MathConstants()
         self._medium = Medium(name=choice(['SiO2', 'CaF2', 'LiF']),
                               lmbda=self._lmbda,
                               m_constants=self.__m_constants)
@@ -39,25 +39,25 @@ class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
                                   '$1 \ / \ 2$': 1 / 2}
         self._horizontal_line = None
 
-    def add_prefix(self, name):
+    def _add_prefix(self, name):
         d = vars(self._args)
         d['prefix'] = 'test_' + name
 
-    def calculate_max_intensity(self, z, spatial_coord=0.0):
+    def __calculate_max_intensity(self, z, spatial_coord=0.0):
         z_rel = z / (self._medium.k_0 * self._radius**2)
         a_0 = exp(-spatial_coord**2 / (self._radius**2 * (1 + z_rel**2))) / sqrt(1.0 + z_rel**2) ** self._p
         k_psi = (spatial_coord / self._radius)**2 * z_rel / (1 + z_rel**2) ** self._p - arctan(z_rel)
 
         return norm(a_0 * exp(1j * k_psi))**2
 
-    def check(self, df):
+    def _check(self, df):
         self.assertLess(maximum(abs(df['i_max / i_0'] - df['analytics']) / df['analytics']), self._eps)
 
     @abc.abstractmethod
     def process(self):
         """Numerical solution"""
 
-    def plot(self, df, path_to_save_plot, z_diff):
+    def _plot(self, df, path_to_save_plot, z_diff):
         df['z_normalized'] /= z_diff
 
         font_size = 40
@@ -94,9 +94,9 @@ class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight')
         plt.close()
 
-    def add_analytics_to_df(self, df):
+    def _add_analytics_to_df(self, df):
         df['analytics'] = 0.0
         n = len(df)
         for i in range(n):
             z = df['z_normalized'][i]
-            df['analytics'][i] = self.calculate_max_intensity(z)
+            df['analytics'][i] = self.__calculate_max_intensity(z)

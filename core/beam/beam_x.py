@@ -26,7 +26,7 @@ class BeamX(Beam2D):
                 self._distribution_type = 'ring'
         else:
             Exception('Wrong M!')
-        self._field = self.initialize_field(self.__half, self._M, self.__x_0, self.__x_max, self.__dx, self.__n_x)
+        self._field = self.__initialize_field(self.__half, self._M, self.__x_0, self.__x_max, self.__dx, self.__n_x)
 
         self._z_diff = self.medium.k_0 * self.__x_0 ** 2
 
@@ -60,12 +60,12 @@ class BeamX(Beam2D):
         return self.__dx
 
     def update_intensity(self):
-        self._intensity = self.field_to_intensity(self._field, self.__n_x)
+        self._intensity = self.__field_to_intensity(self._field, self.__n_x)
         self._i_max = maximum(self._intensity)
 
     @staticmethod
     @jit(nopython=True)
-    def field_to_intensity(field, n_x):
+    def __field_to_intensity(field, n_x):
         intensity = zeros(shape=(n_x,), dtype=float64)
         for i in range(n_x):
             intensity[i] = (field[i] * conj(field[i])).real
@@ -73,7 +73,7 @@ class BeamX(Beam2D):
         return intensity
 
     @staticmethod
-    def initialize_field(half, M, x_0, x_max, dx, n_x):
+    def __initialize_field(half, M, x_0, x_max, dx, n_x):
         arr = zeros(shape=(n_x,), dtype=complex64)
         for i in range(n_x):
             x = i * dx - 0.5 * x_max

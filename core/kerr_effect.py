@@ -1,14 +1,14 @@
-import abc
+from abc import ABCMeta, abstractmethod
 from numba import jit
 from numpy import exp, multiply
 
 
-class KerrExecutor(metaclass=abc.ABCMeta):
+class KerrExecutor(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self._beam = kwargs['beam']
-        self._nonlin_phase_const = -0.5j * self._beam.r_kerr / self._beam.z_diff
+        self.__beam = kwargs['beam']
+        self.__nonlin_phase_const = -0.5j * self.__beam.r_kerr / self.__beam.z_diff
 
-    @abc.abstractmethod
+    @abstractmethod
     def info(self):
         """Information about KerrExecutor type"""
 
@@ -18,7 +18,7 @@ class KerrExecutor(metaclass=abc.ABCMeta):
         return multiply(field, exp(current_nonlin_phase * intensity))
 
     def process_kerr_effect(self, dz):
-        self._beam._field = self.phase_increment(self._beam._field, self._beam.intensity, self._nonlin_phase_const * dz)
+        self.__beam._field = self.phase_increment(self.__beam._field, self.__beam.intensity, self.__nonlin_phase_const * dz)
 
 
 class KerrExecutorX(KerrExecutor):

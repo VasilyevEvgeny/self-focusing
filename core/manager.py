@@ -36,17 +36,23 @@ class Manager:
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def create_global_results_dir(self):
+    def __create_global_results_dir(self):
         self.create_dir(self.__global_results_dir)
 
-    def create_results_dir(self):
+    def __create_results_dir(self):
         self.create_dir(self.__results_dir)
 
-    def create_track_dir(self):
+    def __create_track_dir(self):
         self.create_dir(self.__track_dir)
 
-    def create_beam_dir(self):
+    def __create_beam_dir(self):
         self.create_dir(self.__beam_dir)
+
+    def create_dirs(self):
+        self.__create_global_results_dir()
+        self.__create_results_dir()
+        self.__create_track_dir()
+        self.__create_beam_dir()
 
     @property
     def beam_dir(self):

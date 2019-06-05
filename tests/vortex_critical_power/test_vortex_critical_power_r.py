@@ -12,7 +12,7 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
     def __init__(self, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
 
-        self.add_prefix(NAME)
+        self._add_prefix(NAME)
         self.__results_dir, self.__results_dir_name = create_multidir(self._args.global_root_dir,
                                                                       self._args.global_results_dir_name,
                                                                       self._args.prefix)
@@ -78,11 +78,11 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
 
             self._p_v_rel_pred[idx] = p_v_pred
 
-            self.plot_propagation(dfs, m_dir, m)
+            self._plot_propagation(dfs, m_dir, m)
 
     def test_vortex_critical_power_r(self):
         self.process()
-        self.check()
+        self._check()
 
         if self._flag_plot:
-            self.plot(self.__results_dir)
+            self._plot(self.__results_dir)

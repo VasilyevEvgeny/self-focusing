@@ -12,7 +12,7 @@ class RingCriticalPowerR(RingCriticalPower):
     def __init__(self, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
 
-        self.add_prefix(NAME)
+        self._add_prefix(NAME)
         self.__results_dir, self.__results_dir_name = create_multidir(self._args.global_root_dir,
                                                                       self._args.global_results_dir_name,
                                                                       self._args.prefix)
@@ -78,14 +78,13 @@ class RingCriticalPowerR(RingCriticalPower):
 
             self._p_g_rel_pred[idx] = p_g_pred
 
-            self.plot_propagation(dfs, M_dir, M)
+            self._plot_propagation(dfs, M_dir, M)
 
     def ring_critical_power_r(self):
         self.process()
 
         if self._flag_plot:
-            self.plot(self.__results_dir)
-
+            self._plot(self.__results_dir)
 
 
 ring_critical_power_r = RingCriticalPowerR()

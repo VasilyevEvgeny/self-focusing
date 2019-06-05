@@ -1,12 +1,12 @@
-import abc
+from abc import ABCMeta, abstractmethod
 
 from core.medium import Medium
-from core.m_constants import M_Constants
+from core.m_constants import MathConstants
 
 
-class Beam(metaclass=abc.ABCMeta):
+class Beam(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self.__m_constants = M_Constants()
+        self.__m_constants = MathConstants()
         self._lmbda = kwargs['lmbda']
 
         self._medium = Medium(name=kwargs['medium'],
@@ -17,6 +17,14 @@ class Beam(metaclass=abc.ABCMeta):
 
         self._distribution_type, self._field, self._intensity, self._i_max, self._i_0, self._z_diff, self._r_kerr = \
             None, None, None, None, None, None, None
+
+    @abstractmethod
+    def info(self):
+        """Information about beam"""
+
+    @abstractmethod
+    def update_intensity(self):
+        """update intensity"""
 
     @property
     def medium(self):

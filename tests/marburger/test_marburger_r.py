@@ -10,13 +10,13 @@ class TestMarburgerR(TestMarburger):
     def __init__(self, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
 
-        self.add_prefix(NAME)
+        self._add_prefix(NAME)
         self.__results_dir, self.__results_dir_name = create_multidir(self._args.global_root_dir, self._args.global_results_dir_name,
                                                                       self._args.prefix)
 
         self._n_z = 10000
 
-        self._eps = 0.25
+        self._eps = 0.3
         self._png_name = NAME
 
     def process(self):
@@ -51,7 +51,7 @@ class TestMarburgerR(TestMarburger):
 
     def test_marburger_r(self):
         self.process()
-        self.check()
+        self._check()
 
         if self._flag_plot:
-            self.plot(self.__results_dir)
+            self._plot(self.__results_dir)

@@ -8,7 +8,7 @@ class TestDiffractionRGauss(TestDiffraction):
     def __init__(self, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
 
-        self.add_prefix(NAME)
+        self._add_prefix(NAME)
 
         self._p = 1.0
         self._eps = 0.02
@@ -43,8 +43,8 @@ class TestDiffractionRGauss(TestDiffraction):
         track_filename, path_to_save_plot, z_diff = self.process()
         df = xlsx_to_df(track_filename, normalize_z_to=1)
 
-        self.add_analytics_to_df(df)
-        self.check(df)
+        self._add_analytics_to_df(df)
+        self._check(df)
 
         if self._flag_plot:
-            self.plot(df, path_to_save_plot, z_diff)
+            self._plot(df, path_to_save_plot, z_diff)

@@ -1,4 +1,4 @@
-import abc
+from abc import abstractmethod
 
 from .beam import Beam
 from core.functions import calculate_p_gauss, calculate_p_vortex
@@ -35,7 +35,7 @@ class Beam3D(Beam):
         else:
             raise Exception('Wrong distribution type: "%s".' % self._distribution_type)
 
-    @abc.abstractmethod
+    @abstractmethod
     def info(self):
         """Information about beam"""
 

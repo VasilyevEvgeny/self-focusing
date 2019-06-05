@@ -6,7 +6,7 @@ from .beam import BeamX, BeamR, BeamXY
 from .diffraction import FourierDiffractionExecutorXY, SweepDiffractionExecutorX, SweepDiffractionExecutorR
 from .kerr_effect import KerrExecutorX, KerrExecutorR, KerrExecutorXY
 from .logger import Logger
-from .m_constants import M_Constants
+from .m_constants import MathConstants
 from .manager import Manager
 from .medium import Medium
 from .noise import GaussianNoise
