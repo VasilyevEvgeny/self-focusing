@@ -175,23 +175,13 @@ def plot_beam_3d_flat(mode, beam, z, step, path, plot_beam_normalization):
     del arr
 
 
-def plot_beam_3d_volume(mode, beam, z, step, path):
-    fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
-    # if 'multimedia' in mode:
-    #     fig_size = (3, 3)
-    #     x_max = 250
-    #     y_max = 250
-    #     title = False
-    #     ticks = False
-    #     labels = False
-    # else:
+def plot_beam_3d_volume(prefix, beam, z, step, path, plot_beam_normalization):
     fig_size = (12, 10)
     x_max = 250
     y_max = 250
     title = False
     ticks = True
     labels = True
-    bbox = 'tight'
 
     x_left = -x_max * 10 ** -6
     x_right = x_max * 10 ** -6
@@ -212,48 +202,58 @@ def plot_beam_3d_volume(mode, beam, z, step, path):
 
     arr = transpose(arr)
 
-    xs = xs[x_idx_left:x_idx_right]
-    ys = ys[y_idx_left:y_idx_right]
+    xs = [e * 10**6 for e in xs[x_idx_left:x_idx_right]]
+    ys = [e * 10**6 for e in ys[y_idx_left:y_idx_right]]
 
     xx, yy = meshgrid(xs, ys)
 
-    # n_plot_levels = 100
-    # max_intensity_value = None
-    # if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
-    #     max_intensity_value = plot_beam_normalization
-    # elif plot_beam_normalization == 'local':
-    #     max_intensity_value = beam.i_max
-    # di = max_intensity_value / n_plot_levels
-    # levels_plot = [i * di for i in range(n_plot_levels + 1)]
+    n_plot_levels = 100
+    max_intensity_value = None
+    if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
+        max_intensity_value = plot_beam_normalization
+    elif plot_beam_normalization == 'local':
+        max_intensity_value = beam.i_max
+    di = max_intensity_value / n_plot_levels
+    levels_plot = [i * di for i in range(n_plot_levels + 1)]
 
-    font_size=40
+    font_size = 40
     fig = plt.figure(figsize=fig_size)
     ax = fig.add_subplot(111, projection='3d')
 
-    levels_plot = [i * 0.1 for i in range(100)]
     ax.plot_surface(xx, yy, arr, cmap='jet', rstride=1, cstride=1, antialiased=False,
                     vmin=levels_plot[0], vmax=levels_plot[-1])
 
     ax.view_init(elev=50, azim=345)
-    ax.set_zlim([levels_plot[0], levels_plot[-1]])
+
+    offset_x = -1.1 * x_max
+    offset_y = 1.1 * y_max
+    ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x, levels=0)
+    ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y, levels=0)
 
     if ticks:
         x_labels = ['-150', '0', '+150']
         y_labels = ['-150', '0', '+150']
-        x_ticks = calc_ticks_x(x_labels, xs)
-        y_ticks = calc_ticks_x(y_labels, ys)
-        plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
-        plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
+        plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
+        plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
     else:
         plt.xticks([])
         plt.yticks([])
 
-    zticks = [0, 5, 10]
+    ax.set_zlim([levels_plot[0], levels_plot[-1]])
+    n_z_ticks = 3
+    di0 = levels_plot[-1] / n_z_ticks
+    prec = 2
+    zticks = [int(i * di0 * 10**prec) / 10**prec for i in range(n_z_ticks)]
     ax.set_zticks(zticks)
 
+    ax.tick_params(labelsize=font_size - 5)
+    ax.xaxis.set_tick_params(pad=30)
+    ax.yaxis.set_tick_params(pad=5)
+    ax.zaxis.set_tick_params(pad=20)
+
     if labels:
-        plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-        plt.ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+        plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+        plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
 
     if title:
         i_max = beam.i_max * beam.i_0
@@ -261,16 +261,8 @@ def plot_beam_3d_volume(mode, beam, z, step, path):
                   fontsize=font_size - 10)
 
     ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
-    #ax.set_aspect('equal')
 
-    # if 'multimedia' in mode:
-    #     bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
-    #     if beam.distribution_type == 'gauss':
-    #         m, M = 0, 0
-    #     else:
-    #         m, M = beam.m, beam.M
-    #     C = beam.noise_percent
-    #     plt.title('$M = {:d}, \ m = {:d}, \ C = {:02d}\%$'.format(M, m, C), fontsize=14)
+    bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
 
     plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
     plt.close()

@@ -20,6 +20,7 @@ propagator = Propagator(args=args,
                         flag_const_dz=True,
                         dn_print_current_state=50,
                         dn_plot_beam=50,
-                        beam_normalization_type='local')
+                        beam_normalization_type=3,
+                        beam_in_3D=True)
 
 propagator.propagate()

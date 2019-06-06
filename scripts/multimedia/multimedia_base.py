@@ -13,7 +13,7 @@ class BaseMultimedia(metaclass=ABCMeta):
                                                                     self._args.prefix)
 
     @abstractmethod
-    def _get_data(self):
+    def _get_data(self, plot_beam_func):
         """get_data"""
 
     @abstractmethod
