@@ -1,5 +1,4 @@
-from numpy import pi, conj, exp, zeros, float64, complex64
-from numpy import max as maximum
+from numpy import pi, exp, zeros, complex64
 from scipy.special import gamma
 from numba import jit
 
@@ -7,20 +6,25 @@ from .beam_3d import Beam3D
 
 
 class BeamR(Beam3D):
+    """
+    Subsubclass for 3-dimensional beam in axisymmetric approximation with radial coordinate r
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.__r_0 = kwargs['r_0']
-        self.__r_max = 40.0 * self.__r_0
-        self.__n_r = kwargs['n_r']
-        self.__dr = self.__r_max / self.__n_r
-        self.__rs = [i * self.__dr for i in range(self.__n_r)]
+        self.__r_0 = kwargs['r_0']  # characteristic spatial size
+        self.__r_max = 40.0 * self.__r_0  # spatial grid size
+        self.__n_r = kwargs['n_r']  # number of points in spatial grid
+        self.__dr = self.__r_max / self.__n_r  # spatial grid step
+        self.__rs = [i * self.__dr for i in range(self.__n_r)]  # spatial grid nodes
 
+        # field initialization
         self._field = self.__initialize_field(self._M, self.__r_0, self.__dr, self.__n_r)
 
+        # other parameters initialization
         self._i_0 = self.__calculate_i0()
         self._z_diff = self._medium.k_0 * self.__r_0**2
-
         self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
 
         self.update_intensity()
@@ -49,25 +53,28 @@ class BeamR(Beam3D):
     def dr(self):
         return self.__dr
 
-    def update_intensity(self):
-        self._intensity = self.__field_to_intensity(self._field, self.__n_r)
-        self._i_max = maximum(self._intensity)
-
-    @staticmethod
-    @jit(nopython=True)
-    def __field_to_intensity(field, n_r):
-        intensity = zeros(shape=(n_r,), dtype=float64)
-        for i in range(n_r):
-            intensity[i] = (field[i] * conj(field[i])).real
-
-        return intensity
-
     def __calculate_i0(self):
-        return self._p_0 / (pi * self.__r_0**2 * gamma(self._m+1))
+        """
+        LATEX SYNTAX:
+        P_0 = \int\limits_0^{+\infty} I_0(r) 2 \pi r dr = I_0 \int\limits_0^{+\infty} i(r) 2 \pi r dr = const I_0
+        -->
+        I_0 = P_0 / const
+
+        :return: I_0
+        """
+        return self._p_0 / (pi * self.__r_0**2 * gamma(self._M+1))
 
     @staticmethod
     @jit(nopython=True)
     def __initialize_field(M, r_0, dr, n_r):
+        """
+        :param M: power of polynomial before exponent in initial condition
+        :param r_0: characteristic spatial size
+        :param dr: spatial grid step
+        :param n_r: number of points in spatial grid
+
+        :return: initialized field array
+        """
         arr = zeros(shape=(n_r,), dtype=complex64)
         for i in range(n_r):
             r = i * dr

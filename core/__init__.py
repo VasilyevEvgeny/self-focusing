@@ -1,7 +1,6 @@
 from .functions import calc_ticks_x, crop_x, linear_approximation_complex, linear_approximation_real, r_to_xy_real, \
     get_files, make_paths, create_dir, create_multidir, make_animation, make_video, compile_to_pdf, xlsx_to_df, \
-    calculate_p_gauss, calculate_p_vortex
-from .args import parse_args
+    calculate_p_gauss, calculate_p_vortex, parse_args
 from .beam import BeamX, BeamR, BeamXY
 from .diffraction import FourierDiffractionExecutorXY, SweepDiffractionExecutorX, SweepDiffractionExecutorR
 from .kerr_effect import KerrExecutorX, KerrExecutorR, KerrExecutorXY

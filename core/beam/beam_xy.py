@@ -1,5 +1,4 @@
-from numpy import pi, conj, arctan2, exp, sqrt, zeros, float64, complex64, mean
-from numpy import max as maximum
+from numpy import pi, arctan2, exp, sqrt, zeros, complex64, mean, sum as summ
 from scipy.special import gamma
 from numba import jit
 
@@ -7,32 +6,41 @@ from .beam_3d import Beam3D
 
 
 class BeamXY(Beam3D):
+    """
+    Subsubclass for 3-dimensional beam with spatial coordinates x and y
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.__x_0 = kwargs['x_0']
-        self.__y_0 = kwargs['y_0']
+        self.__x_0 = kwargs['x_0']  # characteristic spatial size along x
+        self.__y_0 = kwargs['y_0']  # characteristic spatial size along y
 
-        self.__x_max = 10.0 * max(self.__x_0, self.__y_0)
-        self.__y_max = self.__x_max
+        self.__x_max = 10.0 * max(self.__x_0, self.__y_0)  # spatial grid size along x
+        self.__y_max = self.__x_max  # spatial grid size along y
 
-        self.__n_x = kwargs['n_x']
-        self.__n_y = kwargs['n_y']
+        self.__n_x = kwargs['n_x']  # number of points in spatial grid along x
+        self.__n_y = kwargs['n_y']  # number of points in spatial grid along y
 
-        self.__dx = self.__x_max / self.__n_x
-        self.__dy = self.__y_max / self.__n_y
+        self.__dx = self.__x_max / self.__n_x  # spatial grid step along x
+        self.__dy = self.__y_max / self.__n_y  # spatial grid step along y
 
-        self.__xs = [i * self.__dx - 0.5 * self.__x_max for i in range(self.__n_x)]
-        self.__ys = [i * self.__dy - 0.5 * self.__y_max for i in range(self.__n_y)]
+        self.__xs = [i * self.__dx - 0.5 * self.__x_max for i in range(self.__n_x)]  # spatial grid nodes along x
+        self.__ys = [i * self.__dy - 0.5 * self.__y_max for i in range(self.__n_y)]  # spatial grid nodes along y
 
-        self.__dk_x = 2.0 * pi / self.__x_max
-        self.__dk_y = 2.0 * pi / self.__y_max
+        self.__dk_x = 2.0 * pi / self.__x_max  # wave vector step along x
+        self.__dk_y = 2.0 * pi / self.__y_max  # wave vector step along y
 
-        self.__k_xs = [i * self.__dk_x if i < self.__n_x / 2 else (i - self.__n_x) * self.__dk_x for i in range(self.__n_x)]
-        self.__k_ys = [i * self.__dk_y if i < self.__n_y / 2 else (i - self.__n_y) * self.__dk_y for i in range(self.__n_y)]
+        self.__k_xs = [i * self.__dk_x if i < self.__n_x / 2 else (i - self.__n_x) * self.__dk_x  # wave vector grid
+                       for i in range(self.__n_x)]                                                # nodes along x
 
-        self.__noise_percent = kwargs.get('noise_percent', 0.0)
-        self.__noise_field = zeros(shape=(self.__n_x, self.__n_y))
+        self.__k_ys = [i * self.__dk_y if i < self.__n_y / 2 else (i - self.__n_y) * self.__dk_y  # wave vector grid
+                       for i in range(self.__n_y)]                                                # nodes along y
+
+        self.__noise_percent = kwargs.get('noise_percent', 0.0)  # multiplicative noise percent
+        self.__noise_field = zeros(shape=(self.__n_x, self.__n_y))  # array for complex noise field
+
+        # noise initialization
         if self.__noise_percent:
             self.__noise = kwargs['noise']
             self.__noise.initialize(n_x=self.__n_x,
@@ -42,16 +50,17 @@ class BeamXY(Beam3D):
             self.__noise.process()
             self.__noise_field = self.__noise.noise_field
 
+        # field initialization
         self._field = self.__initialize_field(self._M, self._m, self.__x_0, self.__y_0, self.__x_max, self.__y_max,
-                                            self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
-                                            self.__noise_field)
-
-        self._i_0 = self.__calculate_i0()
-        self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
-
-        self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
+                                              self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
+                                              self.__noise_field)
 
         self.update_intensity()
+
+        # other parameters initialization
+        self._i_0 = self.__calculate_i0()
+        self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
+        self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
 
     @property
     def info(self):
@@ -121,46 +130,63 @@ class BeamXY(Beam3D):
     def noise(self):
         return self.__noise
 
-    def update_intensity(self):
-        self._intensity = self.__field_to_intensity(self._field, self.__n_x, self.__n_y)
-        self._i_max = maximum(self._intensity)
-
     @staticmethod
     @jit(nopython=True)
-    def __field_to_intensity(field, n_x, n_y):
-        intensity = zeros(shape=(n_x, n_y), dtype=float64)
-        for i in range(n_x):
-            for j in range(n_y):
-                intensity[i, j] = (field[i, j] * conj(field[i, j])).real
+    def __calculate_intensity_intergral(intensity, dx, dy):
+        """
+        LATEX SYNTAX:
+        intensity_integral = \iint\limits_{-\infty}^{+\infty} i(x, y) dx dy
 
-        return intensity
+        :param intensity: intensity array
+        :param dx: spatial grid step along x
+        :param dy: spatial grid step along y
 
-    @staticmethod
-    @jit(nopython=True)
-    def __calculate_intensity_intergral(field, n_x, n_y, dx, dy):
-        intensity_intergral = 0.0
-        for i in range(n_x):
-            for j in range(n_y):
-                intensity_intergral += (field[i, j] * conj(field[i, j])).real * dx * dy
+        :return:
+        """
+        intensity_intergral = summ(intensity) * dx * dy
 
         return intensity_intergral
 
     def __calculate_i0(self):
+        """
+        LATEX SYNTAX:
+        P_0 = \int\limits_0^{+\infty} I_0(r) 2 \pi r dr = I_0 \int\limits_0^{+\infty} i(r) 2 \pi r dr = const I_0
+        -->
+        I_0 = P_0 / const
+
+        :return: I_0
+        """
         if self.__noise_percent == 0.0 and self.__x_0 == self.__y_0:
-            return self._p_0 / (pi * self.__x_0**2 * gamma(self._m+1))
+            return self._p_0 / (pi * self.__x_0**2 * gamma(self._M+1))
         else:
-            return self._p_0 / self.__calculate_intensity_intergral(self._field, self.__n_x, self.__n_y, self.__dx, self.__dy)
+            return self._p_0 / self.__calculate_intensity_intergral(self._intensity, self.__dx, self.__dy)
 
     @staticmethod
     @jit(nopython=False)
     def __initialize_field(M, m, x_0, y_0, x_max, y_max, dx, dy, n_x, n_y, noise_percent, noise):
+        """
+        :param M: power of polynomial before exponent in initial condition
+        :param m: topological charge
+        :param x_0: characteristic spatial size along x
+        :param y_0: characteristic spatial size along y
+        :param x_max: spatial grid size along x
+        :param y_max: spatial grid size along y
+        :param dx: spatial grid step along x
+        :param dy: spatial grid step along y
+        :param n_x: number of points in spatial grid along x
+        :param n_y: number of points in spatial grid along y
+        :param noise_percent: multiplicative noise percent
+        :param noise: array for complex noise field
+
+        :return: initialized field array
+        """
         arr = zeros(shape=(n_x, n_y), dtype=complex64)
         for i in range(n_x):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
                 arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
-                            sqrt((x / x_0)**2 + (y / y_0)**2)**M * \
-                            exp(-0.5 * ((x / x_0) ** 2 + (y / y_0) ** 2)) * \
+                            sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
+                            exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
                             exp(1j * m * arctan2(x, y))
 
         return arr

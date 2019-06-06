@@ -1,61 +1,53 @@
 from numpy import transpose, meshgrid
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
 
 from scripts.multimedia.multimedia_base import BaseMultimedia
-from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, get_files, \
+from core import BeamR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, get_files, \
     r_to_xy_real, crop_x
 
 
-class Multimedia1(BaseMultimedia):
+class Multimedia2(BaseMultimedia):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _get_data(self, plot_beam_func):
         indices = []
-        for idx_col, noise_percent in enumerate([1]):
-            for idx_row, (M, m) in enumerate([(1, 1)]):
-                print('================================================================')
-                print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
-                print('================================================================')
+        for idx_row, (M, m) in enumerate([(1, 1)]):
+            print('================================================================')
+            print('M = %d' % M, ', m = %d' % m)
+            print('================================================================')
 
-                noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
-                                      variance=1)
+            beam = BeamR(medium='SiO2',
+                         p_0_to_p_V=5,
+                         M=M,
+                         m=m,
+                         lmbda=1800 * 10 ** -9,
+                         r_0=100 * 10 ** -6,
+                         n_r=2048)
 
-                beam = BeamXY(medium='SiO2',
-                              p_0_to_p_V=5,
-                              p_0_to_p_G=5,
-                              M=M,
-                              m=m,
-                              noise_percent=noise_percent,
-                              noise=noise,
-                              lmbda=1800 * 10 ** -9,
-                              x_0=100 * 10 ** -6,
-                              y_0=100 * 10 ** -6,
-                              n_x=2048,
-                              n_y=2048)
+            propagator = Propagator(args=self._args,
+                                    multidir_name=self._results_dir_name,
+                                    beam=beam,
+                                    diffraction=SweepDiffractionExecutorR(beam=beam),
+                                    kerr_effect=KerrExecutorR(beam=beam),
+                                    n_z=3000,
+                                    dz0=10 ** -4,
+                                    flag_const_dz=True,
+                                    dn_print_current_state=50,
+                                    dn_plot_beam=10,
+                                    max_intensity_to_stop=5 * beam.i_0,
+                                    beam_normalization_type=5,
+                                    beam_in_3D=True,
+                                    plot_beam_func=plot_beam_func)
 
-                propagator = Propagator(args=self._args,
-                                        multidir_name=self._results_dir_name,
-                                        beam=beam,
-                                        diffraction=FourierDiffractionExecutorXY(beam=beam),
-                                        kerr_effect=KerrExecutorXY(beam=beam),
-                                        n_z=3000,
-                                        dz0=10 ** -4,
-                                        flag_const_dz=True,
-                                        dn_print_current_state=50,
-                                        dn_plot_beam=10,
-                                        max_intensity_to_stop=5 * beam.i_0,
-                                        beam_normalization_type=3,
-                                        beam_in_3D=True,
-                                        plot_beam_func=plot_beam_func)
+            propagator.propagate()
 
-                propagator.propagate()
+            del beam
+            del propagator
 
-                del beam
-                del propagator
-
-                indices.append((idx_col, idx_row))
+            indices.append((0, idx_row))
 
         all_files, n_pictures_max = get_files(self._results_dir)
 
@@ -104,6 +96,7 @@ class Multimedia1(BaseMultimedia):
         levels_plot = [i * di for i in range(n_plot_levels + 1)]
 
         font_size = 40
+        font_weight = 'bold'
         fig = plt.figure(figsize=fig_size)
         ax = fig.add_subplot(111, projection='3d')
 
@@ -121,28 +114,29 @@ class Multimedia1(BaseMultimedia):
 
         if ticks:
             x_labels = ['-150', '0', '+150']
-            y_labels = ['-150', '0', '+150']
-            plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
-            plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
+            y_labels = ['-150    ', '0    ', '+150    ']
+            plt.xticks([int(e) for e in y_labels], y_labels, fontsize=font_size - 5)
+            plt.yticks([int(e) for e in x_labels], x_labels, fontsize=font_size - 5)
         else:
             plt.xticks([])
             plt.yticks([])
 
         ax.set_zlim([levels_plot[0], levels_plot[-1]])
-        n_z_ticks = 3
+        ax.text(300, 5, 6.5, s='$\qquad\qquad\quad\mathbf{I/I_0}$', fontsize=font_size, fontweight=font_weight)
+        n_z_ticks = 4
         di0 = levels_plot[-1] / n_z_ticks
         prec = 2
-        zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks)]
+        zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks+1)]
         ax.set_zticks(zticks)
 
         ax.tick_params(labelsize=font_size - 5)
-        ax.xaxis.set_tick_params(pad=30)
+        ax.xaxis.set_tick_params(pad=10)
         ax.yaxis.set_tick_params(pad=5)
         ax.zaxis.set_tick_params(pad=20)
 
         if labels:
-            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
 
         if title:
             i_max = beam.i_max * beam.i_0
@@ -163,5 +157,5 @@ class Multimedia1(BaseMultimedia):
         self._compose(all_files, indices, n_pictures_max)
 
 
-multimedia = Multimedia1()
+multimedia = Multimedia2()
 multimedia.process_multimedia()
