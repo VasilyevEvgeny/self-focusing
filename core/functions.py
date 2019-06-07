@@ -22,6 +22,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def xlsx_to_df(path_to_xlsx, normalize_z_to=10**2, normalize_i_to=10**17):
     df = pd.read_excel(path_to_xlsx)
 

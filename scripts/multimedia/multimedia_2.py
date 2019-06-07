@@ -1,7 +1,6 @@
 from numpy import transpose, meshgrid
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from pylab import *
 
 from scripts.multimedia.multimedia_base import BaseMultimedia
 from core import BeamR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, get_files, \
@@ -20,7 +19,7 @@ class Multimedia2(BaseMultimedia):
             print('================================================================')
 
             beam = BeamR(medium='SiO2',
-                         p_0_to_p_V=5,
+                         p_0_to_p_vortex=5,
                          M=M,
                          m=m,
                          lmbda=1800 * 10 ** -9,
@@ -33,7 +32,7 @@ class Multimedia2(BaseMultimedia):
                                     diffraction=SweepDiffractionExecutorR(beam=beam),
                                     kerr_effect=KerrExecutorR(beam=beam),
                                     n_z=3000,
-                                    dz0=10 ** -4,
+                                    dz0=10**-5,
                                     flag_const_dz=True,
                                     dn_print_current_state=50,
                                     dn_plot_beam=10,
@@ -58,7 +57,7 @@ class Multimedia2(BaseMultimedia):
         fig_size = (12, 10)
         x_max = 250
         y_max = 250
-        title = False
+        title = True
         ticks = True
         labels = True
 
@@ -105,12 +104,17 @@ class Multimedia2(BaseMultimedia):
 
         ax.view_init(elev=50, azim=345)
 
-        #offset_x = -1.1 * x_max
-        #offset_y = 1.1 * y_max
-        #ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x,
-        #           levels=1)
-        #ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y,
-        #           levels=1)
+        offset_x = -1.1 * x_max
+        offset_y = 1.1 * y_max
+        ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x,
+                   levels=1)
+        ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y,
+                   levels=1)
+
+        if title:
+            i_max = beam.i_max * beam.i_0
+            ax.text(0, -250, 6, s='$\qquad$z = %4.02f cm\nI$_{max}$ = %4.02f TW/сm$^2$\n\n\n\n\n' %
+                                  (round(z * 10 ** 2, 3), i_max / 10**16), fontsize=font_size - 10)
 
         if ticks:
             x_labels = ['-150', '0', '+150']
@@ -138,14 +142,9 @@ class Multimedia2(BaseMultimedia):
             plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
             plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
 
-        if title:
-            i_max = beam.i_max * beam.i_0
-            plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
-                      fontsize=font_size - 10)
-
         ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
 
-        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
+        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 10.0)
 
         plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()

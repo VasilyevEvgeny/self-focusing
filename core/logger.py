@@ -7,20 +7,31 @@ from .functions import compile_to_pdf
 
 
 class Logger:
+    """
+    Сlass intended for logging information on the propagation of a laser beam
+    """
+
     def __init__(self, **kwargs):
-        self.__path = kwargs['path']
-        self.__diffraction = kwargs['diffraction']
-        self.__kerr_effect = kwargs['kerr_effect']
+        self.__path = kwargs['path']  # results directory
+        self.__diffraction = kwargs['diffraction']  # diffraction object
+        self.__kerr_effect = kwargs['kerr_effect']  # kerr effect object
 
-        self.__track_filename = self.__path + '/propagation.xlsx'
+        self.__track_filename = self.__path + '/propagation.xlsx'  # full path of propagation file
 
-        self.__functions = OrderedDict()
+        self.__functions = OrderedDict()  # dict for calculations of functions operation time
 
     @property
     def track_filename(self):
         return self.__track_filename
 
     def measure_time(self, function, args):
+        """
+
+        :param function: function object, the execution time of which must be measured
+        :param args: arguments of that function
+
+        :return: function result
+        """
         t_start = time()
         res = function(*args)
         t_end = time()
@@ -34,6 +45,11 @@ class Logger:
         return res
 
     def log_times(self):
+        """
+        Creating a log of the total execution time of the main functions in the program
+
+        :return: None
+        """
         with open(self.__path + '/times.log', 'w') as f:
             f.write('{:40s} | {:15}'.format('MODULE', 'TIME (hh:mm:ss)\n'))
             f.write('--------------------------------------------------------------\n')
@@ -41,15 +57,24 @@ class Logger:
                 f.write('{:40s} | {:10}\n'.format(key, str(timedelta(seconds=self.__functions[key]))))
 
     def save_initial_parameters(self, beam, n_z, dz0, max_intensity_to_stop, filename='parameters'):
+        """
+        The function generates a latex-code that is passed to the latex-compiler input, after which
+        a document with calculation parameters is generated.
+
+        :param beam: beam object
+        :param n_z: number of points along evolutionary coordinate z
+        :param dz0: grid step along evolutionary coordinate z at the beginning of the propagation
+        :param max_intensity_to_stop: peak intensity in the beam at which the calculations must be stopped
+        :param filename: name of file with initial parameters
+
+        :return: None
+        """
         tex_file_name = filename + '.tex'
         tex_file_path = self.__path + '/' + tex_file_name
 
 ##########################
 # BEGIN
 ##########################
-
-#
-#
 
         tex_file_data = \
 '''\documentclass[10pt]{extarticle}
@@ -177,7 +202,8 @@ $k_1$ & %.2f & fs/mm \\tabularnewline
 \hline
 $k_2$ & %.2f & fs$^2$/mm \\tabularnewline
 \\midrule[2pt]
-''' % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12, beam.medium.k_2 * 10**27)
+''' % (material, beam.medium.n_0, beam.medium.n_2 * 10**20, beam.medium.k_0 * 10**-3, beam.medium.k_1 * 10**12,
+       beam.medium.k_2 * 10**27)
 
 
 ##########################
@@ -333,26 +359,46 @@ $I_{stop}$ & %.2f & TW/cm$^2$ \\tabularnewline
 \end{document}
 '''
 
+        # writing latex-code to file
         with open(tex_file_path, 'w') as f:
             f.write(tex_file_data)
 
+        # generation of pdf-file with deletion of source latex-code file
         compile_to_pdf(tex_file_path, delete_tex_file=True)
 
     @staticmethod
-    def print_current_state(n_step, states, states_columns):
+    def print_current_state(n_step, states_arr, states_columns):
+        """
+        Sends to the output stream information in the beam propagation
+
+        :param n_step: number of step along evolutionary coordinate z
+        :param states_arr: array with data about propagation
+        :param states_columns: columns for states array
+
+        :return: None
+        """
         if n_step == 0:
             print('      |   %s   |    %s   |  %s |  %s |' % (states_columns[0],
-                                                         states_columns[1],
-                                                         states_columns[2],
-                                                         states_columns[3]))
+                                                              states_columns[1],
+                                                              states_columns[2],
+                                                              states_columns[3]))
         output_string = '{:04d} {:11.6f} {:13e} {:11.6f} {:17e}'.format(n_step,
-                                                                      states[n_step, 0],
-                                                                      states[n_step, 1],
-                                                                      states[n_step, 2],
-                                                                      states[n_step, 3])
+                                                                        states_arr[n_step, 0],
+                                                                        states_arr[n_step, 1],
+                                                                        states_arr[n_step, 2],
+                                                                        states_arr[n_step, 3])
         print(output_string)
 
     def log_track(self, states_arr, states_columns):
+        """
+        Saves to the xlsx-document the information from states_arr with columns from states_columns
+
+        :param states_arr: array with data about propagation
+        :param states_columns: columns for states array
+
+        :return: None
+        """
+
         workbook = Workbook(self.__track_filename)
 
         worksheet = workbook.add_worksheet()

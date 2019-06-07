@@ -23,8 +23,7 @@ class Multimedia1(BaseMultimedia):
                                       variance=1)
 
                 beam = BeamXY(medium='SiO2',
-                              p_0_to_p_V=5,
-                              p_0_to_p_G=5,
+                              p_0_to_p_vortex=5,
                               M=M,
                               m=m,
                               noise_percent=noise_percent,
@@ -41,7 +40,7 @@ class Multimedia1(BaseMultimedia):
                                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                                         kerr_effect=KerrExecutorXY(beam=beam),
                                         n_z=3000,
-                                        dz0=10 ** -4,
+                                        dz0=10**-5,
                                         flag_const_dz=True,
                                         dn_print_current_state=50,
                                         dn_plot_beam=10,
