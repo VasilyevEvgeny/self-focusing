@@ -1,8 +1,9 @@
 from core import BeamX, SweepDiffractionExecutorX, KerrExecutorX, Propagator, parse_args
 
-
+# parse args from command line
 args = parse_args()
 
+# create object of 2D beam
 beam = BeamX(medium='LiF',
              M=1,
              half=True,
@@ -11,6 +12,7 @@ beam = BeamX(medium='LiF',
              n_x=4096,
              r_kerr=75.4)
 
+# create propagator object
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutorX(beam=beam),
@@ -22,4 +24,5 @@ propagator = Propagator(args=args,
                         dn_plot_beam=1,
                         beam_normalization_type='local')
 
+# initiate propagation process
 propagator.propagate()

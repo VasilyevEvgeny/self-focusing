@@ -6,6 +6,12 @@ from core import parse_args, create_dir, create_multidir, make_animation, make_v
 
 
 class BaseMultimedia(metaclass=ABCMeta):
+    """
+    Abstract class containing the necessary methods to implement multimedia mode.
+    It is assumed that to create the next multimedia the derived class is created, which is inherited from this.
+    Methods _get_data, process_multimedia and plot_beam_func are defined in the derived class.
+    """
+
     def __init__(self, **kwargs):
         self._args = parse_args()
         self._results_dir, self._results_dir_name = create_multidir(self._args.global_root_dir,

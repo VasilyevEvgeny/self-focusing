@@ -7,7 +7,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from core import create_dir, make_paths, make_animation, make_video, parse_args
 
 
-
 @jit(nopython=True)
 def calc_phase(arg):
     while arg >= 2 * pi:
@@ -26,6 +25,8 @@ def phase_initialization(phase, x, y, n_points, m):
 
 
 def plot_images(**kwargs):
+    """Plots phase distribution in initial condition with different azimuth"""
+
     global_root_dir = kwargs['global_root_dir']
     global_results_dir_name = kwargs['global_results_dir_name']
     prefix = kwargs['prefix']

@@ -1,11 +1,13 @@
 from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, parse_args
 
-
+# parse args from command line
 args = parse_args()
 
+# create noise object
 noise = GaussianNoise(r_corr_in_meters=10*10**-6,
                       variance=1)
 
+# create object of 3D beam
 beam = BeamXY(medium='LiF',
               p_0_to_p_vortex=5,
               m=1,
@@ -18,6 +20,7 @@ beam = BeamXY(medium='LiF',
               n_x=512,
               n_y=512)
 
+# create propagator object
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
@@ -30,4 +33,5 @@ propagator = Propagator(args=args,
                         beam_normalization_type=3,
                         beam_in_3D=True)
 
+# initiate propagation process
 propagator.propagate()

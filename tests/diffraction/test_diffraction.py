@@ -5,16 +5,23 @@ from numpy import sqrt, arctan, exp
 from numpy.linalg import norm
 from numpy import max as maximum
 from numpy.random import randint, choice
-from core import Medium, MathConstants
 from argparse import Namespace
+
+from core import Medium, MathConstants, load_dirnames
 
 
 class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
+    """
+    Abstract class for testing diffraction of different beams.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._args = Namespace(global_root_dir='L:/Vasilyev',
-                               global_results_dir_name='Self-focusing_results',
+        global_root_dir, global_results_dir_name = load_dirnames()
+
+        self._args = Namespace(global_root_dir=global_root_dir,
+                               global_results_dir_name=global_results_dir_name,
                                insert_datetime=True)
 
         self._lmbda = randint(400, 3001) * 10**-9

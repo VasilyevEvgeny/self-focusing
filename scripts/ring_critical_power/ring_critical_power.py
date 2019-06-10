@@ -8,6 +8,13 @@ from core import MathConstants, Medium, parse_args
 
 
 class RingCriticalPower(metaclass=abc.ABCMeta):
+    """
+    Abstract class for self-focusing study of ring beams without phase singularity.
+    It is assumed that the class should be inherited from it, in which the method process is defined, where,
+    in the presence or absence of an axisymmetric approximation, the search for a critical power of self-focusing for
+    annular beam is realized.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -49,6 +56,8 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         """Numerical solution"""
 
     def _plot_propagation(self, dfs, path_to_save_plot, m):
+        """Plots beam peak intensity dependence on evolutionary coordinate z"""
+
         font_size = 40
         font_weight = 'bold'
         plt.figure(figsize=(15,10))
@@ -79,6 +88,8 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         plt.close()
 
     def _plot(self, path_to_save_plot):
+        """Plots numerically found critical power of self-focusing for the annular beam in unit of Gaussian critical
+         power of self-focusing"""
 
         font_size = 40
         font_weight = 'bold'

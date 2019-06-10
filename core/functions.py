@@ -11,7 +11,25 @@ import cv2
 import subprocess
 import pandas as pd
 import argparse
+import pathlib
 
+
+def load_dirnames(path=os.getcwd() + '/tests/dirnames.txt'):
+
+    if pathlib.Path(path).exists():
+        with open(path, 'r') as f:
+            global_root_dir = f.readline()
+            global_results_dir_name = f.readline()
+
+            if global_root_dir[-1] == '\n':
+                global_root_dir = global_root_dir[:-1]
+
+            if global_results_dir_name[-1] == '\n':
+                global_results_dir_name = global_results_dir_name[:-1]
+
+            return global_root_dir, global_results_dir_name
+    else:
+        raise Exception('No file with dirnames in test mode!')
 
 def parse_args():
     """Parses argiment from comman line"""

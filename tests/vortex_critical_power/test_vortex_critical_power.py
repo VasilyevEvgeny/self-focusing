@@ -6,15 +6,21 @@ from numpy import array, zeros
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
 
-from core import MathConstants, Medium, calculate_p_vortex
+from core import MathConstants, Medium, calculate_p_vortex, load_dirnames
 
 
 class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
+    """
+    Abstract class for testing the formula for critical self-focusing power of optical vortex.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._args = Namespace(global_root_dir='L:/Vasilyev',
-                               global_results_dir_name='Self-focusing_results')
+        global_root_dir, global_results_dir_name = load_dirnames()
+
+        self._args = Namespace(global_root_dir=global_root_dir,
+                               global_results_dir_name=global_results_dir_name)
 
         self._lmbda = randint(400, 3001) * 10**-9
         self._radius = randint(30, 151) * 10**-6

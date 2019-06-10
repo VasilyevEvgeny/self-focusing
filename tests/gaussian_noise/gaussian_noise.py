@@ -7,6 +7,10 @@ from core import GaussianNoise
 
 
 class TestGaussianNoise(TestCase):
+    """
+    Class for testing of generated complex gaussian noise parameters
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

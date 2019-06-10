@@ -5,15 +5,21 @@ from numpy.random import randint, choice
 from numpy import sqrt, array, zeros, linspace
 from matplotlib import pyplot as plt
 
-from core import MathConstants, Medium
+from core import MathConstants, Medium, load_dirnames
 
 
 class TestMarburger(TestCase, metaclass=abc.ABCMeta):
+    """
+    Abstract class for testing Marburger formula in axisymmetric and nonaxisymmetric approximation.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._args = Namespace(global_root_dir='L:/Vasilyev',
-                               global_results_dir_name='Self-focusing_results',
+        global_root_dir, global_results_dir_name = load_dirnames()
+
+        self._args = Namespace(global_root_dir=global_root_dir,
+                               global_results_dir_name=global_results_dir_name,
                                insert_datetime=True)
 
         self._lmbda = randint(400, 3001) * 10**-9

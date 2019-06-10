@@ -19,6 +19,8 @@ def intensity_initialization(n_points, x, y, x_0, y_0, M):
 
 
 def plot_images(**kwargs):
+    """Plots intensity distribution in initial condition with different azimuth"""
+
     global_root_dir = kwargs['global_root_dir']
     global_results_dir_name = kwargs['global_results_dir_name']
     prefix = kwargs['prefix']
