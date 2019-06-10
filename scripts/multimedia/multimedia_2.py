@@ -24,6 +24,7 @@ class Multimedia2(BaseMultimedia):
                          m=m,
                          lmbda=1800 * 10 ** -9,
                          r_0=100 * 10 ** -6,
+                         radiuses_in_grid=10,
                          n_r=2048)
 
             propagator = Propagator(args=self._args,

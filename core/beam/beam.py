@@ -31,6 +31,8 @@ class Beam(metaclass=ABCMeta):
                                         # M > 0, m = 0  ->  ring
                                         # M > 0, m > 0  ->  vortex
 
+        self._radiuses_in_grid = 20     # grid_size / radius
+
         self._field = None              # array for complex light field
         self._intensity = None          # array for float intensity of the field
         self._i_max = None              # peak beam intensity for z = const, [a.u.]
