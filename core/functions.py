@@ -14,6 +14,8 @@ import argparse
 
 
 def parse_args():
+    """Parses argiment from comman line"""
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--global_root_dir')
     parser.add_argument('--global_results_dir_name')
@@ -24,6 +26,8 @@ def parse_args():
 
 
 def xlsx_to_df(path_to_xlsx, normalize_z_to=10**2, normalize_i_to=10**17):
+    """Converts xlsx propagation file to pandas dataframe with some normalized columns"""
+
     df = pd.read_excel(path_to_xlsx)
 
     df['z, m'] *= normalize_z_to
@@ -36,6 +40,8 @@ def xlsx_to_df(path_to_xlsx, normalize_z_to=10**2, normalize_i_to=10**17):
 
 
 def calc_ticks_x(labels, xs):
+    """Calculates grid points corresponding to labels along axis"""
+
     ticks = []
     nxt = 0
     for label in labels:
@@ -48,6 +54,8 @@ def calc_ticks_x(labels, xs):
 
 
 def crop_x(arr, xs, x_left, x_right, mode):
+    """Crops array along axis x from x_left to x_right"""
+
     i_min, i_max = 0, -1
     for i in range(len(xs) - 1, 0, -1):
         if xs[i] < x_left:
@@ -67,17 +75,23 @@ def crop_x(arr, xs, x_left, x_right, mode):
 
 @jit(nopython=True)
 def linear_approximation_complex(x, x1, y1, x2, y2):
+    """Linear approximation for complex arguments"""
+
     return complex((y1.real - y2.real) / (x1 - x2) * x + (y2.real * x1 - x2 * y1.real) / (x1 - x2),
                    (y1.imag - y2.imag) / (x1 - x2) * x + (y2.imag * x1 - x2 * y1.imag) / (x1 - x2))
 
 
 @jit(nopython=True)
 def linear_approximation_real(x, x1, y1, x2, y2):
+    """Linear approximation for float arguments"""
+
     return (y1 - y2) / (x1 - x2) * x + (y2 * x1 - x2 * y1) / (x1 - x2)
 
 
 @jit(nopython=True)
 def r_to_xy_real(r_slice):
+    """Converts 1D array with data along radius-vector r to 2D array with axially symmetric data (x,y)"""
+
     n_r = len(r_slice)
     n_x, n_y = 2 * n_r, 2 * n_r
     arr = zeros(shape=(n_x, n_y), dtype=float64)
@@ -90,6 +104,8 @@ def r_to_xy_real(r_slice):
 
 
 def get_files(path):
+    """Prepares some data to further calculations in multimedia mode"""
+
     all_files = []
     n_pictures_max = 0
     for path in glob(path + '/*'):
@@ -106,6 +122,8 @@ def get_files(path):
 
 
 def make_paths(global_root_dir, global_results_dir_name, prefix, insert_datetime=True):
+    """Returns paths formed from command line arguments"""
+
     global_results_dir = global_root_dir + '/' + global_results_dir_name
 
     if insert_datetime:
@@ -127,6 +145,8 @@ def make_paths(global_root_dir, global_results_dir_name, prefix, insert_datetime
 
 
 def create_dir(**kwargs):
+    """Creates dir with default name 'images' deleting the existing directory"""
+
     path = kwargs['path']
     dir_name = kwargs.get('dir_name', 'images')
 
@@ -143,6 +163,8 @@ def create_dir(**kwargs):
 
 
 def create_multidir(global_root_dir, global_results_dir_name, prefix):
+    """Creates directory for multidir mode"""
+
     global_results_dir, results_dir, results_dir_name = make_paths(global_root_dir, global_results_dir_name, prefix)
     create_dir(path=global_results_dir, dir_name=results_dir_name)
 
@@ -150,6 +172,8 @@ def create_multidir(global_root_dir, global_results_dir_name, prefix):
 
 
 def make_animation(root_dir, name, images_dir='images', fps=10):
+    """Makes gif-animation from series of pictures"""
+
     images_for_animation = []
     for file in glob(root_dir + '/' + images_dir + '/*'):
         images_for_animation.append(imageio.imread(file))
@@ -157,6 +181,8 @@ def make_animation(root_dir, name, images_dir='images', fps=10):
 
 
 def make_video(root_dir, name, images_dir='images', fps=10):
+    """Makes video from series of pictures"""
+
     images_for_video = []
     for file in glob(root_dir + '/' + images_dir + '/*'):
         images_for_video.append(cv2.imread(file))
@@ -174,6 +200,8 @@ def make_video(root_dir, name, images_dir='images', fps=10):
 
 
 def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
+    """Compiles tex-code with pdf-latex and produces pdf-file with ability to delete temporary files"""
+
     path_list = (tex_file_path.replace('\\', '/')).split('/')
     path, filename = '/'.join(path_list[:-1]), path_list[-1].split('.')[0]
 
@@ -199,8 +227,12 @@ def compile_to_pdf(tex_file_path, delete_tmp_files=True, delete_tex_file=False):
 
 
 def calculate_p_gauss(lmbda, n_0, n_2):
+    """Calculates critical power of self-focusing for Gaussian beam"""
+
     return 3.77 * lmbda ** 2 / (8 * pi * n_0 * n_2)
 
 
 def calculate_p_vortex(m, p_gauss):
+    """Calculates critical power of self-focusing for vortex beam"""
+
     return p_gauss * 2**(2 * m + 1) * gamma(m + 1) * gamma(m + 2) / (2 * gamma(2 * m + 1))

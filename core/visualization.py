@@ -8,6 +8,8 @@ from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
 
 def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_normalization_to_x0=True):
+    """Plots intensity distribution in 2D beam"""
+
     fig_size, x_max, ticks, labels, title, bbox = None, None, None, None, None, None
     if mode == 'multimedia':
         fig_size = (3, 3)
@@ -72,6 +74,8 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_nor
 
 
 def plot_beam_3d_flat(mode, beam, z, step, path, plot_beam_normalization):
+    """Plots intensity distribution in 2D beam with contour_plot"""
+
     fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
     if 'multimedia' in mode:
         fig_size = (3, 3)
@@ -176,6 +180,8 @@ def plot_beam_3d_flat(mode, beam, z, step, path, plot_beam_normalization):
 
 
 def plot_beam_3d_volume(prefix, beam, z, step, path, plot_beam_normalization):
+    """Plots intensity distribution in 2D beam with 3D-plot"""
+
     fig_size = (12, 10)
     x_max = 250
     y_max = 250
@@ -271,6 +277,8 @@ def plot_beam_3d_volume(prefix, beam, z, step, path, plot_beam_normalization):
 
 
 def plot_noise(beam, path):
+    """Plots picture with information about generated complex noise"""
+
     xx_s = [(i * beam.dx - 0.5 * beam.x_max) * 10**6 for i in range(beam.n_x)]
     yy_s = [(i * beam.dy - 0.5 * beam.y_max) * 10**6 for i in range(beam.n_y)]
 
@@ -383,6 +391,8 @@ def plot_noise(beam, path):
 
 
 def plot_track(states_arr, parameter_index, path):
+    """Plots parameter dependence on evolutionary coordinate z"""
+
     zs = [e * 10 ** 2 for e in states_arr[:, 0]]
     parameters = states_arr[:, parameter_index]
 
