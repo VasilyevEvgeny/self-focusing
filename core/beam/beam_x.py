@@ -12,7 +12,7 @@ class BeamX(Beam2D):
         super().__init__(**kwargs)
 
         self.__x_0 = kwargs['x_0']  # characteristic spatial size
-        self.__x_max = self._radiuses_in_grid * self.__x_0  # spatial grid size
+        self.__x_max = self._radii_in_grid * self.__x_0  # spatial grid size
         self.__n_x = kwargs['n_x']  # number of points in spatial grid
         self.__dx = self.__x_max / self.__n_x  # spatial grid step
         self.__xs = [i * self.__dx - 0.5 * self.__x_max for i in range(self.__n_x)]  # spatial grid nodes

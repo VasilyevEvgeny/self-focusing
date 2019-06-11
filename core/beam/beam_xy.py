@@ -16,7 +16,7 @@ class BeamXY(Beam3D):
         self.__x_0 = kwargs['x_0']  # characteristic spatial size along x
         self.__y_0 = kwargs['y_0']  # characteristic spatial size along y
 
-        self.__x_max = self._radiuses_in_grid * max(self.__x_0, self.__y_0)  # spatial grid size along x
+        self.__x_max = self._radii_in_grid * max(self.__x_0, self.__y_0)  # spatial grid size along x
         self.__y_max = self.__x_max  # spatial grid size along y
 
         self.__n_x = kwargs['n_x']  # number of points in spatial grid along x
