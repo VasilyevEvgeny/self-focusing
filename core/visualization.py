@@ -289,6 +289,7 @@ def plot_noise(beam, path):
     field_real, field_imag = beam.noise._noise_field_real, beam.noise._noise_field_imag
 
     font_size = 20
+    font_weight = 'bold'
     fig = plt.figure(figsize=(20, 15))
     grid = plt.GridSpec(4, 2, hspace=0.7, wspace=0.2)
 
@@ -314,35 +315,47 @@ def plot_noise(beam, path):
     x_ticks = calc_ticks_x(x_labels, xs)
     y_ticks = calc_ticks_x(y_labels, ys)
 
+    # fields
+
     ax_fr = fig.add_subplot(grid[:2, 0])
     ax_fr.contourf(field_real, cmap='gray', levels=50)
     ax_fr.set_xticks(x_ticks)
-    ax_fr.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight='bold')
-    ax_fr.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fr.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
+    ax_fr.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
     ax_fr.set_yticks(y_ticks)
-    ax_fr.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight='bold')
-    ax_fr.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fr.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight=font_weight)
+    ax_fr.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
     ax_fr.grid(color='red', linestyle='--', linewidth=2, alpha=0.5)
     ax_fr.set_aspect('equal')
-    ax_fr.set_title('$\mathbf{\sigma^2_{real}}$ = %.2f\n' % beam.noise.variance_real, fontsize=font_size, fontweight='bold')
+    ax_fr.set_title('$\mathbf{\sigma^2_{real}}$ = %.2f\n' % beam.noise.variance_real, fontsize=font_size,
+                    fontweight=font_weight)
 
     ax_fi = fig.add_subplot(grid[:2, 1])
     ax_fi.contourf(field_imag, cmap='gray', levels=50)
     ax_fi.set_xticks(x_ticks)
-    ax_fi.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight='bold')
-    ax_fi.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fi.set_xticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
+    ax_fi.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
     ax_fi.set_yticks(y_ticks)
-    ax_fi.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight='bold')
-    ax_fi.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_fi.set_yticklabels(x_labels, fontsize=font_size - 5, fontweight=font_weight)
+    ax_fi.set_ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
     ax_fi.grid(color='red', linestyle='--', linewidth=2, alpha=0.5)
     ax_fi.set_aspect('equal')
     ax_fi.set_title('$\mathbf{\sigma^2_{imag}}$ = %.2f\n' % beam.noise.variance_imag, fontsize=font_size,
-                    fontweight='bold')
+                    fontweight=font_weight)
 
-    rc('font', weight='bold', size=font_size-5)
+    # autocorrs
 
     x_min, x_max = 0, 5 * r_corr
+    n_xs = 5
+    dxs = (x_max - x_min) / n_xs
+    x_ticks = [int(i * dxs) for i in range(n_xs + 1)]
+
     y_min, y_max = -0.15 * variance_expected, variance_expected * 1.15
+    n_ys = 5
+    dys = variance_expected / (n_ys - 1)
+    prec = 2
+    y_ticks = [round(int(i * dys * 10**prec) / 10**prec, 2) for i in range(n_ys)]
+    y_labels = [ "%.02f" % e for e in y_ticks ]
 
     ax_rx = fig.add_subplot(grid[2, 0])
     ax_rx.plot(yy_s, autocorr_real_x, color='red', linewidth=5, zorder=2)
@@ -350,43 +363,58 @@ def plot_noise(beam, path):
     ax_rx.grid(linewidth=1, linestyle='dotted')
     ax_rx.set_xlim(x_min, x_max)
     ax_rx.set_ylim(y_min, y_max)
-    ax_rx.set_title('\n$\mathbf{R^x_{real}}$', fontsize=font_size, fontweight='bold')
-    ax_rx.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_rx.set_title('\n$\mathbf{R^x_{real}}$', fontsize=font_size, fontweight=font_weight)
+    ax_rx.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+    ax_rx.set_xticks(x_ticks)
+    ax_rx.set_xticklabels(x_ticks, fontsize=font_size - 5, fontweight=font_weight)
+    ax_rx.set_yticks(y_ticks)
+    ax_rx.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
     ax_ix = fig.add_subplot(grid[2, 1])
     ax_ix.plot(yy_s, autocorr_imag_x, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
-    ax_ix.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
-    ax_ix.grid(linewidth=1, linestyle="dotted")
+    ax_ix.axvline(r_corr, linestyle='solid', color='black', linewidth=3, zorder=1)
+    ax_ix.grid(linewidth=1, linestyle='dotted')
     ax_ix.set_xlim(x_min, x_max)
     ax_ix.set_ylim(y_min, y_max)
-    ax_ix.set_title('\n$\mathbf{R^x_{imag}}$', fontsize=font_size, fontweight='bold')
-    ax_ix.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_ix.set_title('\n$\mathbf{R^x_{imag}}$', fontsize=font_size, fontweight=font_weight)
+    ax_ix.set_xlabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+    ax_ix.set_xticks(x_ticks)
+    ax_ix.set_xticklabels(x_ticks, fontsize=font_size - 5,  fontweight=font_weight)
+    ax_ix.set_yticks(y_ticks)
+    ax_ix.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
     ax_ry = fig.add_subplot(grid[3, 0])
     ax_ry.plot(xx_s, autocorr_real_y, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
-    ax_ry.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
-    ax_ry.grid(linewidth=1, linestyle="dotted")
+    ax_ry.axvline(r_corr, linestyle='solid', color='black', linewidth=3, zorder=1)
+    ax_ry.grid(linewidth=1, linestyle='dotted')
     ax_ry.set_xlim(x_min, x_max)
     ax_ry.set_ylim(y_min, y_max)
-    ax_ry.set_title('\n$\mathbf{R^y_{real}}$', fontsize=font_size, fontweight='bold')
-    ax_ry.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_ry.set_title('\n$\mathbf{R^y_{real}}$', fontsize=font_size, fontweight=font_weight)
+    ax_ry.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+    ax_ry.set_xticks(x_ticks)
+    ax_ry.set_xticklabels(x_ticks, fontsize=font_size - 5, fontweight=font_weight)
+    ax_ry.set_yticks(y_ticks)
+    ax_ry.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
     ax_iy = fig.add_subplot(grid[3, 1])
     ax_iy.plot(xx_s, autocorr_imag_y, color='red', linewidth=5, label='$\\bar{K}_x$', zorder=2)
-    ax_iy.axvline(r_corr, linestyle="solid", color="black", linewidth=3, zorder=1)
-    ax_iy.grid(linewidth=1, linestyle="dotted")
+    ax_iy.axvline(r_corr, linestyle='solid', color='black', linewidth=3, zorder=1)
+    ax_iy.grid(linewidth=1, linestyle='dotted')
     ax_iy.set_xlim(x_min, x_max)
     ax_iy.set_ylim(y_min, y_max)
-    ax_iy.set_title('\n$\mathbf{R^y_{imag}}$', fontsize=font_size, fontweight='bold')
-    ax_iy.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+    ax_iy.set_title('\n$\mathbf{R^y_{imag}}$', fontsize=font_size, fontweight=font_weight)
+    ax_iy.set_xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+    ax_iy.set_xticks(x_ticks)
+    ax_iy.set_xticklabels(x_ticks, fontsize=font_size - 5, fontweight=font_weight)
+    ax_iy.set_yticks(y_ticks)
+    ax_iy.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
     fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
-                 (variance_expected, round(r_corr)), fontsize=font_size, fontweight='bold')
+                 (variance_expected, round(r_corr)), fontsize=font_size, fontweight=font_weight)
 
     plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight')
     plt.close()
 
-    rc('font', weight='normal', size=12)
     del field_real, field_imag
 
 

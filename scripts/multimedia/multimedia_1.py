@@ -20,7 +20,7 @@ class Multimedia1(BaseMultimedia):
                 print('================================================================')
 
                 noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
-                                      variance=1)
+                                      variance=0.5)
 
                 beam = BeamXY(medium='SiO2',
                               p_0_to_p_vortex=5,
@@ -31,8 +31,9 @@ class Multimedia1(BaseMultimedia):
                               lmbda=1800 * 10 ** -9,
                               x_0=100 * 10 ** -6,
                               y_0=100 * 10 ** -6,
-                              n_x=2048,
-                              n_y=2048)
+                              n_x=256,
+                              n_y=256,
+                              radii_in_grid=20)
 
                 propagator = Propagator(args=self._args,
                                         multidir_name=self._results_dir_name,
@@ -45,7 +46,7 @@ class Multimedia1(BaseMultimedia):
                                         dn_print_current_state=50,
                                         dn_plot_beam=10,
                                         max_intensity_to_stop=5 * beam.i_0,
-                                        beam_normalization_type=3,
+                                        beam_normalization_type=5,
                                         beam_in_3D=True,
                                         plot_beam_func=plot_beam_func)
 
@@ -65,7 +66,7 @@ class Multimedia1(BaseMultimedia):
         fig_size = (12, 10)
         x_max = 250
         y_max = 250
-        title = False
+        title = True
         ticks = True
         labels = True
 
@@ -103,6 +104,7 @@ class Multimedia1(BaseMultimedia):
         levels_plot = [i * di for i in range(n_plot_levels + 1)]
 
         font_size = 40
+        font_weight = 'bold'
         fig = plt.figure(figsize=fig_size)
         ax = fig.add_subplot(111, projection='3d')
 
@@ -118,9 +120,14 @@ class Multimedia1(BaseMultimedia):
         #ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y,
         #           levels=1)
 
+        if title:
+            i_max = beam.i_max * beam.i_0
+            ax.text(0, -250, 6, s='$\qquad$z = %4.02f cm\nI$_{max}$ = %4.02f TW/сm$^2$\n\n\n\n\n' %
+                                  (round(z * 10 ** 2, 3), i_max / 10**16), fontsize=font_size - 10)
+
         if ticks:
             x_labels = ['-150', '0', '+150']
-            y_labels = ['-150', '0', '+150']
+            y_labels = ['-150    ', '0    ', '+150    ']
             plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
             plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
         else:
@@ -128,10 +135,11 @@ class Multimedia1(BaseMultimedia):
             plt.yticks([])
 
         ax.set_zlim([levels_plot[0], levels_plot[-1]])
-        n_z_ticks = 3
+        ax.text(300, 5, 6.5, s='$\qquad\qquad\quad\mathbf{I/I_0}$', fontsize=font_size, fontweight=font_weight)
+        n_z_ticks = 4
         di0 = levels_plot[-1] / n_z_ticks
         prec = 2
-        zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks)]
+        zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks + 1)]
         ax.set_zticks(zticks)
 
         ax.tick_params(labelsize=font_size - 5)
@@ -140,17 +148,13 @@ class Multimedia1(BaseMultimedia):
         ax.zaxis.set_tick_params(pad=20)
 
         if labels:
-            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-
-        if title:
-            i_max = beam.i_max * beam.i_0
-            plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
-                      fontsize=font_size - 10)
+            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
+            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
 
         ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
 
-        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
+        #bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
+        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 10.0)
 
         plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()
