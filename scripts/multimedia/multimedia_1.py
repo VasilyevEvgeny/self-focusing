@@ -13,7 +13,7 @@ class Multimedia1(BaseMultimedia):
 
     def _get_data(self, plot_beam_func):
         indices = []
-        for idx_col, noise_percent in enumerate([1]):
+        for idx_col, noise_percent in enumerate([0]):
             for idx_row, (M, m) in enumerate([(1, 1)]):
                 print('================================================================')
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
@@ -156,7 +156,7 @@ class Multimedia1(BaseMultimedia):
         #bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
         bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 10.0)
 
-        plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
+        plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox, dpi=50)
         plt.close()
 
         del arr
