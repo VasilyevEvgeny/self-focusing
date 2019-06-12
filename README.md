@@ -31,3 +31,4 @@ pip install -r <path_to_project>/requirements.txt
 
 # [Mathematical model](math_model/math_model.pdf)
 
+A mathematical model of beams self-focusing was obtained using the method of slowly varying amplitudes and the terms responsible for diffraction and instantaneous Kerr effect are included. The model can be used to consider three-dimensional beams both in the axisymmetric approximation, and with both transverse spatial coordinates including ring beams with a phase singularity on the optical axis - the so-called optical vortices. The possibility of considering ring beams without phase singularity, as well as Gaussian beams, is supported. Implemented accounting for complex noise in the initial condition. In addition, two-dimensional beams are also considered.
