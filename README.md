@@ -12,7 +12,7 @@ Program for scientific research, which allows to simulate the phenomenon of [sel
 
 * Python 3
 
-![python](resources/readme/python.jpg)
+![python](resources/readme/python.png)
 
 * pdflatex
 
