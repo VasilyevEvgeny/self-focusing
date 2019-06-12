@@ -2,7 +2,7 @@
 
 Program for scientific research, which allows to simulate the phenomenon of self-focusing of different laser beams (including Gaussian, annular and vortex beams) in solid media in different approximations taking into account noise.
 
-![wiki](https://github.com/VasilyevEvgeny/self-focusing/wiki)
+[wiki](https://github.com/VasilyevEvgeny/self-focusing/wiki)
 
 <p align="center">
 <img src=resources/demonstration.gif>
