@@ -2,8 +2,8 @@
 
 Program for scientific research, which allows to simulate the phenomenon of [self-focusing](https://en.wikipedia.org/wiki/Self-focusing) of different laser beams (including [Gaussian](https://en.wikipedia.org/wiki/Gaussian_beam), ring and [vortex beams](https://en.wikipedia.org/wiki/Optical_vortex)) in condensed media in different approximations taking into account noise.
 
-[wiki](https://github.com/VasilyevEvgeny/self-focusing/wiki)
-
+### [**--> wiki <--**](https://github.com/VasilyevEvgeny/self-focusing/wiki)
+  
 <p align="center">
 <img src=resources/demonstration.gif>
 </p>
