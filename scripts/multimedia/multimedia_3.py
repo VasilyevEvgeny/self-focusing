@@ -45,8 +45,8 @@ class Multimedia1(BaseMultimedia):
                                         flag_const_dz=True,
                                         dn_print_current_state=50,
                                         dn_plot_beam=50,
-                                        max_intensity_to_stop=10**17,
-                                        beam_normalization_type=10**17/beam.i_0,
+                                        max_intensity_to_stop=4*10**16,
+                                        beam_normalization_type=4*10**16/beam.i_0,
                                         beam_in_3D=True,
                                         plot_beam_func=plot_beam_func)
 
@@ -122,7 +122,7 @@ class Multimedia1(BaseMultimedia):
 
         if title:
             i_max = beam.i_max * beam.i_0
-            ax.text(0, -250, 18, s='$\qquad\quad$z = %4.02f cm\n$\quad$I$_{max}$ = %4.02f TW/сm$^2$\n\n\n\n\n' %
+            ax.text(0, -250, 7.5, s='$\qquad\quad$z = %4.02f cm\n$\quad$I$_{max}$ = %4.02f TW/сm$^2$\n\n\n\n\n' %
                                   (round(z * 10 ** 2, 3),  i_max / 10**16), fontsize=font_size - 10)
 
         if ticks:
@@ -135,20 +135,20 @@ class Multimedia1(BaseMultimedia):
             plt.yticks([])
 
         ax.set_zlim([levels_plot[0], levels_plot[-1]])
-        ax.text(300, 5, 20, s='$\qquad\qquad\qquad\qquad\mathbf{I}$\n$\qquad\qquad\qquad$TW/cm$\mathbf{^2}$',
+        ax.text(300, 5, 8, s='$\qquad\qquad\qquad\qquad\mathbf{I}$\n$\qquad\qquad\qquad$TW/cm$\mathbf{^2}$',
                 fontsize=font_size-10, fontweight=font_weight)
         n_z_ticks = 4
         di0 = levels_plot[-1] / n_z_ticks
         prec = 2
         zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks + 1)]
-        zticks_labels = ["%.01f" % round(e * beam.i_0 / 10**16, 3) for e in zticks]
+        zticks_labels = ["%.00f" % round(e * beam.i_0 / 10**16, 3) for e in zticks]
         ax.set_zticks(zticks)
         ax.set_zticklabels(zticks_labels)
 
         ax.tick_params(labelsize=font_size - 5)
         ax.xaxis.set_tick_params(pad=30)
         ax.yaxis.set_tick_params(pad=5)
-        ax.zaxis.set_tick_params(pad=20)
+        ax.zaxis.set_tick_params(pad=10)
 
         if labels:
             plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
