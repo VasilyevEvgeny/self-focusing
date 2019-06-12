@@ -5,18 +5,18 @@ Program for scientific research, which allows to simulate the phenomenon of [sel
 ### [**>>> wiki <<<**](https://github.com/VasilyevEvgeny/self-focusing/wiki)
   
 <p align="center">
-<img src=resources/demonstration.gif>
+<img src=resources/readme/demonstration.gif>
 </p>
 
 # Requirements
 
 * Python 3
 
-![python](resources/python.jpg)
+![python](resources/readme/python.jpg)
 
 * pdflatex
 
-![latex](resources/latex.png)
+![latex](resources/readme/latex.png)
 
 # Installation
 
