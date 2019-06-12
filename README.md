@@ -9,7 +9,9 @@ Program for scientific research, which allows to simulate the phenomenon of self
 # Requirements
 
 * Python 3
+![python](resources/python.jpg)
 * pdflatex
+![latex](resources/latex.png)
 
 # Installation
 
