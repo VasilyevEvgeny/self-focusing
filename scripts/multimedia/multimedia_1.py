@@ -13,7 +13,7 @@ class Multimedia1(BaseMultimedia):
 
     def _get_data(self, plot_beam_func):
         indices = []
-        for idx_col, noise_percent in enumerate([0]):
+        for idx_col, noise_percent in enumerate([1]):
             for idx_row, (M, m) in enumerate([(1, 1)]):
                 print('================================================================')
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
@@ -31,8 +31,8 @@ class Multimedia1(BaseMultimedia):
                               lmbda=1800 * 10 ** -9,
                               x_0=100 * 10 ** -6,
                               y_0=100 * 10 ** -6,
-                              n_x=256,
-                              n_y=256,
+                              n_x=2048,
+                              n_y=2048,
                               radii_in_grid=20)
 
                 propagator = Propagator(args=self._args,
