@@ -348,7 +348,7 @@ def plot_noise(beam, path):
     x_min, x_max = 0, 5 * r_corr
     n_xs = 5
     dxs = (x_max - x_min) / n_xs
-    x_ticks = [int(i * dxs) for i in range(n_xs + 1)]
+    x_ticks = [round(i * dxs) for i in range(n_xs + 1)]
 
     y_min, y_max = -0.15 * variance_expected, variance_expected * 1.15
     n_ys = 5
@@ -409,10 +409,10 @@ def plot_noise(beam, path):
     ax_iy.set_yticks(y_ticks)
     ax_iy.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
-    fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
+    fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r_{corr} = %d}$ $\mathbf{\mu m}$' %
                  (variance_expected, round(r_corr)), fontsize=font_size, fontweight=font_weight)
 
-    plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight', dpi=50)
+    plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight')
     plt.close()
 
     del field_real, field_imag
