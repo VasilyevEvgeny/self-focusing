@@ -11,7 +11,7 @@ class Beam2D(Beam):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self._halse = None  # flag to use only half of the distribution
+        self._half = None  # flag to use only half of the distribution
 
         # distribution type determination
         if self._M == 0:

@@ -13,14 +13,14 @@ class Multimedia1(BaseMultimedia):
 
     def _get_data(self, plot_beam_func):
         indices = []
-        for idx_col, noise_percent in enumerate([0]):
+        for idx_col, noise_percent in enumerate([1]):
             for idx_row, (M, m) in enumerate([(1, 1)]):
                 print('================================================================')
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
-                noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
-                                      variance=0.5)
+                noise = GaussianNoise(r_corr_in_meters=50 * 10 ** -6,
+                                      variance=2)
 
                 beam = BeamXY(medium='SiO2',
                               p_0_to_p_vortex=5,
@@ -40,7 +40,7 @@ class Multimedia1(BaseMultimedia):
                                         beam=beam,
                                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                                         kerr_effect=KerrExecutorXY(beam=beam),
-                                        n_z=3000,
+                                        n_z=1,
                                         dz0=10**-5,
                                         flag_const_dz=True,
                                         dn_print_current_state=50,

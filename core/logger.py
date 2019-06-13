@@ -285,6 +285,16 @@ $R_{kerr}$ & %.2f & -- \\tabularnewline
 C & %.2f & -- \\tabularnewline
 ''' % (beam.noise_percent / 100)
 
+            if beam.noise_percent:
+                tex_file_data += \
+'''
+\hline
+$\sigma^2$ & %.2f & -- \\tabularnewline
+\hline
+$r_{corr}$ & %d & $\mu$m \\tabularnewline
+''' % (beam.noise.variance_expected,
+       beam.noise.r_corr_in_meters * 10**6)
+
         tex_file_data += \
 '''\\midrule[2pt]'''
 

@@ -412,7 +412,7 @@ def plot_noise(beam, path):
     fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r^* = %d}$ $\mathbf{\mu m}$' %
                  (variance_expected, round(r_corr)), fontsize=font_size, fontweight=font_weight)
 
-    plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight')
+    plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight', dpi=50)
     plt.close()
 
     del field_real, field_imag
