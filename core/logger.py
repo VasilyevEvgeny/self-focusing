@@ -293,7 +293,7 @@ $\sigma^2$ & %.2f & -- \\tabularnewline
 \hline
 $r_{corr}$ & %d & $\mu$m \\tabularnewline
 ''' % (beam.noise.variance_expected,
-       beam.noise.r_corr_in_meters * 10**6)
+       round(beam.noise.r_corr_in_meters * 10**6, 1))
 
         tex_file_data += \
 '''\\midrule[2pt]'''

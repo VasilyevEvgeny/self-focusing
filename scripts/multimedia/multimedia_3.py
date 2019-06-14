@@ -19,7 +19,7 @@ class Multimedia1(BaseMultimedia):
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
-                noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
+                noise = GaussianNoise(r_corr_in_meters=100 * 10 ** -6,
                                       variance=1)
 
                 beam = BeamXY(medium='SiO2',
@@ -40,7 +40,7 @@ class Multimedia1(BaseMultimedia):
                                         beam=beam,
                                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                                         kerr_effect=KerrExecutorXY(beam=beam),
-                                        n_z=1,
+                                        n_z=3000,
                                         dz0=10**-5,
                                         flag_const_dz=True,
                                         dn_print_current_state=50,
