@@ -1,4 +1,4 @@
-from core import BeamX, SweepDiffractionExecutorX, KerrExecutorX, Propagator, parse_args
+from core import BeamX, SweepDiffractionExecutorX, KerrExecutorX, Propagator, BeamVisualizator2D, parse_args
 
 # parse args from command line
 args = parse_args()
@@ -17,12 +17,13 @@ propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutorX(beam=beam),
                         kerr_effect=KerrExecutorX(beam=beam),
-                        n_z=1,
-                        dz0=beam.z_diff/1000,
-                        flag_const_dz=True,
-                        dn_print_current_state=10,
-                        dn_plot_beam=1,
-                        beam_normalization_type='local')
+                        n_z=1000,
+                        dz_0=beam.z_diff/1000,
+                        const_dz=True,
+                        print_current_state_every=10,
+                        plot_beam_every=1,
+                        plot_beam_maximum='local',
+                        plot_beam_func=BeamVisualizator2D.plot_beam_profile)
 
 # initiate propagation process
 propagator.propagate()

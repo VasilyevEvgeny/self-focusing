@@ -21,7 +21,7 @@ class ComplexNoise(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self._variance_expected = kwargs.get('variance', 1)  # variance
 
-        self._r_corr_in_meters = kwargs['r_corr_in_meters']  # correlation radius
+        self._r_corr_in_meters = kwargs['r_corr']  # correlation radius
         self._r_corr_in_points = None
 
         self._noise_field = None  # array for complex noise

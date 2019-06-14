@@ -13,11 +13,11 @@ class BeamR(Beam3D):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.__r_0 = kwargs['r_0']  # characteristic spatial size
-        self.__r_max = self._radii_in_grid * self.__r_0  # spatial grid size
+        self.__r_0 = kwargs['r_0']  # characteristic spatial size, [m]
+        self.__r_max = self._radii_in_grid * self.__r_0  # spatial grid size, [m]
         self.__n_r = kwargs['n_r']  # number of points in spatial grid
-        self.__dr = self.__r_max / self.__n_r  # spatial grid step
-        self.__rs = [i * self.__dr for i in range(self.__n_r)]  # spatial grid nodes
+        self.__dr = self.__r_max / self.__n_r  # spatial grid step, [m]
+        self.__rs = [i * self.__dr for i in range(self.__n_r)]  # spatial grid nodes, [m]
 
         # field initialization
         self._field = self.__initialize_field(self._M, self.__r_0, self.__dr, self.__n_r)

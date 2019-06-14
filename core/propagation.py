@@ -1,7 +1,7 @@
 from numpy import zeros
 from numba import jit
 
-from .visualization import plot_beam_2d, plot_beam_3d_flat, plot_beam_3d_volume, plot_track, plot_noise
+from .visualization import plot_track, plot_noise
 from .logger import Logger
 from .manager import Manager
 
@@ -26,29 +26,20 @@ class Propagator:
                                path=self.__manager.results_dir)  #
 
         self.__n_z = kwargs['n_z']  # maximum number of grid steps along evolutionary coordinate z
-        self.__flag_const_dz = kwargs['flag_const_dz']  # use constant step along z or not
+        self.__const_dz = kwargs['const_dz']  # use constant step along z or not
 
-        self.__dn_print_current_state = kwargs.get('dn_print_current_state', None)  # frequency of current state print
+        self.__print_current_state_every = kwargs.get('print_current_state_every', None)  # frequency of current state print
 
-        self.__dn_plot_beam = kwargs.get('dn_plot_beam', None)  # frequency of plotting beam
+        self.__plot_beam_every = kwargs.get('plot_beam_every', None)  # frequency of plotting beam
         self.__flag_print_track = kwargs.get('print_track', True)  # print track function or not
 
         # settings for function which plots beam
-        if self.__dn_plot_beam:
-            self.__beam_normalization_type = kwargs['beam_normalization_type']
-            self.__plot_beam_func = kwargs.get('plot_beam_func', None)
-            if self.__plot_beam_func is None:
-                if self.__beam.info == 'beam_x':
-                    self.__plot_beam_func = plot_beam_2d
-                else:
-                    self.__beam_in_3D = kwargs.get('beam_in_3D', False)
-                    if self.__beam_in_3D:
-                        self.__plot_beam_func = plot_beam_3d_volume
-                    else:
-                        self.__plot_beam_func = plot_beam_3d_flat
+        if self.__plot_beam_every:
+            self.__plot_beam_maximum = kwargs['plot_beam_maximum']
+            self.__plot_beam_func = kwargs['plot_beam_func']
 
         self.__z = 0.0  # initial value of z
-        self.__dz = kwargs['dz0']  # initial step along z
+        self.__dz = kwargs['dz_0']  # initial step along z
 
         self.__max_intensity_to_stop = kwargs.get('max_intensity_to_stop', 10**17)  # peak intensity in beam
                                                                                     # at which the calculations stop
@@ -145,7 +136,7 @@ class Propagator:
 
                 # update intensity and step along z (if needed)
                 self.__logger.measure_time(self.__beam.update_intensity, [])
-                if not self.__flag_const_dz:
+                if not self.__const_dz:
                     self.__dz = self.__logger.measure_time(self.__update_dz, [self.__beam.medium.k_0,
                                                                               self.__beam.medium.n_0,
                                                                               self.__beam.medium.n_2,
@@ -157,16 +148,16 @@ class Propagator:
                                                                     self.__beam.i_max, self.__beam.i_0])
 
             # print current state
-            if self.__dn_print_current_state:
-                if not n_step % self.__dn_print_current_state:
+            if self.__print_current_state_every:
+                if not n_step % self.__print_current_state_every:
                     self.__logger.measure_time(self.__logger.print_current_state, [n_step, self.__states_arr,
                                                                                    self.__states_columns])
 
             # plot beam
-            if self.__dn_plot_beam and not (n_step % self.__dn_plot_beam):
-                self.__logger.measure_time(self.__plot_beam_func, [self.__args.prefix, self.__beam, self.__z, n_step,
-                                                                   self.__manager.beam_dir,
-                                                                   self.__beam_normalization_type])
+            if self.__plot_beam_every and not (n_step % self.__plot_beam_every):
+                self.__logger.measure_time(self.__plot_beam_func, [self.__beam, self.__z, n_step,
+                                                                   self.__plot_beam_maximum,
+                                                                   self.__manager.beam_dir])
 
             # check if calculations must be stopped
             if self.__beam.i_max * self.__beam.i_0 > self.__max_intensity_to_stop:

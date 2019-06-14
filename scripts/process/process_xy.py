@@ -1,10 +1,11 @@
-from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, parse_args
+from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, BeamVisualizator3D, \
+    parse_args
 
 # parse args from command line
 args = parse_args()
 
 # create noise object
-noise = GaussianNoise(r_corr_in_meters=50*10**-6,
+noise = GaussianNoise(r_corr=50*10**-6,
                       variance=1)
 
 # create object of 3D beam
@@ -26,12 +27,12 @@ propagator = Propagator(args=args,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                         kerr_effect=KerrExecutorXY(beam=beam),
                         n_z=1,
-                        dz0=10**-4,
-                        flag_const_dz=False,
-                        dn_print_current_state=50,
-                        dn_plot_beam=50,
-                        beam_normalization_type='local',
-                        beam_in_3D=False)
+                        dz_0=10**-4,
+                        const_dz=False,
+                        print_current_state_every=50,
+                        plot_beam_every=50,
+                        plot_beam_maximum='local',
+                        plot_beam_func=BeamVisualizator3D.plot_beam_flat)
 
 # initiate propagation process
 propagator.propagate()

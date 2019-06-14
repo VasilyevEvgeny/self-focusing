@@ -1,23 +1,94 @@
+from abc import ABCMeta, abstractmethod
 from numpy import transpose, meshgrid
 from matplotlib import pyplot as plt
-from matplotlib import rc
 from mpl_toolkits.mplot3d import Axes3D
 from pylab import contourf
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
 
-def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_normalization_to_x0=True):
-    """Plots intensity distribution in 2D beam"""
+class BeamVisualizator(metaclass=ABCMeta):
 
-    fig_size, x_max, ticks, labels, title, bbox = None, None, None, None, None, None
-    if mode == 'multimedia':
-        fig_size = (3, 3)
-        x_max = 400
-        title = False
-        ticks = False
-        labels = False
-    else:
+    def __init__(self, **kwargs):
+        self._beam = kwargs['beam']
+        self._plot_beam_maximum = kwargs['plot_beam_maximum']
+
+        # FLAGS
+        self._ticks = True
+        self._labels = True
+        self._title = True
+        self._colorbar = True
+
+        self._font_size = 50
+        self._font_weight = 'bold'
+
+        self._fig_size = (12, 10)
+
+        self._cmap = plt.get_cmap('jet')
+
+        self._x_max = 250 * 10**-6  # m
+        self._y_max = self._x_max
+
+        self._x_left, self._x_right = -self._x_max, self._x_max
+        self._y_left, self._y_right = -self._y_max, self._y_max
+
+
+
+        self._levels_plot, self._max_intensity = self.__calculate_levels_plot()
+
+        self._x_labels = ['-150', '0', '+150']
+        self._y_labels = ['-150', '0', '+150']
+
+    def _process_arr(self):
+        self._arr, self._xs, self._ys = None, None, None
+        if self._beam.info == 'beam_r':
+            self._arr = r_to_xy_real(self._beam.intensity)
+            self._xs = [-e for e in self._beam.rs][::-1][:-1] + self._beam.rs
+            self._ys = self._xs
+        elif self._beam.info == 'beam_xy':
+            self._arr = self._beam.intensity
+            self._xs, self._ys = self._beam.xs, self._beam.ys
+
+        self._arr, self._x_idx_left, self._x_idx_right = crop_x(self._arr, self._xs, self._x_left, self._x_right,
+                                                                mode='x')
+        self._arr, self._y_idx_left, self._y_idx_right = crop_x(self._arr, self._ys, self._y_left, self._y_right,
+                                                                mode='y')
+
+        self._arr = transpose(self._arr)
+
+        self._xs = self._xs[self._x_idx_left:self._x_idx_right]
+        self._ys = self._ys[self._y_idx_left:self._y_idx_right]
+
+    def __calculate_levels_plot(self):
+        n_plot_levels = 100
+        max_intensity = None
+        if isinstance(self._plot_beam_maximum, int) or isinstance(self._plot_beam_maximum, float):
+            max_intensity = self._plot_beam_maximum
+        elif self._plot_beam_maximum == 'local':
+            max_intensity = self._beam.i_max / self._beam.i_0
+        di = max_intensity / n_plot_levels
+        levels_plot = [i * di for i in range(n_plot_levels + 1)]
+
+        return levels_plot, max_intensity
+
+    @abstractmethod
+    def plot_beam_flat(self, beam, z, step, plot_beam_maximum, path_to_save):
+        """Abstract method to plot beam in flat"""
+
+    @abstractmethod
+    def plot_beam_volume(self, beam, z, step, plot_beam_maximum, path_to_save):
+        """Abstract method to plot beam in volume"""
+
+
+class BeamVisualizator2D(BeamVisualizator):
+    def __init__(self):
+        super().__init__()
+
+    def plot_beam_profile(self, beam, z, step, plot_beam_maximum, path_to_save):
+        """Plots intensity distribution in 2D beam"""
+
+        x_ticks_normalization_to_x0 = True
+
         fig_size = (12, 10)
         x_max = 400
         title = False
@@ -25,255 +96,210 @@ def plot_beam_2d(mode, beam, z, step, path, plot_beam_normalization, x_ticks_nor
         labels = True
         bbox = 'tight'
 
-    font_size = 40
-    plt.figure(figsize=fig_size)
-    plt.plot(beam.intensity, color='black', linewidth=5)
+        font_size = 40
+        plt.figure(figsize=fig_size)
+        plt.plot(beam.intensity, color='black', linewidth=5)
 
-    if title:
-        plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm', fontsize=font_size-10)
+        if title:
+            plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm', fontsize=font_size-10)
 
-    if ticks:
+        if ticks:
 
-        if x_ticks_normalization_to_x0:
-            n_ticks = 11
-            x_tickslabels = [ str(i - n_ticks // 2) for i in range(n_ticks) ]
-            points_in_x0 = int(beam.x_0 / beam.dx)
-            center = int(0.5 * beam.n_x)
-            x_ticks = [ center + (i - n_ticks//2) * points_in_x0 for i in range(n_ticks) ]
-            plt.xticks(x_ticks, x_tickslabels, fontsize=font_size-10)
+            if x_ticks_normalization_to_x0:
+                n_ticks = 11
+                x_tickslabels = [ str(i - n_ticks // 2) for i in range(n_ticks) ]
+                points_in_x0 = int(beam.x_0 / beam.dx)
+                center = int(0.5 * beam.n_x)
+                x_ticks = [ center + (i - n_ticks//2) * points_in_x0 for i in range(n_ticks) ]
+                plt.xticks(x_ticks, x_tickslabels, fontsize=font_size-10)
+            else:
+                x_labels = ['-150', '0', '+150']
+                x_ticks = calc_ticks_x(x_labels, beam.xs)
+                plt.xticks(x_ticks, x_labels, fontsize=font_size-10)
+
+            if isinstance(plot_beam_maximum, int) or isinstance(plot_beam_maximum, float):
+                max_intensity_value = plot_beam_maximum
+                levels_plot = 7
+                di = max_intensity_value / levels_plot
+                y_ticks = [i * di for i in range(levels_plot + 1)]
+                y_labels = ['%02.02f' % round(e, 2) for e in y_ticks]
+                plt.yticks(y_ticks, y_labels, fontsize=font_size - 10)
+                percent = 0.15
+                plt.ylim([-percent, (1 + percent) * max_intensity_value])
+            elif plot_beam_maximum == 'local':
+                plt.yticks(fontsize=font_size - 10)
+
+        x_max_ticks = calc_ticks_x([str(-x_max), str(x_max)], beam.xs)
+        plt.xlim(x_max_ticks)
+
+        if labels:
+            if x_ticks_normalization_to_x0:
+                plt.xlabel('$\mathbf{x \ / \ x_0}$', fontsize=font_size, fontweight='bold')
+            else:
+                plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+            plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight='bold')
+
+        plt.grid(linestyle='dotted', linewidth=2, alpha=0.5)
+        plt.savefig(path_to_save + '/%04d.png' % step, bbox_inches='tight')
+        plt.close()
+
+    def plot_beam_flat(self, beam, z, step, plot_beam_maximum, path_to_save):
+        pass
+
+    def plot_beam_volume(self, beam, z, step, plot_beam_maximum, path_to_save):
+        pass
+
+
+class BeamVisualizator3D(BeamVisualizator):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def plot_beam_flat(self, beam, z, step, plot_beam_maximum, path_to_save):
+        """Plots intensity distribution in 2D beam with contour_plot"""
+
+        fig, ax = plt.subplots(figsize=self._fig_size)
+        plot = contourf(self._arr, cmap=self._cmap, levels=self._levels_plot)
+
+        if self._ticks:
+            x_ticks = calc_ticks_x(self._x_labels, self._xs)
+            y_ticks = calc_ticks_x(self._y_labels, self._ys)
+            plt.xticks(x_ticks, self._y_labels, fontsize=self._font_size - 5)
+            plt.yticks(y_ticks, self._x_labels, fontsize=self._font_size - 5)
         else:
+            plt.xticks([])
+            plt.yticks([])
+
+        if self._labels:
+            plt.xlabel('x, $\mathbf{\mu m}$', fontsize=self._font_size, fontweight='bold')
+            plt.ylabel('y, $\mathbf{\mu m}$', fontsize=self._font_size, fontweight='bold')
+
+        if self._title:
+            i_max = beam.i_max * beam.i_0
+            plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
+                      fontsize=self._font_size - 10)
+
+        plt.grid(color='white', linestyle='dotted', linewidth=3, alpha=0.5)
+        ax.set_aspect('equal')
+
+        if self._colorbar:
+            n_ticks_colorbar_levels = 4
+            dcb = self._max_intensity / n_ticks_colorbar_levels
+            levels_ticks_colorbar = [i * dcb for i in range(n_ticks_colorbar_levels + 1)]
+            colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation='vertical', aspect=10, pad=0.05)
+            colorbar.set_label('I/I$\mathbf{_0}$', labelpad=-140, y=1.2, rotation=0, fontsize=self._font_size, fontweight='bold')
+            ticks_cbar = ['%05.2f' % e if e != 0 else '00.00' for e in levels_ticks_colorbar]
+            colorbar.ax.set_yticklabels(ticks_cbar)
+            colorbar.ax.tick_params(labelsize=self._font_size - 10)
+
+        # if 'multimedia' in mode:
+        #     bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
+        #     if beam.distribution_type == 'gauss':
+        #         m, M = 0, 0
+        #     else:
+        #         m, M = beam.m, beam.M
+        #     C = beam.noise_percent
+        #     plt.title('$M = {:d}, \ m = {:d}, \ C = {:02d}\%$'.format(M, m, C), fontsize=14)
+
+        plt.savefig(path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.close()
+
+        del arr
+
+    def plot_beam_volume(self, beam, z, step, plot_beam_maximum, path_to_save):
+        """Plots intensity distribution in 2D beam with 3D-plot"""
+
+        fig_size = (12, 10)
+        x_max = 250
+        y_max = 250
+        title = False
+        ticks = True
+        labels = True
+
+        x_left = -x_max * 10 ** -6
+        x_right = x_max * 10 ** -6
+        y_left = -y_max * 10 ** -6
+        y_right = y_max * 10 ** -6
+
+        arr, xs, ys = None, None, None
+        if beam.info == 'beam_r':
+            arr = r_to_xy_real(beam.intensity)
+            xs = [-e for e in beam.rs][::-1][:-1] + beam.rs
+            ys = xs
+        elif beam.info == 'beam_xy':
+            arr = beam.intensity
+            xs, ys = beam.xs, beam.ys
+
+        arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
+        arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
+
+        arr = transpose(arr)
+
+        xs = [e * 10**6 for e in xs[x_idx_left:x_idx_right]]
+        ys = [e * 10**6 for e in ys[y_idx_left:y_idx_right]]
+
+        xx, yy = meshgrid(xs, ys)
+
+        n_plot_levels = 100
+        max_intensity_value = None
+        if isinstance(plot_beam_maximum, int) or isinstance(plot_beam_maximum, float):
+            max_intensity_value = plot_beam_maximum
+        elif plot_beam_maximum == 'local':
+            max_intensity_value = beam.i_max
+        di = max_intensity_value / n_plot_levels
+        levels_plot = [i * di for i in range(n_plot_levels + 1)]
+
+        font_size = 40
+        fig = plt.figure(figsize=fig_size)
+        ax = fig.add_subplot(111, projection='3d')
+
+        ax.plot_surface(xx, yy, arr, cmap='jet', rstride=1, cstride=1, antialiased=False,
+                        vmin=levels_plot[0], vmax=levels_plot[-1])
+
+        ax.view_init(elev=50, azim=345)
+
+        offset_x = -1.1 * x_max
+        offset_y = 1.1 * y_max
+        ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x, levels=0)
+        ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y, levels=0)
+
+        if ticks:
             x_labels = ['-150', '0', '+150']
-            x_ticks = calc_ticks_x(x_labels, beam.xs)
-            plt.xticks(x_ticks, x_labels, fontsize=font_size-10)
-
-        if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
-            max_intensity_value = plot_beam_normalization
-            levels_plot = 7
-            di = max_intensity_value / levels_plot
-            y_ticks = [i * di for i in range(levels_plot + 1)]
-            y_labels = ['%02.02f' % round(e, 2) for e in y_ticks]
-            plt.yticks(y_ticks, y_labels, fontsize=font_size - 10)
-            percent = 0.15
-            plt.ylim([-percent, (1 + percent) * max_intensity_value])
-        elif plot_beam_normalization == 'local':
-            plt.yticks(fontsize=font_size - 10)
-
-    x_max_ticks = calc_ticks_x([str(-x_max), str(x_max)], beam.xs)
-    plt.xlim(x_max_ticks)
-
-    if labels:
-        if x_ticks_normalization_to_x0:
-            plt.xlabel('$\mathbf{x \ / \ x_0}$', fontsize=font_size, fontweight='bold')
+            y_labels = ['-150', '0', '+150']
+            plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
+            plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
         else:
-            plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-        plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight='bold')
+            plt.xticks([])
+            plt.yticks([])
 
-    plt.grid(linestyle='dotted', linewidth=2, alpha=0.5)
-    plt.savefig(path + '/%04d.png' % step, bbox_inches='tight')
-    plt.close()
+        ax.set_zlim([levels_plot[0], levels_plot[-1]])
+        n_z_ticks = 3
+        di0 = levels_plot[-1] / n_z_ticks
+        prec = 2
+        zticks = [int(i * di0 * 10**prec) / 10**prec for i in range(n_z_ticks)]
+        ax.set_zticks(zticks)
 
+        ax.tick_params(labelsize=font_size - 5)
+        ax.xaxis.set_tick_params(pad=30)
+        ax.yaxis.set_tick_params(pad=5)
+        ax.zaxis.set_tick_params(pad=20)
 
-def plot_beam_3d_flat(mode, beam, z, step, path, plot_beam_normalization):
-    """Plots intensity distribution in 2D beam with contour_plot"""
+        if labels:
+            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
+            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
 
-    fig_size, x_max, y_max, ticks, labels, title, colorbar, bbox = None, None, None, None, None, None, None, None
-    if 'multimedia' in mode:
-        fig_size = (3, 3)
-        x_max = 250
-        y_max = 250
-        title = False
-        ticks = False
-        labels = False
-        colorbar = False
-    else:
-        fig_size = (12, 10)
-        x_max = 250
-        y_max = 250
-        title = False
-        ticks = True
-        labels = True
-        colorbar = True
-        bbox = 'tight'
+        if title:
+            i_max = beam.i_max * beam.i_0
+            plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
+                      fontsize=font_size - 10)
 
-    x_left = -x_max * 10 ** -6
-    x_right = x_max * 10 ** -6
-    y_left = -y_max * 10 ** -6
-    y_right = y_max * 10 ** -6
+        ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
 
-    arr, xs, ys = None, None, None
-    if beam.info == 'beam_r':
-        arr = r_to_xy_real(beam.intensity)
-        xs = [-e for e in beam.rs][::-1][:-1] + beam.rs
-        ys = xs
-    elif beam.info == 'beam_xy':
-        arr = beam.intensity
-        xs, ys = beam.xs, beam.ys
+        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
 
-    arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
-    arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
+        plt.savefig(path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.close()
 
-    arr = transpose(arr)
-
-    xs = xs[x_idx_left:x_idx_right]
-    ys = ys[y_idx_left:y_idx_right]
-
-    n_plot_levels = 100
-    max_intensity_value = None
-    if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
-        max_intensity_value = plot_beam_normalization
-    elif plot_beam_normalization == 'local':
-        max_intensity_value = beam.i_max
-    di = max_intensity_value / n_plot_levels
-    levels_plot = [i * di for i in range(n_plot_levels + 1)]
-
-    fig, ax = plt.subplots(figsize=fig_size)
-    font_size = 50
-    cmap = plt.get_cmap('jet')
-    plot = contourf(arr, cmap=cmap, levels=levels_plot)
-
-    if ticks:
-        x_labels = ['-150', '0', '+150']
-        y_labels = ['-150', '0', '+150']
-        x_ticks = calc_ticks_x(x_labels, xs)
-        y_ticks = calc_ticks_x(y_labels, ys)
-        plt.xticks(x_ticks, y_labels, fontsize=font_size - 5)
-        plt.yticks(y_ticks, x_labels, fontsize=font_size - 5)
-    else:
-        plt.xticks([])
-        plt.yticks([])
-
-    if labels:
-        plt.xlabel('x, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-        plt.ylabel('y, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-
-    if title:
-        i_max = beam.i_max * beam.i_0
-        plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
-                  fontsize=font_size - 10)
-
-    ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
-    ax.set_aspect('equal')
-
-    if colorbar:
-        n_ticks_colorbar_levels = 4
-        dcb = max_intensity_value / n_ticks_colorbar_levels
-        levels_ticks_colorbar = [i * dcb for i in range(n_ticks_colorbar_levels + 1)]
-        colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation='vertical', aspect=10, pad=0.05)
-        colorbar.set_label('I/I$\mathbf{_0}$', labelpad=-140, y=1.2, rotation=0, fontsize=font_size, fontweight='bold')
-        ticks_cbar = ['%05.2f' % e if e != 0 else '00.00' for e in levels_ticks_colorbar]
-        colorbar.ax.set_yticklabels(ticks_cbar)
-        colorbar.ax.tick_params(labelsize=font_size - 10)
-
-    if 'multimedia' in mode:
-        bbox = fig.bbox_inches.from_bounds(0.22, 0.19, 2.63, 3)
-        if beam.distribution_type == 'gauss':
-            m, M = 0, 0
-        else:
-            m, M = beam.m, beam.M
-        C = beam.noise_percent
-        plt.title('$M = {:d}, \ m = {:d}, \ C = {:02d}\%$'.format(M, m, C), fontsize=14)
-
-    plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
-    plt.close()
-
-    del arr
-
-
-def plot_beam_3d_volume(prefix, beam, z, step, path, plot_beam_normalization):
-    """Plots intensity distribution in 2D beam with 3D-plot"""
-
-    fig_size = (12, 10)
-    x_max = 250
-    y_max = 250
-    title = False
-    ticks = True
-    labels = True
-
-    x_left = -x_max * 10 ** -6
-    x_right = x_max * 10 ** -6
-    y_left = -y_max * 10 ** -6
-    y_right = y_max * 10 ** -6
-
-    arr, xs, ys = None, None, None
-    if beam.info == 'beam_r':
-        arr = r_to_xy_real(beam.intensity)
-        xs = [-e for e in beam.rs][::-1][:-1] + beam.rs
-        ys = xs
-    elif beam.info == 'beam_xy':
-        arr = beam.intensity
-        xs, ys = beam.xs, beam.ys
-
-    arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
-    arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
-
-    arr = transpose(arr)
-
-    xs = [e * 10**6 for e in xs[x_idx_left:x_idx_right]]
-    ys = [e * 10**6 for e in ys[y_idx_left:y_idx_right]]
-
-    xx, yy = meshgrid(xs, ys)
-
-    n_plot_levels = 100
-    max_intensity_value = None
-    if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
-        max_intensity_value = plot_beam_normalization
-    elif plot_beam_normalization == 'local':
-        max_intensity_value = beam.i_max
-    di = max_intensity_value / n_plot_levels
-    levels_plot = [i * di for i in range(n_plot_levels + 1)]
-
-    font_size = 40
-    fig = plt.figure(figsize=fig_size)
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.plot_surface(xx, yy, arr, cmap='jet', rstride=1, cstride=1, antialiased=False,
-                    vmin=levels_plot[0], vmax=levels_plot[-1])
-
-    ax.view_init(elev=50, azim=345)
-
-    offset_x = -1.1 * x_max
-    offset_y = 1.1 * y_max
-    ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x, levels=0)
-    ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y, levels=0)
-
-    if ticks:
-        x_labels = ['-150', '0', '+150']
-        y_labels = ['-150', '0', '+150']
-        plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
-        plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
-    else:
-        plt.xticks([])
-        plt.yticks([])
-
-    ax.set_zlim([levels_plot[0], levels_plot[-1]])
-    n_z_ticks = 3
-    di0 = levels_plot[-1] / n_z_ticks
-    prec = 2
-    zticks = [int(i * di0 * 10**prec) / 10**prec for i in range(n_z_ticks)]
-    ax.set_zticks(zticks)
-
-    ax.tick_params(labelsize=font_size - 5)
-    ax.xaxis.set_tick_params(pad=30)
-    ax.yaxis.set_tick_params(pad=5)
-    ax.zaxis.set_tick_params(pad=20)
-
-    if labels:
-        plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-        plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight='bold')
-
-    if title:
-        i_max = beam.i_max * beam.i_0
-        plt.title('z = ' + str(round(z * 10 ** 2, 3)) + ' cm\nI$_{max}$ = %.2E' % i_max + ' W/m$^2$\n',
-                  fontsize=font_size - 10)
-
-    ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
-
-    bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
-
-    plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox)
-    plt.close()
-
-    del arr
+        del arr
 
 
 def plot_noise(beam, path):

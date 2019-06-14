@@ -31,15 +31,15 @@ class Beam(metaclass=ABCMeta):
                                         # M > 0, m = 0  ->  ring
                                         # M > 0, m > 0  ->  vortex
 
-        self._radii_in_grid = 20        # grid_size / radius
+        self._radii_in_grid = 20        # grid_size / radius, [a.u.]
 
         self._field = None              # array for complex light field
         self._intensity = None          # array for float intensity of the field
-        self._i_max = None              # peak beam intensity for z = const, [a.u.]
-        self._i_0 = None                # coefficient for initial beam intensity, W/m^2
-        self._z_diff = None             # diffraction length of the beam
+        self._i_max = None              # peak beam intensity for z = const, [W/m^2]
+        self._i_0 = None                # coefficient for initial beam intensity, [W/m^2]
+        self._z_diff = None             # diffraction length of the beam, [m]
                                         # z_diff = k_0 r_0^2
-        self._r_kerr = None             # nonlinearity parameter for Kerr effect
+        self._r_kerr = None             # nonlinearity parameter for Kerr effect, [rad]
                                         # r_kerr = 2 k_0 n_2 I_0 z_diff / n_0
 
     @abstractmethod
@@ -48,7 +48,7 @@ class Beam(metaclass=ABCMeta):
 
     def update_intensity(self):
         self._intensity = self._field_to_intensity(self._field)
-        self._i_max = maximum(self._intensity)
+        self._i_max = maximum(self._intensity) * self._i_0
 
     @staticmethod
     @jit(nopython=True)
