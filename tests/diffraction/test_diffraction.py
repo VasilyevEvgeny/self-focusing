@@ -83,10 +83,12 @@ class TestDiffraction(TestCase, metaclass=abc.ABCMeta):
 
         if self._language == 'english':
             x_label = '$\mathbf{z \ / \ z_{diff}}$'
+            y_label = '$\mathbf{I \ / \ I_{max} (z=0)}$'
         else:
             x_label = '$\mathbf{z \ / \ z_{диф}}$'
+            y_label = '$\mathbf{I \ / \ I_{макс} (z=0)}$'
         plt.xlabel(x_label, fontsize=font_size, fontweight=font_weight)
-        plt.ylabel('$\mathbf{I \ / \ I_0}$', fontsize=font_size, fontweight=font_weight)
+        plt.ylabel(y_label, fontsize=font_size, fontweight=font_weight)
 
         if self._horizontal_line == 1 / sqrt(2):
             plt.axhline(1 / sqrt(2), color='black', linestyle='solid', linewidth=5, zorder=-1)
