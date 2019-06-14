@@ -1,0 +1,11 @@
+MODULE                                   | TIME (hh:mm:ss)
+--------------------------------------------------------------
+__flush_current_state                    | 0:00:00.113933
+print_current_state                      | 0:00:00.002001
+plot_beam_func                           | 0:10:45.820098
+process_diffraction                      | 0:10:34.852194
+process_kerr_effect                      | 0:02:44.716010
+update_intensity                         | 0:00:42.731138
+__crop_states_arr                        | 0:00:00   
+log_track                                | 0:00:00   
+plot_track                               | 0:00:00   
