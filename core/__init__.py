@@ -10,4 +10,4 @@ from .manager import Manager
 from .medium import Medium
 from .noise import GaussianNoise
 from .propagation import Propagator
-from .visualization import BeamVisualizator2D, BeamVisualizator3D, plot_track, plot_noise
+from .visualization import BeamVisualizer, plot_track, plot_noise

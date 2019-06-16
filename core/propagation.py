@@ -1,7 +1,7 @@
 from numpy import zeros
 from numba import jit
 
-from .visualization import plot_track, plot_noise
+from .visualization import BeamVisualizer, plot_track, plot_noise
 from .logger import Logger
 from .manager import Manager
 
@@ -35,8 +35,8 @@ class Propagator:
 
         # settings for function which plots beam
         if self.__plot_beam_every:
-            self.__plot_beam_maximum = kwargs['plot_beam_maximum']
-            self.__plot_beam_func = kwargs['plot_beam_func']
+            self.__visualizer = kwargs['visualizer']
+            self.__visualizer.get_path_to_save(self.__manager.beam_dir)
 
         self.__z = 0.0  # initial value of z
         self.__dz = kwargs['dz_0']  # initial step along z
@@ -70,19 +70,19 @@ class Propagator:
 
         states_arr[n_step][0] = z
         states_arr[n_step][1] = dz
-        states_arr[n_step][2] = i_max
-        states_arr[n_step][3] = i_max * i_0
+        states_arr[n_step][2] = i_max / i_0
+        states_arr[n_step][3] = i_max
 
     @staticmethod
     @jit(nopython=True)
-    def __update_dz(k_0, n_0, n_2, i_max, i_0, dz, nonlin_phase_max=0.05):
+    def __update_dz(k_0, n_0, n_2, i_max, dz, nonlin_phase_max=0.05):
         """
         Reduces the step along the evolutionary coordinate z by calculating the maximum Kerr phase incursion
 
         :return: updated dz
         """
 
-        nonlin_phase = k_0 * n_2 * i_0 * i_max * dz / n_0
+        nonlin_phase = k_0 * n_2 * i_max * dz / n_0
         if nonlin_phase > nonlin_phase_max:
             dz *= 0.8 * nonlin_phase_max / nonlin_phase
 
@@ -141,11 +141,11 @@ class Propagator:
                                                                               self.__beam.medium.n_0,
                                                                               self.__beam.medium.n_2,
                                                                               self.__beam.i_max,
-                                                                              self.__beam.i_0, self.__dz])
+                                                                              self.__dz])
 
             # flush current state
             self.__logger.measure_time(self.__flush_current_state, [self.__states_arr, n_step, self.__z, self.__dz,
-                                                                    self.__beam.i_max, self.__beam.i_0])
+                                                                    self.__beam.i_max, self.beam.i_0])
 
             # print current state
             if self.__print_current_state_every:
@@ -155,12 +155,10 @@ class Propagator:
 
             # plot beam
             if self.__plot_beam_every and not (n_step % self.__plot_beam_every):
-                self.__logger.measure_time(self.__plot_beam_func, [self.__beam, self.__z, n_step,
-                                                                   self.__plot_beam_maximum,
-                                                                   self.__manager.beam_dir])
+                self.__logger.measure_time(self.__visualizer.plot_beam, [self.__beam, self.__z, n_step])
 
             # check if calculations must be stopped
-            if self.__beam.i_max * self.__beam.i_0 > self.__max_intensity_to_stop:
+            if self.__beam.i_max > self.__max_intensity_to_stop:
                 break
 
         # cropped states arr and log track

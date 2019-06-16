@@ -55,12 +55,12 @@ class BeamXY(Beam3D):
                                               self.__dx, self.__dy, self.__n_x, self.__n_y, self.__noise_percent,
                                               self.__noise_field)
 
-        self.update_intensity()
-
         # other parameters initialization
-        self._i_0 = self.__calculate_i0()
+        self._i_0 = self.__calculate_i_0()
         self._z_diff = self._medium.k_0 * mean([self.__x_0, self.__y_0])**2
         self._r_kerr = 2 * self.medium.k_0 * self.medium.n_2 * self._i_0 * self._z_diff / self.medium.n_0
+
+        self.update_intensity()
 
     @property
     def info(self):
@@ -147,7 +147,7 @@ class BeamXY(Beam3D):
 
         return intensity_intergral
 
-    def __calculate_i0(self):
+    def __calculate_i_0(self):
         """
         LATEX SYNTAX:
         P_0 = \int\limits_0^{+\infty} I_0(r) 2 \pi r dr = I_0 \int\limits_0^{+\infty} i(r) 2 \pi r dr = const I_0
@@ -159,7 +159,8 @@ class BeamXY(Beam3D):
         if self.__noise_percent == 0.0 and self.__x_0 == self.__y_0:
             return self._p_0 / (pi * self.__x_0**2 * gamma(self._M+1))
         else:
-            return self._p_0 / self.__calculate_intensity_intergral(self._intensity, self.__dx, self.__dy)
+            return self._p_0 / self.__calculate_intensity_intergral(self._field_to_intensity(self._field),
+                                                                    self.__dx, self.__dy)
 
     @staticmethod
     @jit(nopython=False)
