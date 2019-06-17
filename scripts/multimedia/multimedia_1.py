@@ -3,7 +3,7 @@ from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecut
 
 
 class Multimedia1(BaseMultimedia):
-    """1 XY vortex with noise"""
+    """XY vortex with noise"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

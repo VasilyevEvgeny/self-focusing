@@ -1,7 +1,3 @@
-from numpy import meshgrid
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
 from scripts.multimedia.multimedia_base import BaseMultimedia
 from core import BeamX, SweepDiffractionExecutorX, KerrExecutorX, Propagator, BeamVisualizer
 
@@ -38,7 +34,7 @@ class Multimedia2(BaseMultimedia):
                                         beam=beam,
                                         diffraction=SweepDiffractionExecutorX(beam=beam),
                                         kerr_effect=KerrExecutorX(beam=beam),
-                                        n_z=1000,
+                                        n_z=2000,
                                         dz_0=10**-5,
                                         const_dz=True,
                                         print_current_state_every=10,
