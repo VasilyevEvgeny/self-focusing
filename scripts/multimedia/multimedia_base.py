@@ -41,7 +41,7 @@ class BaseMultimedia(metaclass=ABCMeta):
 
         return all_files, n_pictures_max
 
-    def __compose(self, all_files, indices, n_pictures_max, fps=10, animation=True, video=True):
+    def __compose(self, all_files, indices, n_pictures_max, fps=10, n_seconds_pause=2, animation=True, video=True):
         all_files_upd = []
         for idx in range(len(all_files)):
             files = []
@@ -54,11 +54,11 @@ class BaseMultimedia(metaclass=ABCMeta):
                 files.append(all_files[idx][-1])
 
             # 1 second pause at the beginning
-            for i in range(fps):
+            for i in range(n_seconds_pause * fps):
                 files = [all_files[idx][0]] + files
 
             # 1 second pause at the end
-            for i in range(fps):
+            for i in range(n_seconds_pause * fps):
                 files.append(all_files[idx][-1])
 
             all_files_upd.append(files)
