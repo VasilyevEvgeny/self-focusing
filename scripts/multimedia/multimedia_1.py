@@ -1,17 +1,96 @@
-from numpy import transpose, meshgrid
+from numpy import meshgrid
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from scripts.multimedia.multimedia_base import BaseMultimedia
-from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, get_files, \
-    r_to_xy_real, crop_x
+from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecutorXY, Propagator, BeamVisualizer
 
 
-class Multimedia1(BaseMultimedia):
+class BeamVisualizer1(BeamVisualizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _get_data(self, plot_beam_func):
+    def plot_beam(self, beam, z, step):
+        """Plots intensity distribution in 2D beam with contour_plot"""
+
+        # FLAGS
+        ticks = True
+        labels = True
+        title = True
+
+        fig = plt.figure(figsize=self._fig_size)
+        ax = fig.add_subplot(111, projection='3d')
+
+        levels_plot, _ = self._initialize_levels_plot()
+        arr, xs, ys = self._initialize_arr()
+
+        xs, ys = [e * 10**6 for e in xs], [e * 10**6 for e in ys]
+        xx, yy = meshgrid(xs, ys)
+        ax.plot_surface(xx, yy, arr, cmap=self._cmap, rstride=1, cstride=1, antialiased=False,
+                        vmin=levels_plot[0], vmax=levels_plot[-1])
+
+        ax.view_init(elev=50, azim=345)
+
+        if beam.info == 'beam_r':
+            offset_x = -1.1 * self.__x_max * 10**6
+            offset_y = 1.1 * self.__y_max * 10**6
+            ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x,
+                       levels=1)
+            ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y,
+                       levels=1)
+
+        if ticks:
+            plt.xticks([int(e) for e in self._y_ticklabels], [e + '      ' for e in self._y_ticklabels],
+                       fontsize=self._font_size['ticks'])
+            plt.yticks([int(e) for e in self._x_ticklabels], [e for e in self._y_ticklabels],
+                       fontsize=self._font_size['ticks'])
+
+            n_z_ticks = 3
+            di0 = levels_plot[-1] / n_z_ticks
+            prec = 2
+            zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks + 1)]
+            ax.set_zlim([levels_plot[0], levels_plot[-1]])
+            ax.set_zticks(zticks)
+            ax.tick_params(labelsize=self._font_size['ticks'])
+            ax.xaxis.set_tick_params(pad=5)
+            ax.yaxis.set_tick_params(pad=5)
+            ax.zaxis.set_tick_params(pad=30)
+        else:
+            plt.xticks([])
+            plt.yticks([])
+            ax.set_zticks([])
+
+        if labels:
+            plt.xlabel('\n\n\n\n' + self._y_label, fontsize=self._font_size['labels'],
+                       fontweight=self._font_weight['labels'])
+            plt.ylabel('\n\n' + self._x_label, fontsize=self._font_size['labels'],
+                       fontweight=self._font_weight['labels'])
+            if self._normalize_intensity_to == beam.i_0:
+                z_label = '$\qquad\qquad\quad$ I/I$\mathbf{_0}$'
+            else:
+                z_label = '$\qquad\qquad\qquad\mathbf{I}$\n$\qquad\qquad\quad$TW/\n$\quad\qquad\qquad$cm$\mathbf{^2}$'
+            ax.text(0, 0, levels_plot[-1] * 0.8, s=z_label, fontsize=self._font_size['labels'],
+                    fontweight=self._font_weight['labels'])
+
+        if title:
+            plt.title('z = %4.02f cm\nI$_{max}$ = %4.02f TW/cm$^2$\n' %
+                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+
+        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.3, 10.0)
+
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.close()
+
+        del arr
+
+
+class Multimedia1(BaseMultimedia):
+    """1 XY vortex with noise"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _get_data(self):
         indices = []
         for idx_col, noise_percent in enumerate([1]):
             for idx_row, (M, m) in enumerate([(1, 1)]):
@@ -19,8 +98,8 @@ class Multimedia1(BaseMultimedia):
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
-                noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
-                                      variance=0.5)
+                noise = GaussianNoise(r_corr=10 * 10 ** -6,
+                                      variance=1)
 
                 beam = BeamXY(medium='SiO2',
                               p_0_to_p_vortex=5,
@@ -31,9 +110,14 @@ class Multimedia1(BaseMultimedia):
                               lmbda=1800 * 10 ** -9,
                               x_0=100 * 10 ** -6,
                               y_0=100 * 10 ** -6,
-                              n_x=2048,
-                              n_y=2048,
+                              n_x=512,
+                              n_y=512,
                               radii_in_grid=20)
+
+                visualizer = BeamVisualizer1(beam=beam,
+                                             maximum_intensity=4*10**16,
+                                             normalize_intensity_to=1,
+                                             plot_type=None)
 
                 propagator = Propagator(args=self._args,
                                         multidir_name=self._results_dir_name,
@@ -41,15 +125,12 @@ class Multimedia1(BaseMultimedia):
                                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                                         kerr_effect=KerrExecutorXY(beam=beam),
                                         n_z=3000,
-                                        dz0=10**-5,
-                                        flag_const_dz=True,
-                                        dn_print_current_state=50,
-                                        dn_plot_beam=10,
-                                        max_intensity_to_stop=5 * beam.i_0,
-                                        beam_normalization_type=5,
-                                        beam_in_3D=True,
-                                        plot_beam_func=plot_beam_func)
-
+                                        dz_0=10**-5,
+                                        const_dz=True,
+                                        print_current_state_every=50,
+                                        max_intensity_to_stop=4*10**16,
+                                        plot_beam_every=50,
+                                        visualizer=visualizer)
                 propagator.propagate()
 
                 del beam
@@ -57,113 +138,9 @@ class Multimedia1(BaseMultimedia):
 
                 indices.append((idx_col, idx_row))
 
-        all_files, n_pictures_max = get_files(self._results_dir)
+        all_files, n_pictures_max = self._get_files(self._results_dir)
 
         return all_files, indices, n_pictures_max
-
-    @staticmethod
-    def plot_beam_func(prefix, beam, z, step, path, plot_beam_normalization):
-        fig_size = (12, 10)
-        x_max = 250
-        y_max = 250
-        title = True
-        ticks = True
-        labels = True
-
-        x_left = -x_max * 10 ** -6
-        x_right = x_max * 10 ** -6
-        y_left = -y_max * 10 ** -6
-        y_right = y_max * 10 ** -6
-
-        arr, xs, ys = None, None, None
-        if beam.info == 'beam_r':
-            arr = r_to_xy_real(beam.intensity)
-            xs = [-e for e in beam.rs][::-1][:-1] + beam.rs
-            ys = xs
-        elif beam.info == 'beam_xy':
-            arr = beam.intensity
-            xs, ys = beam.xs, beam.ys
-
-        arr, x_idx_left, x_idx_right = crop_x(arr, xs, x_left, x_right, mode='x')
-        arr, y_idx_left, y_idx_right = crop_x(arr, ys, y_left, y_right, mode='y')
-
-        arr = transpose(arr)
-
-        xs = [e * 10 ** 6 for e in xs[x_idx_left:x_idx_right]]
-        ys = [e * 10 ** 6 for e in ys[y_idx_left:y_idx_right]]
-
-        xx, yy = meshgrid(xs, ys)
-
-        n_plot_levels = 100
-        max_intensity_value = None
-        if isinstance(plot_beam_normalization, int) or isinstance(plot_beam_normalization, float):
-            max_intensity_value = plot_beam_normalization
-        elif plot_beam_normalization == 'local':
-            max_intensity_value = beam.i_max
-        di = max_intensity_value / n_plot_levels
-        levels_plot = [i * di for i in range(n_plot_levels + 1)]
-
-        font_size = 40
-        font_weight = 'bold'
-        fig = plt.figure(figsize=fig_size)
-        ax = fig.add_subplot(111, projection='3d')
-
-        ax.plot_surface(xx, yy, arr, cmap='jet', rstride=1, cstride=1, antialiased=False,
-                        vmin=levels_plot[0], vmax=levels_plot[-1])
-
-        ax.view_init(elev=50, azim=345)
-
-        #offset_x = -1.1 * x_max
-        #offset_y = 1.1 * y_max
-        #ax.contour(xx, yy, arr, 1, zdir='x', colors='black', linestyles='solid', linewidths=3, offset=offset_x,
-        #           levels=1)
-        #ax.contour(xx, yy, arr, 1, zdir='y', colors='black', linestyles='solid', linewidths=3, offset=offset_y,
-        #           levels=1)
-
-        if title:
-            i_max = beam.i_max * beam.i_0
-            ax.text(0, -250, 6, s='$\qquad$z = %4.02f cm\nI$_{max}$ = %4.02f TW/сm$^2$\n\n\n\n\n' %
-                                  (round(z * 10 ** 2, 3), i_max / 10**16), fontsize=font_size - 10)
-
-        if ticks:
-            x_labels = ['-150', '0', '+150']
-            y_labels = ['-150    ', '0    ', '+150    ']
-            plt.xticks([int(e) for e in y_labels], fontsize=font_size - 5)
-            plt.yticks([int(e) for e in x_labels], fontsize=font_size - 5)
-        else:
-            plt.xticks([])
-            plt.yticks([])
-
-        ax.set_zlim([levels_plot[0], levels_plot[-1]])
-        ax.text(300, 5, 6.5, s='$\qquad\qquad\quad\mathbf{I/I_0}$', fontsize=font_size, fontweight=font_weight)
-        n_z_ticks = 4
-        di0 = levels_plot[-1] / n_z_ticks
-        prec = 2
-        zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks + 1)]
-        ax.set_zticks(zticks)
-
-        ax.tick_params(labelsize=font_size - 5)
-        ax.xaxis.set_tick_params(pad=30)
-        ax.yaxis.set_tick_params(pad=5)
-        ax.zaxis.set_tick_params(pad=20)
-
-        if labels:
-            plt.xlabel('\n\n\n\nx, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
-            plt.ylabel('\n\ny, $\mathbf{\mu m}$', fontsize=font_size, fontweight=font_weight)
-
-        ax.grid(color='white', linestyle='--', linewidth=3, alpha=0.5)
-
-        #bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 8.5)
-        bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.0, 10.0)
-
-        plt.savefig(path + '/%04d.png' % step, bbox_inches=bbox, dpi=50)
-        plt.close()
-
-        del arr
-
-    def process_multimedia(self):
-        all_files, indices, n_pictures_max = self._get_data(plot_beam_func=self.plot_beam_func)
-        self._compose(all_files, indices, n_pictures_max)
 
 
 multimedia = Multimedia1()

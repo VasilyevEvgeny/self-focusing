@@ -121,24 +121,6 @@ def r_to_xy_real(r_slice):
     return arr
 
 
-def get_files(path):
-    """Prepares some data to further calculations in multimedia mode"""
-
-    all_files = []
-    n_pictures_max = 0
-    for path in glob(path + '/*'):
-        files = []
-        n_pictures = 0
-        for file in glob(path + '/beam/*'):
-            files.append(file.replace('\\', '/'))
-            n_pictures += 1
-
-        all_files.append(files)
-        n_pictures_max = max(n_pictures, n_pictures_max)
-
-    return all_files, n_pictures_max
-
-
 def make_paths(global_root_dir, global_results_dir_name, prefix, insert_datetime=True):
     """Returns paths formed from command line arguments"""
 

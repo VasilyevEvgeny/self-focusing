@@ -12,32 +12,32 @@ class BeamVisualizer:
     def __init__(self, **kwargs):
         self.__beam = kwargs['beam']
         self.__maximum_intensity = kwargs['maximum_intensity']
-        self.__normalize_intensity_to = kwargs['normalize_intensity_to']
-        if self.__normalize_intensity_to not in (self.__beam.i_0, 1):
+        self._normalize_intensity_to = kwargs['normalize_intensity_to']
+        if self._normalize_intensity_to not in (self.__beam.i_0, 1):
             raise Exception('Wrong normalize_to arg!')
         self.__plot_type = kwargs['plot_type']
         self.__language = kwargs.get('language', 'english')
-        self.__path_to_save = None
+        self._path_to_save = None
 
         # font
-        self.__font_size = {'title': 40, 'ticks': 40, 'labels': 50, 'colorbar_ticks': 40,
+        self._font_size = {'title': 40, 'ticks': 40, 'labels': 50, 'colorbar_ticks': 40,
                              'colorbar_label': 50}
-        self.__font_weight = {'title': 'bold', 'ticks': 'bold', 'labels': 'bold', 'colorbar_ticks': 'bold',
+        self._font_weight = {'title': 'bold', 'ticks': 'bold', 'labels': 'bold', 'colorbar_ticks': 'bold',
                              'colorbar_label': 'bold'}
 
         # picture
-        self.__fig_size = (12, 10)
-        self.__cmap = plt.get_cmap('jet')
+        self._fig_size = (12, 10)
+        self._cmap = plt.get_cmap('jet')
 
         # axes
         self.__x_max = 250 * 10**-6  # m
         self.__y_max = self.__x_max
-        self.__x_ticklabels = ['-150', '0', '+150']
-        self.__y_ticklabels = ['-150', '0', '+150']
-        self.__x_label, self.__y_label = self.__initialize_labels()
+        self._x_ticklabels = ['-150', '0', '+150']
+        self._y_ticklabels = ['-150', '0', '+150']
+        self._x_label, self._y_label = self.__initialize_labels()
 
     def get_path_to_save(self, path_to_save):
-        self.__path_to_save = path_to_save
+        self._path_to_save = path_to_save
 
     def __initialize_labels(self):
         if self.__language == 'english':
@@ -49,7 +49,7 @@ class BeamVisualizer:
 
         return x_label, y_label
 
-    def __initialize_arr(self):
+    def _initialize_arr(self):
         arr, xs, ys = None, None, None
         if self.__beam.info == 'beam_x':
             n = self.__beam.intensity.shape[0]
@@ -73,7 +73,7 @@ class BeamVisualizer:
         if self.__plot_type != 'flat':
             arr = transpose(arr)
 
-        if self.__normalize_intensity_to == 1:
+        if self._normalize_intensity_to == 1:
             arr *= self.__beam.i_0 / 10**16
 
         xs = xs[x_idx_left:x_idx_right]
@@ -81,7 +81,7 @@ class BeamVisualizer:
 
         return arr, xs, ys
 
-    def __initialize_levels_plot(self):
+    def _initialize_levels_plot(self):
         n_plot_levels = 100
         max_intensity = None
 
@@ -90,7 +90,7 @@ class BeamVisualizer:
         elif self.__maximum_intensity == 'local':
             max_intensity = self.__beam.i_max
 
-        if self.__normalize_intensity_to == self.__beam.i_0:
+        if self._normalize_intensity_to == self.__beam.i_0:
             max_intensity /= self.__beam.i_0
         else:
             max_intensity /= 10**16
@@ -119,10 +119,10 @@ class BeamVisualizer:
         title = True
         bbox = 'tight'
 
-        fig, ax = plt.subplots(figsize=self.__fig_size)
+        fig, ax = plt.subplots(figsize=self._fig_size)
 
-        _, max_intensity = self.__initialize_levels_plot()
-        arr, xs, ys = self.__initialize_arr()
+        _, max_intensity = self._initialize_levels_plot()
+        arr, xs, ys = self._initialize_arr()
         section = arr[:, arr.shape[1]//2]
 
         plt.plot(section, color='black', linewidth=5, linestyle='solid')
@@ -134,26 +134,26 @@ class BeamVisualizer:
             x_ticklabels = ['-150', '0', '+150']
             x_ticks = calc_ticks_x(x_ticklabels, xs)
             plt.xticks(x_ticks, x_ticklabels,
-                       fontsize=self.__font_size['ticks'], fontweight=self.__font_weight['ticks'])
+                       fontsize=self._font_size['ticks'], fontweight=self._font_weight['ticks'])
 
             n_y_ticks = 7
             di = max_intensity / (n_y_ticks - 1)
             y_ticks = [i * di for i in range(n_y_ticks)]
             y_ticklabels = ['%05.2f' % e for e in y_ticks]
             plt.yticks(y_ticks, y_ticklabels,
-                       fontsize=self.__font_size['ticks'], fontweight=self.__font_weight['ticks'])
+                       fontsize=self._font_size['ticks'], fontweight=self._font_weight['ticks'])
 
         if labels:
-            plt.xlabel(self.__x_label, fontsize=self.__font_size['labels'], fontweight=self.__font_weight['labels'])
-            if self.__normalize_intensity_to == beam.i_0:
+            plt.xlabel(self._x_label, fontsize=self._font_size['labels'], fontweight=self._font_weight['labels'])
+            if self._normalize_intensity_to == beam.i_0:
                 y_label = 'I/I$\mathbf{_0}$'
             else:
                 y_label = '$\qquad$I, TW/cm$\mathbf{^2}$'
-            plt.ylabel(y_label, fontsize=self.__font_size['labels'], fontweight=self.__font_weight['labels'])
+            plt.ylabel(y_label, fontsize=self._font_size['labels'], fontweight=self._font_weight['labels'])
 
         if title:
             plt.title('z = %4.02f cm\nI$_{max}$ = %4.02f TW/cm$^2$\n' %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self.__font_size['title'])
+                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
 
         ax.grid(color='gray', linestyle='dotted', linewidth=2, alpha=0.5)
 
@@ -172,29 +172,29 @@ class BeamVisualizer:
         colorbar = True
         bbox = 'tight'
 
-        fig, ax = plt.subplots(figsize=self.__fig_size)
+        fig, ax = plt.subplots(figsize=self._fig_size)
 
-        levels_plot, max_intensity = self.__initialize_levels_plot()
-        arr, xs, ys = self.__initialize_arr()
+        levels_plot, max_intensity = self._initialize_levels_plot()
+        arr, xs, ys = self._initialize_arr()
 
-        plot = contourf(arr, cmap=self.__cmap, levels=levels_plot)
+        plot = contourf(arr, cmap=self._cmap, levels=levels_plot)
 
         if ticks:
-            x_ticks = calc_ticks_x(self.__x_ticklabels, xs)
-            y_ticks = calc_ticks_x(self.__y_ticklabels, ys)
-            plt.xticks(x_ticks, self.__y_ticklabels, fontsize=self.__font_size['ticks'])
-            plt.yticks(y_ticks, self.__x_ticklabels, fontsize=self.__font_size['ticks'])
+            x_ticks = calc_ticks_x(self._x_ticklabels, xs)
+            y_ticks = calc_ticks_x(self._y_ticklabels, ys)
+            plt.xticks(x_ticks, self._y_ticklabels, fontsize=self._font_size['ticks'])
+            plt.yticks(y_ticks, self._x_ticklabels, fontsize=self._font_size['ticks'])
         else:
             plt.xticks([])
             plt.yticks([])
 
         if labels:
-            plt.xlabel(self.__x_label, fontsize=self.__font_size['labels'], fontweight=self.__font_weight['labels'])
-            plt.ylabel(self.__y_label, fontsize=self.__font_size['labels'], fontweight=self.__font_weight['labels'])
+            plt.xlabel(self._x_label, fontsize=self._font_size['labels'], fontweight=self._font_weight['labels'])
+            plt.ylabel(self._y_label, fontsize=self._font_size['labels'], fontweight=self._font_weight['labels'])
 
         if title:
             plt.title('z = %4.02f cm\nI$_{max}$ = %4.02f TW/cm$^2$\n' %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self.__font_size['title'])
+                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
 
         ax.grid(color='white', linestyle='dotted', linewidth=3, alpha=0.5)
         ax.set_aspect('equal')
@@ -204,17 +204,17 @@ class BeamVisualizer:
             dcb = max_intensity / n_ticks_colorbar_levels
             levels_ticks_colorbar = [i * dcb for i in range(n_ticks_colorbar_levels + 1)]
             colorbar = fig.colorbar(plot, ticks=levels_ticks_colorbar, orientation='vertical', aspect=10, pad=0.05)
-            if self.__normalize_intensity_to == beam.i_0:
+            if self._normalize_intensity_to == beam.i_0:
                 colorbar_label = 'I/I$\mathbf{_0}$'
             else:
                 colorbar_label = '$\qquad$I, TW/cm$\mathbf{^2}$'
             colorbar.set_label(colorbar_label, labelpad=-140, y=1.2, rotation=0,
-                               fontsize=self.__font_size['colorbar_label'],
-                               fontweight=self.__font_weight['colorbar_label'])
+                               fontsize=self._font_size['colorbar_label'],
+                               fontweight=self._font_weight['colorbar_label'])
             ticks_cbar = ['%05.2f' % e if e != 0 else '00.00' for e in levels_ticks_colorbar]
 
             colorbar.ax.set_yticklabels(ticks_cbar)
-            colorbar.ax.tick_params(labelsize=self.__font_size['colorbar_ticks'])
+            colorbar.ax.tick_params(labelsize=self._font_size['colorbar_ticks'])
 
         plt.savefig(self.__path_to_save + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()
@@ -229,15 +229,15 @@ class BeamVisualizer:
         labels = True
         title = True
 
-        fig = plt.figure(figsize=self.__fig_size)
+        fig = plt.figure(figsize=self._fig_size)
         ax = fig.add_subplot(111, projection='3d')
 
-        levels_plot, _ = self.__initialize_levels_plot()
-        arr, xs, ys = self.__initialize_arr()
+        levels_plot, _ = self._initialize_levels_plot()
+        arr, xs, ys = self._initialize_arr()
 
         xs, ys = [e * 10**6 for e in xs], [e * 10**6 for e in ys]
         xx, yy = meshgrid(xs, ys)
-        ax.plot_surface(xx, yy, arr, cmap=self.__cmap, rstride=1, cstride=1, antialiased=False,
+        ax.plot_surface(xx, yy, arr, cmap=self._cmap, rstride=1, cstride=1, antialiased=False,
                         vmin=levels_plot[0], vmax=levels_plot[-1])
 
         ax.view_init(elev=50, azim=345)
@@ -251,10 +251,10 @@ class BeamVisualizer:
                        levels=1)
 
         if ticks:
-            plt.xticks([int(e) for e in self.__y_ticklabels], [e + '      ' for e in self.__y_ticklabels],
-                       fontsize=self.__font_size['ticks'])
-            plt.yticks([int(e) for e in self.__x_ticklabels], [e for e in self.__y_ticklabels],
-                       fontsize=self.__font_size['ticks'])
+            plt.xticks([int(e) for e in self._y_ticklabels], [e + '      ' for e in self._y_ticklabels],
+                       fontsize=self._font_size['ticks'])
+            plt.yticks([int(e) for e in self._x_ticklabels], [e for e in self._y_ticklabels],
+                       fontsize=self._font_size['ticks'])
 
             n_z_ticks = 3
             di0 = levels_plot[-1] / n_z_ticks
@@ -262,7 +262,7 @@ class BeamVisualizer:
             zticks = [int(i * di0 * 10 ** prec) / 10 ** prec for i in range(n_z_ticks + 1)]
             ax.set_zlim([levels_plot[0], levels_plot[-1]])
             ax.set_zticks(zticks)
-            ax.tick_params(labelsize=self.__font_size['ticks'])
+            ax.tick_params(labelsize=self._font_size['ticks'])
             ax.xaxis.set_tick_params(pad=5)
             ax.yaxis.set_tick_params(pad=5)
             ax.zaxis.set_tick_params(pad=30)
@@ -272,20 +272,20 @@ class BeamVisualizer:
             ax.set_zticks([])
 
         if labels:
-            plt.xlabel('\n\n\n\n' + self.__y_label, fontsize=self.__font_size['labels'],
-                       fontweight=self.__font_weight['labels'])
-            plt.ylabel('\n\n' + self.__x_label, fontsize=self.__font_size['labels'],
-                       fontweight=self.__font_weight['labels'])
-            if self.__normalize_intensity_to == beam.i_0:
+            plt.xlabel('\n\n\n\n' + self._y_label, fontsize=self._font_size['labels'],
+                       fontweight=self._font_weight['labels'])
+            plt.ylabel('\n\n' + self._x_label, fontsize=self._font_size['labels'],
+                       fontweight=self._font_weight['labels'])
+            if self._normalize_intensity_to == beam.i_0:
                 z_label = '$\qquad\qquad\quad$ I/I$\mathbf{_0}$'
             else:
                 z_label = '$\qquad\qquad\qquad\mathbf{I}$\n$\qquad\qquad\quad$TW/\n$\quad\qquad\qquad$cm$\mathbf{^2}$'
-            ax.text(0, 0, levels_plot[-1] * 0.8, s=z_label, fontsize=self.__font_size['labels'],
-                    fontweight=self.__font_weight['labels'])
+            ax.text(0, 0, levels_plot[-1] * 0.8, s=z_label, fontsize=self._font_size['labels'],
+                    fontweight=self._font_weight['labels'])
 
         if title:
             plt.title('z = %4.02f cm\nI$_{max}$ = %4.02f TW/cm$^2$\n' %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self.__font_size['title'])
+                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
 
         bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.3, 10.0)
 

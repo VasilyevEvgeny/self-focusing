@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from PIL import Image
+from glob import glob
 
 
 from core import parse_args, create_dir, create_multidir, make_animation, make_video
@@ -19,14 +20,28 @@ class BaseMultimedia(metaclass=ABCMeta):
                                                                     self._args.prefix)
 
     @abstractmethod
-    def _get_data(self, plot_beam_func):
-        """get_data"""
+    def _get_data(self):
+        return [], [], 0
 
-    @abstractmethod
-    def process_multimedia(self):
-        """process_multimedia"""
+    @staticmethod
+    def _get_files(path):
+        """Prepares some data to further calculations in multimedia mode"""
 
-    def _compose(self, all_files, indices, n_pictures_max, fps=10, animation=True, video=True):
+        all_files = []
+        n_pictures_max = 0
+        for path in glob(path + '/*'):
+            files = []
+            n_pictures = 0
+            for file in glob(path + '/beam/*'):
+                files.append(file.replace('\\', '/'))
+                n_pictures += 1
+
+            all_files.append(files)
+            n_pictures_max = max(n_pictures, n_pictures_max)
+
+        return all_files, n_pictures_max
+
+    def __compose(self, all_files, indices, n_pictures_max, fps=10, animation=True, video=True):
         all_files_upd = []
         for idx in range(len(all_files)):
             files = []
@@ -70,3 +85,7 @@ class BaseMultimedia(metaclass=ABCMeta):
             make_video(root_dir=self._results_dir,
                        name=self._args.prefix,
                        fps=fps)
+
+    def process_multimedia(self):
+        all_files, indices, n_pictures_max = self._get_data()
+        self.__compose(all_files, indices, n_pictures_max)
