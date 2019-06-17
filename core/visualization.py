@@ -157,7 +157,7 @@ class BeamVisualizer:
 
         ax.grid(color='gray', linestyle='dotted', linewidth=2, alpha=0.5)
 
-        plt.savefig(self.__path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()
 
         del arr
@@ -216,7 +216,7 @@ class BeamVisualizer:
             colorbar.ax.set_yticklabels(ticks_cbar)
             colorbar.ax.tick_params(labelsize=self._font_size['colorbar_ticks'])
 
-        plt.savefig(self.__path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()
 
         del arr
@@ -289,7 +289,7 @@ class BeamVisualizer:
 
         bbox = fig.bbox_inches.from_bounds(1.1, 0.3, 10.3, 10.0)
 
-        plt.savefig(self.__path_to_save + '/%04d.png' % step, bbox_inches=bbox)
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox)
         plt.close()
 
         del arr

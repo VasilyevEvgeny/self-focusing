@@ -11,20 +11,20 @@ beam = BeamR(medium='LiF',
              M=1,
              lmbda=1557*10**-9,
              r_0=85*10**-6,
-             n_r=512)
+             n_r=2048)
 
 # create visualizer object
 visualizer = BeamVisualizer(beam=beam,
                             maximum_intensity='local',
-                            normalize_intensity_to=1,
-                            plot_type='profile')
+                            normalize_intensity_to=beam.i_0,
+                            plot_type='volume')
 
 # create propagator object
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutorR(beam=beam),
                         kerr_effect=KerrExecutorR(beam=beam),
-                        n_z=1000,
+                        n_z=1,
                         dz_0=beam.z_diff / 1000,
                         const_dz=True,
                         print_current_state_every=50,
