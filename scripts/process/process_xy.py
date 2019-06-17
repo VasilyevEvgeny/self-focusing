@@ -23,21 +23,21 @@ beam = BeamXY(medium='LiF',
 
 # create visualizer object
 visualizer = BeamVisualizer(beam=beam,
-                            maximum_intensity='local',
-                            normalize_intensity_to=beam.i_0,
-                            plot_type='volume')
+                            maximum_intensity=4*10**16,
+                            normalize_intensity_to=1,
+                            plot_type='flat')
 
 # create propagator object
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                         kerr_effect=KerrExecutorXY(beam=beam),
-                        n_z=1,
-                        dz_0=10**-4,
+                        n_z=2000,
+                        dz_0=10**-5,
                         const_dz=False,
                         print_current_state_every=50,
                         plot_beam_every=50,
-                        max_intensity_to_stop=10**17,
+                        max_intensity_to_stop=4*10**16,
                         visualizer=visualizer)
 
 # initiate propagation process
