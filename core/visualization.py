@@ -37,14 +37,15 @@ class BeamVisualizer:
         self._x_label, self._y_label = self.__initialize_labels()
 
         # title
-        self.__title_string = 'z = %05.2f cm\nI$_{max}$ = %05.2f TW/cm$^2$\n'
+        self.__default_title_string = 'z = %05.2f cm\nI$_{max}$ = %05.2f TW/cm$^2$\n'
+        self.__title_string = kwargs.get('title_string', self.__default_title_string)
 
         # bbox
         self.__bbox_width = 10.3
         self.__bbox_height = 10.0
 
         # picture
-        self.__dpi = 50
+        self.__dpi = kwargs.get('dpi', 50)
 
     def get_path_to_save(self, path_to_save):
         self._path_to_save = path_to_save
@@ -165,8 +166,11 @@ class BeamVisualizer:
                         fontsize=self._font_size['labels'], fontweight=self._font_weight['labels'])
 
         if title:
-            plt.title(self.__title_string %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            if self.__title_string == self.__default_title_string:
+                plt.title(self.__title_string %
+                          (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            else:
+                plt.title(self.__title_string, fontsize=self._font_size['title'])
 
         ax.grid(color='gray', linestyle='dotted', linewidth=2, alpha=0.5)
 
@@ -209,8 +213,11 @@ class BeamVisualizer:
                        labelpad=-30)
 
         if title:
-            plt.title((self.__title_string + '\n') %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            if self.__title_string == self.__default_title_string:
+                plt.title((self.__title_string + '\n') %
+                          (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            else:
+                plt.title(self.__title_string, fontsize=self._font_size['title'])
 
         ax.grid(color='white', linestyle='dotted', linewidth=3, alpha=0.5)
         ax.set_aspect('equal')
@@ -308,8 +315,11 @@ class BeamVisualizer:
                     fontweight=self._font_weight['labels'])
 
         if title:
-            plt.title(self.__title_string %
-                      (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            if self.__title_string == self.__default_title_string:
+                plt.title(self.__title_string %
+                          (round(z * 10 ** 2, 3), beam.i_max / 10 ** 16), fontsize=self._font_size['title'])
+            else:
+                plt.title(self.__title_string, fontsize=self._font_size['title'])
 
         bbox = fig.bbox_inches.from_bounds(1.1, 0.3, self.__bbox_width, self.__bbox_height)
 

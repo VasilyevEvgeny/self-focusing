@@ -3,7 +3,7 @@ from core import BeamR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, Be
 
 
 class Multimedia3(BaseMultimedia):
-    """BeamX in 3 representations"""
+    """Gaussian, ring and vortex beams in volume"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
