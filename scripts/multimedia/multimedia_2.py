@@ -21,11 +21,11 @@ class Multimedia2(BaseMultimedia):
                              half=False,
                              lmbda=1800 * 10 ** -9,
                              x_0=100 * 10 ** -6,
-                             n_x=512,
+                             n_x=2048,
                              r_kerr=75.4)
 
                 visualizer = BeamVisualizer(beam=beam,
-                                            maximum_intensity='local',
+                                            maximum_intensity=4*10**16,
                                             normalize_intensity_to=beam.i_0,
                                             plot_type=plot_type)
 
