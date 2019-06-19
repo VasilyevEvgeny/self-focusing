@@ -128,7 +128,6 @@ class BeamVisualizer:
         ticks = True
         labels = True
         title = True
-        bbox = 'tight'
 
         fig, ax = plt.subplots(figsize=(10, 8))
 
@@ -189,7 +188,6 @@ class BeamVisualizer:
         labels = True
         title = True
         colorbar = True
-        bbox = 'tight'
 
         fig, ax = plt.subplots(figsize=(9, 7))
 
