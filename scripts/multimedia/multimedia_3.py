@@ -16,11 +16,11 @@ class Multimedia3(BaseMultimedia):
                 print('M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
-                p_rel_gauss = 3 if M == 0 and m == 0 else 3.6
+                p_rel_gauss = 4 if M == 0 and m == 0 else 4.8
 
                 beam = BeamR(medium='LiF',
                              p_0_to_p_gauss=p_rel_gauss,
-                             p_0_to_p_vortex=3,
+                             p_0_to_p_vortex=4,
                              m=m,
                              M=M,
                              lmbda=1800 * 10 ** -9,
@@ -30,7 +30,8 @@ class Multimedia3(BaseMultimedia):
                 visualizer = BeamVisualizer(beam=beam,
                                             maximum_intensity='local',
                                             normalize_intensity_to=1,
-                                            plot_type='volume')
+                                            plot_type='volume',
+                                            dpi=40)
 
                 propagator = Propagator(args=self._args,
                                         multidir_name=self._results_dir_name,
