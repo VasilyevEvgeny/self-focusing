@@ -16,11 +16,13 @@ class Multimedia5(BaseMultimedia):
                 print('M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
+                p_rel_gauss = 4 if M == 0 and m == 0 else 4.8
+
                 beam = BeamR(medium='LiF',
                              m=m,
                              M=M,
                              p_0_to_p_vortex=1,
-                             p_0_to_p_gauss=4,
+                             p_0_to_p_gauss=p_rel_gauss,
                              lmbda=1800 * 10 ** -9,
                              r_0=80 * 10 ** -6,
                              n_r=2048)
