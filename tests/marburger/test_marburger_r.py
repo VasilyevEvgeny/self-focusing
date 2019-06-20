@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from core import BeamR, Propagator, SweepDiffractionExecutorR, KerrExecutorR, create_multidir
+from core import BeamR, Propagator, SweepDiffractionExecutorR, KerrExecutorR, BeamVisualizer, create_multidir
 from tests.marburger.test_marburger import TestMarburger
 
 NAME = 'marburger_r'
@@ -29,18 +29,23 @@ class TestMarburgerR(TestMarburger):
                          r_0=self._radius,
                          n_r=2048)
 
+            visualizer = BeamVisualizer(beam=beam,
+                                        maximum_intensity='local',
+                                        normalize_intensity_to=beam.i_0,
+                                        plot_type='volume')
+
             propagator = Propagator(args=self._args,
                                     multidir_name=self.__results_dir_name,
                                     beam=beam,
                                     diffraction=SweepDiffractionExecutorR(beam=beam),
                                     kerr_effect=KerrExecutorR(beam=beam),
                                     n_z=self._n_z,
-                                    dz0=beam.z_diff / self._n_z,
-                                    flag_const_dz=False,
-                                    dn_print_current_state=0,
-                                    dn_plot_beam=0,
-                                    beam_normalization_type='local',
-                                    max_intensity_to_stop=10**17)
+                                    dz_0=beam.z_diff / self._n_z,
+                                    const_dz=False,
+                                    print_current_state_every=0,
+                                    plot_beam_every=0,
+                                    max_intensity_to_stop=10**17,
+                                    visualizer=visualizer)
 
             propagator.propagate()
 

@@ -2,7 +2,7 @@ from unittest import TestCase
 import abc
 from argparse import Namespace
 from numpy.random import randint, choice
-from numpy import array, zeros
+from numpy import array, zeros, log10, polyfit, linspace
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
 
@@ -23,7 +23,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
                                global_results_dir_name=global_results_dir_name)
 
         self._lmbda = randint(400, 3001) * 10**-9
-        self._radius = randint(30, 151) * 10**-6
+        self._radius = randint(30, 80) * 10**-6
         self.__m_constants = MathConstants()
         self._medium = Medium(name=choice(['SiO2', 'CaF2', 'LiF']),
                               lmbda=self._lmbda,
@@ -41,7 +41,9 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         self._p_v_rel_true = array([calculate_p_vortex(m, 1) for m in self._ms])
         self._p_v_rel_pred = zeros(shape=self._p_v_rel_true.shape)
 
-        self._p_vs = [0.75, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05, 1.1, 1.5, 2.0]
+        self._p_vs = [0.75, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08,
+                      1.09, 1.1, 1.5, 2.0]
+
         self.__cmap = get_cmap('jet')
         self.__n_p_vs = len(self._p_vs)
         self._p_colors = [self.__cmap(i / (self.__n_p_vs-1)) for i in range(self.__n_p_vs)]
@@ -75,7 +77,9 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
                 color = self._p_colors[idx]
                 linewidth = 3
                 z_order = 0
-            plt.plot(df['z_normalized'], df['i_max_normalized'], color=color, linewidth=linewidth, linestyle='solid',
+
+            logarithmic = [ log10(e) for e in df['i_max_normalized'] ]
+            plt.plot(df['z_normalized'], logarithmic, color=color, linewidth=linewidth, linestyle='solid',
                      alpha=0.8, label='$P_0/P_V = %2.2f$' % p_v_normalized, zorder=z_order)
 
         plt.xticks(fontsize=font_size-5, fontweight=font_weight)
@@ -83,13 +87,15 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         if self._language == 'english':
             xlabel = '$\mathbf{z \ / \ z_{diff}}$'
-            ylabel = '$\mathbf{I_{max} \ / \ I_{max}(z=0)}$'
+            ylabel = '$\mathbf{lg [ I_{max} \ / \ I_{max}(z=0) ]}$'
         else:
             xlabel = '$\mathbf{z \ / \ z_{диф}}$'
-            ylabel = '$\mathbf{I_{макс} \ / \ I_{макс}(z=0)}$'
+            ylabel = '$\mathbf{lg [I_{макс} \ / \ I_{макс}(z=0)lg ]}$'
 
         plt.xlabel(xlabel, fontsize=font_size, fontweight=font_weight)
         plt.ylabel(ylabel, fontsize=font_size, fontweight=font_weight)
+
+        plt.ylim([-0.35, 1.1 * log10(self._n_i_max_to_stop)])
 
         plt.grid(linewidth=1, linestyle='dotted', alpha=0.5, color='gray')
 
@@ -98,7 +104,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         plt.savefig(path_to_save_plot + '/i_max(z)_m=%d.png' % m, bbox_inches='tight')
         plt.close()
 
-    def _plot(self, path_to_save_plot):
+    def _plot(self, path_to_save_plot, polyfit_degree=2):
 
         font_size = 40
         font_weight = 'bold'
@@ -106,6 +112,16 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         plt.scatter(self._ms, self._p_v_rel_pred, s=500, color='red')
 
         plt.axhline(1, linewidth=3, color='black', zorder=-1)
+
+        # polynomial regression
+        a, b, c = polyfit(self._ms, self._p_v_rel_pred, polyfit_degree)
+        xs = linspace(self._ms[0], self._ms[-1], 1000)
+        ys = [a * x ** 2 + b * x + c for x in xs]
+        sign_a = '+' if a >= 0 else '-'
+        sign_b = '+' if b >= 0 else '-'
+        sign_c = '+' if c >= 0 else '-'
+        regr_label = '$%s$%05.3fm$^2$$%s$%05.3fm$%s$%05.3f' % (sign_a, abs(a), sign_b, abs(b), sign_c, abs(c))
+        plt.plot(xs, ys, color='green', linewidth=10, alpha=0.5, label=regr_label)
 
         plt.ylim([0.8, 1.2])
 
@@ -121,6 +137,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         plt.ylabel(ylabel, fontsize=font_size, fontweight=font_weight)
 
         plt.grid(linewidth=2, linestyle='dotted', color='gray', alpha=0.5)
+        plt.legend(fontsize=font_size)
 
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight')
         plt.close()

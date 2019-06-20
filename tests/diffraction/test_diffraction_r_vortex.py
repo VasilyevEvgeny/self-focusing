@@ -1,6 +1,6 @@
 from numpy.random import randint
 
-from core import BeamR, Propagator, SweepDiffractionExecutorR, xlsx_to_df
+from core import BeamR, Propagator, SweepDiffractionExecutorR, BeamVisualizer, xlsx_to_df
 from tests.diffraction.test_diffraction import TestDiffraction
 
 NAME = 'diffraction_r_vortex'
@@ -30,15 +30,20 @@ class TestDiffractionRVortex(TestDiffraction):
                      r_0=self._radius,
                      n_r=512)
 
+        visualizer = BeamVisualizer(beam=beam,
+                                    maximum_intensity='local',
+                                    normalize_intensity_to=beam.i_0,
+                                    plot_type='volume')
+
         propagator = Propagator(args=self._args,
                                 beam=beam,
                                 diffraction=SweepDiffractionExecutorR(beam=beam),
                                 n_z=self._n_z,
-                                dz0=beam.z_diff / self._n_z,
-                                flag_const_dz=True,
-                                dn_print_current_state=0,
-                                dn_plot_beam=0,
-                                beam_normalization_type='local')
+                                dz_0=beam.z_diff / self._n_z,
+                                const_dz=True,
+                                print_current_state_every=0,
+                                plot_beam_every=0,
+                                visualizer=visualizer)
 
         propagator.propagate()
 
