@@ -2,7 +2,7 @@ from tqdm import tqdm
 from argparse import Namespace
 from os import mkdir
 
-from core import BeamR, Propagator, SweepDiffractionExecutorR, KerrExecutorR, create_multidir, xlsx_to_df
+from core import BeamR, Propagator, SweepDiffractionExecutorR, KerrExecutorR, BeamVisualizer, create_multidir, xlsx_to_df
 from scripts.ring_critical_power.ring_critical_power import RingCriticalPower
 
 NAME = 'ring_critical_power_r'
@@ -40,7 +40,13 @@ class RingCriticalPowerR(RingCriticalPower):
                              p_0_to_p_gauss=p_g_normalized,
                              lmbda=self._lmbda,
                              r_0=self._radius,
-                             n_r=2048)
+                             n_r=2048,
+                             radii_in_grid=40)
+
+                visualizer = BeamVisualizer(beam=beam,
+                                            maximum_intensity='local',
+                                            normalize_intensity_to=beam.i_0,
+                                            plot_type='profile')
 
                 global_results_dir_name = M_dir.split(self._args.global_root_dir)[1][1:]
                 args = Namespace(global_root_dir=self._args.global_root_dir,
@@ -48,22 +54,22 @@ class RingCriticalPowerR(RingCriticalPower):
                                  prefix='p_0_to_p_g=%2.2f' % p_g_normalized,
                                  insert_datetime=False)
 
-                i_max_to_stop = self._n_i_max_to_stop * beam.i_0 * beam.i_max
+                i_max_to_stop = self._n_i_max_to_stop * beam.i_max
                 propagator = Propagator(args=args,
                                         beam=beam,
                                         diffraction=SweepDiffractionExecutorR(beam=beam),
                                         kerr_effect=KerrExecutorR(beam=beam),
-                                        n_z=self._n_z,
-                                        dz0=self._n_z_diff * beam.z_diff / self._n_z,
-                                        flag_const_dz=True,
-                                        dn_print_current_state=0,
-                                        dn_plot_beam=50,
-                                        beam_normalization_type='local',
-                                        max_intensity_to_stop=i_max_to_stop)
+                                        n_z=self._n_z_diff * self._n_z,
+                                        dz_0= beam.z_diff / self._n_z,
+                                        const_dz=True,
+                                        print_current_state_every=0,
+                                        plot_beam_every=0,
+                                        max_intensity_to_stop=i_max_to_stop,
+                                        visualizer=visualizer)
 
                 propagator.propagate()
 
-                if not flag_critical_found and propagator.beam.i_max * propagator.beam.i_0 > i_max_to_stop:
+                if not flag_critical_found and propagator.beam.i_max > i_max_to_stop:
                     p_g_pred = p_g_normalized
                     flag_critical_found = True
 

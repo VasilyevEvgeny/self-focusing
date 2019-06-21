@@ -40,7 +40,7 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
                              p_0_to_p_vortex=p_v_normalized,
                              lmbda=self._lmbda,
                              r_0=self._radius,
-                             n_r=512,
+                             n_r=4096,
                              radii_in_grid=10)
 
                 visualizer = BeamVisualizer(beam=beam,
@@ -88,7 +88,7 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
 
     def test_vortex_critical_power_r(self):
         self.process()
-        #self._check()
+        self._check()
 
         if self._flag_plot:
             self._plot(self.__results_dir)

@@ -30,8 +30,8 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
                               m_constants=self.__m_constants)
 
         self._n_z = None
-        self._n_z_diff = 5
-        self._n_i_max_to_stop = 10
+        self._n_z_diff = 10
+        self._n_i_max_to_stop = 50
 
         self._eps = None
         self._png_name = None
@@ -87,10 +87,10 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         if self._language == 'english':
             xlabel = '$\mathbf{z \ / \ z_{diff}}$'
-            ylabel = '$\mathbf{lg [ I_{max} \ / \ I_{max}(z=0) ]}$'
+            ylabel = '$\mathbf{lg [ I_{max} \ / \ I_{max}(z=0)]}$'
         else:
             xlabel = '$\mathbf{z \ / \ z_{диф}}$'
-            ylabel = '$\mathbf{lg [I_{макс} \ / \ I_{макс}(z=0)lg ]}$'
+            ylabel = '$\mathbf{lg [I_{макс} \ / \ I_{макс}(z=0)]}$'
 
         plt.xlabel(xlabel, fontsize=font_size, fontweight=font_weight)
         plt.ylabel(ylabel, fontsize=font_size, fontweight=font_weight)
