@@ -21,7 +21,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         self._args = parse_args()
 
         self._lmbda = randint(400, 3001) * 10**-9
-        self._radius = randint(30, 151) * 10**-6
+        self._radius = randint(30, 80) * 10**-6
         self.__m_constants = MathConstants()
         self._medium = Medium(name=choice(['SiO2', 'CaF2', 'LiF']),
                               lmbda=self._lmbda,
