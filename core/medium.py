@@ -169,9 +169,9 @@ class Medium:
         Initializes dispersion parameters for LiF
         """
 
-        C_1 = 0.92549
-        C_2 = 6.96747
-        C_3 = 0
+        C_1 = 0.9254900000
+        C_2 = 6.9674700000
+        C_3 = 0.0000000000
         lambda_1 = 0.0737600000 * 10 ** -6
         lambda_2 = 32.790000000 * 10 ** -6
         lambda_3 = 10**-10
