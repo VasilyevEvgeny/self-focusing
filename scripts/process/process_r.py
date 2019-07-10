@@ -9,8 +9,8 @@ beam = BeamR(medium='LiF',
              p_0_to_p_vortex=5,
              m=1,
              M=1,
-             lmbda=1557*10**-9,
-             r_0=85*10**-6,
+             lmbda=1800*10**-9,
+             r_0=100*10**-6,
              n_r=2048)
 
 # create visualizer object

@@ -32,7 +32,7 @@ def load_dirnames(path=os.getcwd() + '/tests/dirnames.txt'):
         raise Exception('No file with dirnames in test mode!')
 
 def parse_args():
-    """Parses argiment from comman line"""
+    """Parses arguments from command line"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--global_root_dir')
