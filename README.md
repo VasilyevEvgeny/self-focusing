@@ -31,8 +31,8 @@ pip install -r <path_to_project>/requirements.txt
 * **Linux**
 ```bash
 virtualenv venv -p python3
-cd venv
-source activate
+cd venv/bin
+source ./activate
 pip install -r <path_to_project>/requirements.txt
 ```
 
