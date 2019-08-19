@@ -31,6 +31,7 @@ def load_dirnames(path=os.getcwd() + '/tests/dirnames.txt'):
     else:
         raise Exception('No file with dirnames in test mode!')
 
+
 def parse_args():
     """Parses arguments from command line"""
 

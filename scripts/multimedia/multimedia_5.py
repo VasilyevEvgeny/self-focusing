@@ -55,6 +55,7 @@ class Multimedia5(BaseMultimedia):
                 propagator.propagate()
 
                 del beam
+                del visualizer
                 del propagator
 
                 indices.append((idx_col, idx_row))
