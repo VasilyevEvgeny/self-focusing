@@ -16,7 +16,7 @@ class Multimedia1(BaseMultimedia):
                 print('noise_percent = %02d' % noise_percent, ', M = %d' % M, ', m = %d' % m)
                 print('================================================================')
 
-                noise = GaussianNoise(r_corr=10 * 10 ** -6,
+                noise = GaussianNoise(r_corr_in_meters=10 * 10 ** -6,
                                       variance=1)
 
                 beam = BeamXY(medium='SiO2',

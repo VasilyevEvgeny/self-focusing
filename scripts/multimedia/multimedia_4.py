@@ -16,7 +16,7 @@ class Multimedia4(BaseMultimedia):
                 print('r_corr = %d' % (round(r_corr * 10**6)), ', noise_percent = %d' % noise_percent)
                 print('=====================================================================')
 
-                noise = GaussianNoise(r_corr=r_corr,
+                noise = GaussianNoise(r_corr_in_meters=r_corr,
                                       variance=1)
 
                 beam = BeamXY(medium='LiF',
