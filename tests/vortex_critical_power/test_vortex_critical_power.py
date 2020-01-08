@@ -31,7 +31,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         self._n_z = None
         self._n_z_diff = 10
-        self._n_i_max_to_stop = 50
+        self._n_i_max_to_stop = 30
 
         self._eps = None
         self._png_name = None

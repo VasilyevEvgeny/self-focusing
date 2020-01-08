@@ -1,4 +1,4 @@
-from numpy import pi, arctan2, exp, sqrt, zeros, complex64, mean, sum as summ
+from numpy import pi, arctan2, exp, sqrt, zeros, complex64, mean, sum as summ, array
 from scipy.special import gamma
 from numba import jit
 
@@ -31,11 +31,11 @@ class BeamXY(Beam3D):
         self.__dk_x = 2.0 * pi / self.__x_max  # wave vector step along x
         self.__dk_y = 2.0 * pi / self.__y_max  # wave vector step along y
 
-        self.__k_xs = [i * self.__dk_x if i < self.__n_x / 2 else (i - self.__n_x) * self.__dk_x  # wave vector grid
-                       for i in range(self.__n_x)]                                                # nodes along x
+        self.__k_xs = array([i * self.__dk_x if i < self.__n_x / 2 else (i - self.__n_x) * self.__dk_x  # wave vector grid
+                       for i in range(self.__n_x)])                                                     # nodes along x
 
-        self.__k_ys = [i * self.__dk_y if i < self.__n_y / 2 else (i - self.__n_y) * self.__dk_y  # wave vector grid
-                       for i in range(self.__n_y)]                                                # nodes along y
+        self.__k_ys = array([i * self.__dk_y if i < self.__n_y / 2 else (i - self.__n_y) * self.__dk_y  # wave vector grid
+                       for i in range(self.__n_y)])                                                     # nodes along y
 
         self.__noise_percent = kwargs.get('noise_percent', 0.0)  # multiplicative noise percent
         self.__noise_field = zeros(shape=(self.__n_x, self.__n_y))  # array for complex noise field

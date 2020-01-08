@@ -5,7 +5,7 @@ from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecut
 args = parse_args()
 
 # create noise object
-noise = GaussianNoise(r_corr=20*10**-6,
+noise = GaussianNoise(r_corr_in_meters=20*10**-6,
                       variance=1)
 
 # create object of 3D beam
@@ -18,8 +18,8 @@ beam = BeamXY(medium='LiF',
               lmbda=1800*10**-9,
               x_0=100*10**-6,
               y_0=100*10**-6,
-              n_x=2048,
-              n_y=2048)
+              n_x=1024,
+              n_y=1024)
 
 # create visualizer object
 visualizer = BeamVisualizer(beam=beam,
@@ -32,7 +32,7 @@ propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                         kerr_effect=KerrExecutorXY(beam=beam),
-                        n_z=2000,
+                        n_z=1000,
                         dz_0=10**-5,
                         const_dz=False,
                         print_current_state_every=50,

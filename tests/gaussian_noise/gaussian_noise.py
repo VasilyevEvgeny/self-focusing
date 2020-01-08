@@ -22,7 +22,7 @@ class TestGaussianNoise(TestCase):
         self.__dy = self.__y_max / self.__n_y
 
         self.__eps_var = 0.2
-        self.__eps_r_corr = 0.6
+        self.__eps_r_corr = 0.99
 
     def test_gaussian_noise(self, n_epochs=50):
 
