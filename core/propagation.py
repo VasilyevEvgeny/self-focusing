@@ -31,12 +31,19 @@ class Propagator:
         self.__print_current_state_every = kwargs.get('print_current_state_every', None)  # frequency of current state print
 
         self.__plot_beam_every = kwargs.get('plot_beam_every', None)  # frequency of plotting beam
+        self.__plot_spectrum_every = kwargs.get('plot_spectrum_every', None)  # frequency of plotting spectrum
         self.__flag_print_track = kwargs.get('print_track', True)  # print track function or not
 
         # settings for function which plots beam
         if self.__plot_beam_every:
             self.__visualizer = kwargs['visualizer']
             self.__visualizer.get_path_to_save(self.__manager.beam_dir)
+
+        # spectrum
+        self.__spectrum = kwargs.get('spectrum', None)
+        if self.__plot_spectrum_every:
+            self.__spectrum_visualizer = kwargs['spectrum_visualizer']
+            self.__spectrum_visualizer.get_path_to_save(self.__manager.beam_dir)
 
         self.__z = 0.0  # initial value of z
         self.__dz = kwargs['dz_0']  # initial step along z
@@ -156,6 +163,11 @@ class Propagator:
             # plot beam
             if self.__plot_beam_every and not (n_step % self.__plot_beam_every):
                 self.__logger.measure_time(self.__visualizer.plot_beam, [self.__beam, self.__z, n_step])
+
+            # plot spectrum
+            if self.__plot_spectrum_every and not (n_step % self.__plot_spectrum_every):
+                self.__logger.measure_time(self.__spectrum.update, [self.__beam])
+                self.__logger.measure_time(self.__spectrum_visualizer.plot, [self.__spectrum, self.__z, n_step])
 
             # check if calculations must be stopped
             if self.__beam.i_max > self.__max_intensity_to_stop:

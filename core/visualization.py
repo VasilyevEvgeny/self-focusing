@@ -1,6 +1,7 @@
 from numpy import transpose, meshgrid, zeros
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.gridspec as gridspec
 from pylab import contourf
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
@@ -489,3 +490,90 @@ def plot_track(states_arr, parameter_index, path):
 
     plt.savefig(path + '/i_max(z).png', bbox_inches='tight')
     plt.close()
+
+
+class SpectrumVisualizer:
+    def __init__(self, **kwargs):
+        self.__spectrum = kwargs['spectrum']
+
+        self._remaining_central_part_coeff_field = kwargs['remaining_central_part_coeff_field']
+        self._remaining_central_part_coeff_spectrum = kwargs['remaining_central_part_coeff_spectrum']
+
+    def __crop_arr_field(self, arr):
+        """
+        :param remaining_central_part_coeff:
+        0 -> no points,
+        0.5 -> central half number of points,
+        1.0 -> all points
+        :return:
+        """
+
+        if self._remaining_central_part_coeff_field < 0 or self._remaining_central_part_coeff_field > 1:
+            raise Exception('Wrong remaining_central part_coeff!')
+
+        n = arr.shape[0]
+        delta = int(self._remaining_central_part_coeff_field / 2 * n)
+        i_min, i_max = n // 2 - delta, n // 2 + delta
+
+        return arr[i_min:i_max, i_min:i_max]
+
+    def __crop_arr_spectrum(self, arr):
+        """
+        :param remaining_central_part_coeff:
+        0 -> no points,
+        0.5 -> central half number of points,
+        1.0 -> all points
+        :return:
+        """
+
+        if self._remaining_central_part_coeff_spectrum < 0 or self._remaining_central_part_coeff_spectrum > 1:
+            raise Exception('Wrong remaining_central part_coeff!')
+
+        n = arr.shape[0]
+        delta = int(self._remaining_central_part_coeff_spectrum / 2 * n)
+        i_min, i_max = n // 2 - delta, n // 2 + delta
+
+        return arr[i_min:i_max, i_min:i_max]
+
+    def get_path_to_save(self, path_to_save):
+        self._path_to_save = path_to_save
+
+    def plot(self, spectrum, z, step):
+
+        fig = plt.figure(figsize=(15, 10), constrained_layout=True)
+        spec = gridspec.GridSpec(ncols=3, nrows=1, figure=fig)
+        ax1 = fig.add_subplot(spec[0, 0])
+        # ax2 = fig.add_subplot(spec[0, 1])
+        ax3 = fig.add_subplot(spec[0, 1])
+        ax4 = fig.add_subplot(spec[0, 2])
+
+        ax1.set_aspect('equal')
+        # ax2.set_aspect('equal')
+        ax3.set_aspect('equal')
+        ax4.set_aspect('equal')
+
+        ax1.set_title('$\mathbf{I(x, y)}$', fontdict={'fontsize': 30})
+        # ax2.set_title('$\mathbf{\\varphi_{kerr}(x, y)}$', fontdict={'fontsize': 30})
+        ax3.set_title('$\mathbf{\\varphi(x, y)}$', fontdict={'fontsize': 30})
+        ax4.set_title('$\mathbf{S(k_x, k_y)}$', fontdict={'fontsize': 30})
+
+        intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
+        # kerr_phase_for_plot = self._crop_arr_field(spectrum.kerr_phase_xy)
+        phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
+        spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
+
+        ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
+        # print('max =', np.max(phase_for_plot))
+        # print('min =', np.min(phase_for_plot))
+        # ax2.contourf(kerr_phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
+        ax3.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
+        ax4.contourf(spectrum_for_plot, cmap=plt.get_cmap('jet'), levels=100)
+
+        ax1.set_axis_off()
+        # ax2.set_axis_off()
+        ax3.set_axis_off()
+        ax4.set_axis_off()
+
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=50)
+        plt.close()
+

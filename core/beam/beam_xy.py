@@ -188,6 +188,6 @@ class BeamXY(Beam3D):
                 arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
                             sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
                             exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
-                            exp(1j * m * arctan2(x, y))
+                            exp(1j * m * (arctan2(x, y) + pi))
 
         return arr

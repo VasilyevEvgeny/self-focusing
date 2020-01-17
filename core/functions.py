@@ -1,4 +1,4 @@
-from numpy import sqrt, transpose, zeros, float64, pi
+from numpy import sqrt, transpose, zeros, float64, complex64, pi
 from scipy.special import gamma
 from numba import jit
 from glob import glob
@@ -119,6 +119,21 @@ def r_to_xy_real(r_slice):
             r = sqrt((i - n_x / 2.) ** 2 + (j - n_y / 2.) ** 2)
             if int(r) < n_r - 1:
                 arr[i, j] = linear_approximation_real(r, int(r), r_slice[int(r)], int(r) + 1, r_slice[int(r) + 1])
+    return arr
+
+
+@jit(nopython=True)
+def r_to_xy_complex(r_slice):
+    """Converts 1D array with data along radius-vector r to 2D array with axially symmetric data (x,y)"""
+
+    n_r = len(r_slice)
+    n_x, n_y = 2 * n_r, 2 * n_r
+    arr = zeros(shape=(n_x, n_y), dtype=complex64)
+    for i in range(n_x):
+        for j in range(n_y):
+            r = sqrt((i - n_x / 2.) ** 2 + (j - n_y / 2.) ** 2)
+            if int(r) < n_r - 1:
+                arr[i, j] = linear_approximation_complex(r, int(r), r_slice[int(r)], int(r) + 1, r_slice[int(r) + 1])
     return arr
 
 
