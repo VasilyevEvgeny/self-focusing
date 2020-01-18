@@ -1,4 +1,5 @@
-from numpy import transpose, meshgrid, zeros
+from numpy import transpose, meshgrid, zeros, log10, where
+import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.gridspec as gridspec
@@ -538,6 +539,13 @@ class SpectrumVisualizer:
     def get_path_to_save(self, path_to_save):
         self._path_to_save = path_to_save
 
+    @staticmethod
+    def __log_spectrum(arr, p=5):
+        MAX = np.max(arr)
+        low_level = MAX * 10**-p
+        arr[where(arr < low_level)] = low_level
+        return log10(arr / MAX)
+
     def plot(self, spectrum, z, step):
 
         fig = plt.figure(figsize=(15, 10), constrained_layout=True)
@@ -560,14 +568,14 @@ class SpectrumVisualizer:
         intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
         # kerr_phase_for_plot = self._crop_arr_field(spectrum.kerr_phase_xy)
         phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
-        spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
+        spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
 
         ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
         # print('max =', np.max(phase_for_plot))
         # print('min =', np.min(phase_for_plot))
         # ax2.contourf(kerr_phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
         ax3.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
-        ax4.contourf(spectrum_for_plot, cmap=plt.get_cmap('jet'), levels=100)
+        ax4.contourf(spectrum_for_plot, cmap=plt.get_cmap('gray'), levels=100)
 
         ax1.set_axis_off()
         # ax2.set_axis_off()

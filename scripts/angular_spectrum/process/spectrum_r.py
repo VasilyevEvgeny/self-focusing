@@ -1,4 +1,5 @@
-from core import BeamR, SpectrumR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, SpectrumVisualizer, parse_args
+from core import BeamR, SpectrumR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, SpectrumVisualizer, \
+    parse_args, make_animation, make_video
 
 # parse args from command line
 args = parse_args()
@@ -8,7 +9,7 @@ beam = BeamR(medium='LiF',
              p_0_to_p_vortex=5,
              m=1,
              M=1,
-             lmbda=1800*10**-9,
+             lmbda=3000*10**-9,
              r_0=100*10**-6,
              radii_in_grid=70,
              n_r=4096)
@@ -18,7 +19,7 @@ spectrum = SpectrumR(beam=beam)
 # create visualizer object
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
                                          remaining_central_part_coeff_field=0.05,
-                                         remaining_central_part_coeff_spectrum=0.05)
+                                         remaining_central_part_coeff_spectrum=0.1)
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -37,3 +38,14 @@ propagator = Propagator(args=args,
 
 # initiate propagation process
 propagator.propagate()
+
+# multimedia
+make_animation(root_dir=propagator.manager.results_dir,
+               images_dir_name='beam',
+               name=args.prefix,
+               fps=10)
+
+make_video(root_dir=propagator.manager.results_dir,
+           images_dir_name='beam',
+           name=args.prefix,
+           fps=10)
