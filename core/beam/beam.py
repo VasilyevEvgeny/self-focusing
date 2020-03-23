@@ -46,6 +46,10 @@ class Beam(metaclass=ABCMeta):
     def info(self):
         """Beam type"""
 
+    @abstractmethod
+    def save_field(self, path):
+        """"""
+
     def update_intensity(self):
         self._intensity = self._field_to_intensity(self._field)
         self._i_max = maximum(self._intensity) * self._i_0
@@ -81,6 +85,10 @@ class Beam(metaclass=ABCMeta):
     @property
     def i_max(self):
         return self._i_max
+
+    @property
+    def field(self):
+        return self._field
 
     @property
     def intensity(self):

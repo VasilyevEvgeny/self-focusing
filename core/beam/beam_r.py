@@ -1,8 +1,9 @@
-from numpy import pi, exp, zeros, complex64
+from numpy import pi, exp, zeros, complex64, save
 from scipy.special import gamma
 from numba import jit
 
 from .beam_3d import Beam3D
+from ..functions import r_to_xy_complex
 
 
 class BeamR(Beam3D):
@@ -81,3 +82,7 @@ class BeamR(Beam3D):
             arr[i] = (r / r_0)**M * exp(-0.5 * (r / r_0)**2)
 
         return arr
+
+    def save_field(self, path):
+        field_xy = r_to_xy_complex(self._field)
+        save(path, field_xy)

@@ -39,6 +39,14 @@ class Manager:
         self.__track_dir = self.results_dir + '/track'
         self.__beam_dir = self.results_dir + '/beam'
 
+        if kwargs.get('save_field', False):
+            self.__field_dir = self.__beam_dir + '/field'
+            self.create_dir(self.__field_dir)
+
+    @property
+    def field_dir(self):
+        return self.__field_dir
+
     @property
     def results_dir(self):
         return self.__results_dir

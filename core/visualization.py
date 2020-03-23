@@ -497,6 +497,7 @@ class SpectrumVisualizer:
     def __init__(self, **kwargs):
         self.__spectrum = kwargs['spectrum']
 
+        self.__log_scale_of_spectrum = kwargs.get('log_scale_of_spectrum', False)
         self._remaining_central_part_coeff_field = kwargs['remaining_central_part_coeff_field']
         self._remaining_central_part_coeff_spectrum = kwargs['remaining_central_part_coeff_spectrum']
 
@@ -566,9 +567,12 @@ class SpectrumVisualizer:
         ax4.set_title('$\mathbf{S(k_x, k_y)}$', fontdict={'fontsize': 30})
 
         intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
-        # kerr_phase_for_plot = self._crop_arr_field(spectrum.kerr_phase_xy)
+        # kerr_phase_for_plot = self.__crop_arr_field(spectrum.kerr_phase_xy)
         phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
-        spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+        if self.__log_scale_of_spectrum:
+            spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+        else:
+            spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
 
         ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
         # print('max =', np.max(phase_for_plot))

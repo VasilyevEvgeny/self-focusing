@@ -19,8 +19,10 @@ class Propagator:
 
         self.__args = kwargs['args']  # command line arguments
         self.__multidir_name = kwargs.get('multidir_name', None)  # multidir name if used
-        self.__manager = Manager(args=self.__args,                    # manager object
-                                 multidir_name=self.__multidir_name)  #
+        self.__save_field = kwargs.get('save_field', False)
+        self.__manager = Manager(args=self.__args,                            #
+                                 multidir_name=self.__multidir_name,          # manager object
+                                 save_field=self.__save_field)  #
         self.__logger = Logger(diffraction=self.__diffraction,   #
                                kerr_effect=self.__kerr_effect,   # logger object
                                path=self.__manager.results_dir)  #
@@ -168,6 +170,11 @@ class Propagator:
             if self.__plot_spectrum_every and not (n_step % self.__plot_spectrum_every):
                 self.__logger.measure_time(self.__spectrum.update, [self.__beam])
                 self.__logger.measure_time(self.__spectrum_visualizer.plot, [self.__spectrum, self.__z, n_step])
+
+            # save field
+            if self.__save_field:
+                path = self.__manager.field_dir + '/%04d' % n_step
+                self.__beam.save_field(path)
 
             # check if calculations must be stopped
             if self.__beam.i_max > self.__max_intensity_to_stop:

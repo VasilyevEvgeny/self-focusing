@@ -38,7 +38,8 @@ propagator = Propagator(args=args,
                         print_current_state_every=50,
                         plot_beam_every=50,
                         max_intensity_to_stop=4*10**16,
-                        visualizer=visualizer)
+                        visualizer=visualizer,
+                        save_field=True)
 
 # initiate propagation process
 propagator.propagate()

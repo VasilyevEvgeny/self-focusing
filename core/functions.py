@@ -191,7 +191,7 @@ def make_animation(root_dir, name, images_dir_name='images', fps=10):
     """Makes gif-animation from series of pictures"""
 
     images_for_animation = []
-    for file in glob(root_dir + '/' + images_dir_name + '/*'):
+    for file in glob(root_dir + '/' + images_dir_name + '/*.png'):
         images_for_animation.append(imageio.imread(file))
     imageio.mimsave(root_dir + '/' + name + '.gif', images_for_animation, fps=fps)
 
@@ -200,7 +200,7 @@ def make_video(root_dir, name, images_dir_name='images', fps=10):
     """Makes video from series of pictures"""
 
     images_for_video = []
-    for file in glob(root_dir + '/' + images_dir_name + '/*'):
+    for file in glob(root_dir + '/' + images_dir_name + '/*.png'):
         images_for_video.append(cv2.imread(file))
 
     height, width, leyers = images_for_video[0].shape
