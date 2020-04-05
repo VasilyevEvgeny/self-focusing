@@ -190,20 +190,20 @@ class BeamXY(Beam3D):
                 # nested vortices
                 #
 
-                r1 = 250 * 10 ** -6
-                d1 = 100 * 10 ** -6
-
-                r2 = 300 * 10 ** -6
-                d2 = 50 * 10 ** -6
-
-                r = sqrt(x ** 2 + y ** 2)
-
-                arr[i, j] = 0.5 * exp(-0.5 * ((r - r1) ** 2) / d1 ** 2) #+ 0.5 * exp(-0.5 * ((r - r2) ** 2) / d2 ** 2)
+                # r1 = 250 * 10 ** -6
+                # d1 = 100 * 10 ** -6
+                #
+                # r2 = 300 * 10 ** -6
+                # d2 = 50 * 10 ** -6
+                #
+                # r = sqrt(x ** 2 + y ** 2)
+                #
+                # arr[i, j] = 0.5 * exp(-0.5 * ((r - r1) ** 2) / d1 ** 2) #+ 0.5 * exp(-0.5 * ((r - r2) ** 2) / d2 ** 2)
 
                 # if r < 200 * 10**-6: #0.5 * (r1 + r2):
                 #     arr[i, j] *= exp(1j * m * (arctan2(x, y)))
                 # else:
-                arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + pi))
+                # arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + pi))
 
                 # #
                 # # ring width
@@ -215,13 +215,20 @@ class BeamXY(Beam3D):
                 # arr[i, j] = exp(-0.5 * ((r - r0) ** 2) / d ** 2)
 
 
-                ##  OLD
-                # arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
-                #             sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
-                #             exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
-                #             exp(1j * m * (arctan2(x, y) + pi))
+                #  OLD
+                arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
+                            sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
+                            exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
+                            exp(1j * m * (arctan2(x, y) + pi))
 
         return arr
 
-    def save_field(self, path):
-        save(path, self._field)
+    def save_field(self, path, only_center=True):
+        if only_center:
+            percent = 3
+            center = self.__n_x // 2
+            ambit = int(self.__n_x * percent / 100)
+            field = self._field[center-ambit:center+ambit, center-ambit:center+ambit]
+        else:
+            field = self._field
+        save(path, field)

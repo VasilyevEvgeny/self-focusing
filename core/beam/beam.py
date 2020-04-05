@@ -47,7 +47,7 @@ class Beam(metaclass=ABCMeta):
         """Beam type"""
 
     @abstractmethod
-    def save_field(self, path):
+    def save_field(self, path, only_center=True):
         """"""
 
     def update_intensity(self):

@@ -83,6 +83,6 @@ class BeamR(Beam3D):
 
         return arr
 
-    def save_field(self, path):
+    def save_field(self, path, only_center=True):
         field_xy = r_to_xy_complex(self._field)
         save(path, field_xy)

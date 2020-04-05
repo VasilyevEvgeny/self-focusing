@@ -9,3 +9,4 @@ xlsxwriter
 tqdm
 pandas
 xlrd
+scikit-image

@@ -25,7 +25,7 @@ def plot_images(**kwargs):
     global_results_dir_name = kwargs['global_results_dir_name']
     prefix = kwargs['prefix']
     M = kwargs['M']
-    figsize = kwargs.get('figsize', (10,10))
+    figsize = kwargs.get('figsize', (10, 10))
     ext = kwargs.get('ext', 'png')
 
     _, results_dir, _ = make_paths(global_root_dir, global_results_dir_name, prefix)
