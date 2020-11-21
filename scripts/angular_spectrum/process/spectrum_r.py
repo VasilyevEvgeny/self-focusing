@@ -19,8 +19,8 @@ spectrum = SpectrumR(beam=beam)
 # create visualizer object
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
                                          log_scale_of_spectrum=False,
-                                         remaining_central_part_coeff_field=0.05,
-                                         remaining_central_part_coeff_spectrum=0.12)
+                                         remaining_central_part_coeff_field=0.04,     # 0.05
+                                         remaining_central_part_coeff_spectrum=0.04)  # 0.12
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -36,7 +36,7 @@ propagator = Propagator(args=args,
                         plot_beam_every=0,
                         plot_spectrum_every=5,
                         spectrum_visualizer=spectrum_visualizer,
-                        save_field=True)
+                        save_field=False)
 
 # initiate propagation process
 propagator.propagate()

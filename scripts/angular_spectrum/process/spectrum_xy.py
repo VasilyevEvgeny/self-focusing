@@ -21,7 +21,7 @@ spectrum = SpectrumXY(beam=beam)
 # create visualizer object
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
                                          remaining_central_part_coeff_field=0.12,
-                                         remaining_central_part_coeff_spectrum=0.02)
+                                         remaining_central_part_coeff_spectrum=0.007)  # 0.02
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -29,7 +29,7 @@ propagator = Propagator(args=args,
                         spectrum=spectrum,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                         kerr_effect=KerrExecutorXY(beam=beam),
-                        n_z=200,
+                        n_z=1,
                         dz_0=beam.z_diff / 1000,
                         const_dz=True,
                         print_current_state_every=1,
@@ -37,7 +37,7 @@ propagator = Propagator(args=args,
                         plot_beam_every=0,
                         plot_spectrum_every=5,
                         spectrum_visualizer=spectrum_visualizer,
-                        save_field=True)
+                        save_field=False)
 
 # initiate propagation process
 propagator.propagate()

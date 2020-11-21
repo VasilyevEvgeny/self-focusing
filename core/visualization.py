@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.gridspec as gridspec
 from pylab import contourf
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
@@ -549,43 +550,173 @@ class SpectrumVisualizer:
 
     def plot(self, spectrum, z, step):
 
-        fig = plt.figure(figsize=(15, 10), constrained_layout=True)
+        fig = plt.figure(figsize=(15, 10))
         spec = gridspec.GridSpec(ncols=3, nrows=1, figure=fig)
+
+        font_size = 30
+        font_weight = 'bold'
+
         ax1 = fig.add_subplot(spec[0, 0])
-        # ax2 = fig.add_subplot(spec[0, 1])
-        ax3 = fig.add_subplot(spec[0, 1])
-        ax4 = fig.add_subplot(spec[0, 2])
-
         ax1.set_aspect('equal')
-        # ax2.set_aspect('equal')
-        ax3.set_aspect('equal')
-        ax4.set_aspect('equal')
-
-        ax1.set_title('$\mathbf{I(x, y)}$', fontdict={'fontsize': 30})
-        # ax2.set_title('$\mathbf{\\varphi_{kerr}(x, y)}$', fontdict={'fontsize': 30})
-        ax3.set_title('$\mathbf{\\varphi(x, y)}$', fontdict={'fontsize': 30})
-        ax4.set_title('$\mathbf{S(k_x, k_y)}$', fontdict={'fontsize': 30})
-
         intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
-        # kerr_phase_for_plot = self.__crop_arr_field(spectrum.kerr_phase_xy)
+        im1 = ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
+        ax1_ticks = [50, 80, 110]
+        ax1.set_xticks(ax1_ticks)
+        ax1.set_xticklabels(['$\mathbf{-r_0}$', '0', '$\mathbf{+r_0}$'], fontsize=font_size, fontweight=font_weight)
+        ax1.set_yticks(ax1_ticks)
+        ax1.set_yticklabels(['$\mathbf{+r_0}$', '0', '$\mathbf{-r_0}$'], fontsize=font_size, fontweight=font_weight)
+        ax1.grid(color='white', lw=3, ls=':', alpha=0.5)
+        divider = make_axes_locatable(ax1)
+        cax1 = divider.new_vertical(size='8%', pad=0.5)
+        fig.add_axes(cax1)
+        cb1 = fig.colorbar(im1, cax=cax1, orientation='horizontal')
+        cb1.set_label('$\mathbf{I(x,y) \ / \ I_{max}}$', labelpad=-90, fontsize=30)
+        cb1.set_ticks([np.min(intensity_for_plot), np.max(intensity_for_plot)])
+        cb1.set_ticklabels(['0', '1'])
+        cb1.ax.tick_params(labelsize=20)
+
+
+        ax2 = fig.add_subplot(spec[0, 1])
+        ax2.set_aspect('equal')
         phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
+        im2 = ax2.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
+        ax2_ticks = ax1_ticks
+        ax2.set_xticks(ax2_ticks)
+        ax2.set_xticklabels(['$\mathbf{-r_0}$', '0', '$\mathbf{+r_0}$'], fontsize=font_size, fontweight=font_weight)
+        ax2.set_yticks(ax2_ticks)
+        ax2.set_yticklabels(['', '', ''])
+        ax2.grid(color='white', lw=3, ls=':', alpha=0.5)
+        divider = make_axes_locatable(ax2)
+        cax2 = divider.new_vertical(size='8%', pad=0.5)
+        fig.add_axes(cax2)
+        cb2 = fig.colorbar(im2, cax=cax2, orientation='horizontal')
+        cb2.set_label('$\mathbf{\\theta(x,y)}$', labelpad=-90, fontsize=30)
+        cb2.set_ticks([np.min(phase_for_plot), np.max(phase_for_plot)])
+        cb2.set_ticklabels(['0', '2$\pi$'])
+        cb2.ax.tick_params(labelsize=20)
+
+        ax3 = fig.add_subplot(spec[0, 2])
+        ax3.set_aspect('equal')
         if self.__log_scale_of_spectrum:
             spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
         else:
             spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
-
-        ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
-        # print('max =', np.max(phase_for_plot))
-        # print('min =', np.min(phase_for_plot))
-        # ax2.contourf(kerr_phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
-        ax3.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
-        ax4.contourf(spectrum_for_plot, cmap=plt.get_cmap('gray'), levels=100)
-
-        ax1.set_axis_off()
-        # ax2.set_axis_off()
-        ax3.set_axis_off()
-        ax4.set_axis_off()
+        im3 = ax3.contourf(spectrum_for_plot, cmap=plt.get_cmap('gray'), levels=100)
+        ax3_ticks = ax1_ticks
+        ax3.set_xticks(ax3_ticks)
+        ax3.set_xticklabels(['$\mathbf{-k_0}$', '0', '$\mathbf{+k_0}$'], fontsize=font_size, fontweight=font_weight)
+        ax3.set_yticks(ax3_ticks)
+        ax3.yaxis.tick_right()
+        ax3.set_yticklabels(['$\mathbf{+k_0}$', '  0', '$\mathbf{-k_0}$'], fontsize=font_size, fontweight=font_weight)
+        ax3.grid(color='white', lw=3, ls=':', alpha=0.5)
+        divider = make_axes_locatable(ax3)
+        cax3 = divider.new_vertical(size='8%', pad=0.5)
+        fig.add_axes(cax3)
+        cb3 = fig.colorbar(im3, cax=cax3, orientation='horizontal')
+        cb3.set_label('$\mathbf{S(k_x,k_y) \ / \ S_{max}}$', labelpad=-90, fontsize=30)
+        cb3.set_ticks([np.min(spectrum_for_plot), np.max(spectrum_for_plot)])
+        cb3.set_ticklabels(['0', '1'])
+        cb3.ax.tick_params(labelsize=20)
 
         plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=50)
         plt.close()
+
+        # fig = plt.figure(figsize=(15, 10), constrained_layout=True)
+        # spec = gridspec.GridSpec(ncols=3, nrows=1, figure=fig)
+        # ax1 = fig.add_subplot(spec[0, 0])
+        # # ax2 = fig.add_subplot(spec[0, 1])
+        # ax3 = fig.add_subplot(spec[0, 1])
+        # ax4 = fig.add_subplot(spec[0, 2])
+        #
+        # ax1.set_aspect('equal')
+        # # ax2.set_aspect('equal')
+        # ax3.set_aspect('equal')
+        # ax4.set_aspect('equal')
+        #
+        # # ax1.set_title('$\mathbf{I(x, y)}$', fontdict={'fontsize': 30})
+        # # #ax2.set_title('$\mathbf{\\varphi_{kerr}(x, y)}$', fontdict={'fontsize': 30})
+        # # ax3.set_title('$\mathbf{\\varphi(x, y)}$', fontdict={'fontsize': 30})
+        # # ax4.set_title('$\mathbf{S(k_x, k_y)}$', fontdict={'fontsize': 30})
+        #
+        # intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
+        # print(intensity_for_plot.shape)
+        # # kerr_phase_for_plot = self.__crop_arr_field(spectrum.kerr_phase_xy)
+        # phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
+        # if self.__log_scale_of_spectrum:
+        #     spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+        # else:
+        #     spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
+        #
+        # ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=100)
+        # # print('max =', np.max(phase_for_plot))
+        # # print('min =', np.min(phase_for_plot))
+        # # ax2.contourf(kerr_phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
+        # #ax3.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=100)
+        # #ax4.contourf(spectrum_for_plot, cmap=plt.get_cmap('gray'), levels=100)
+        #
+        # font_size = 30
+        # font_weight = 'bold'
+        #
+        # # #
+        # # # propagation
+        # # #
+        # #
+        # # ax1_ticks = [50, 80, 110]
+        # # ax1.set_xticks(ax1_ticks)
+        # # ax1.set_xticklabels(['$\mathbf{-r_0}$', '0', '$\mathbf{+r_0}$'], fontsize=font_size, fontweight=font_weight)
+        # # ax1.set_yticks(ax1_ticks)
+        # # ax1.set_yticklabels(['$\mathbf{+r_0}$', '0', '$\mathbf{-r_0}$'], fontsize=font_size, fontweight=font_weight)
+        # # ax1.grid(color='white', lw=3, ls=':', alpha=0.5)
+        # #
+        # # ax3_ticks = ax1_ticks
+        # # ax3.set_xticks(ax3_ticks)
+        # # ax3.set_xticklabels(['$\mathbf{-r_0}$', '0', '$\mathbf{+r_0}$'], fontsize=font_size, fontweight=font_weight)
+        # # ax3.set_yticks(ax1_ticks)
+        # # ax3.set_yticklabels(['', ''], fontsize=30)
+        # # ax3.grid(color='white', lw=3, ls=':', alpha=0.5)
+        # #
+        # # ax4_ticks = [50, 80, 110]
+        # # ax4.set_xticks(ax4_ticks)
+        # # ax4.set_xticklabels(['$\mathbf{-k_0}$', '0', '$\mathbf{+k_0}$'], fontsize=font_size, fontweight=font_weight)
+        # # ax4.set_yticks(ax4_ticks)
+        # # ax4.yaxis.tick_right()
+        # # ax4.set_yticklabels(['$\mathbf{+k_0}$', '  0', '$\mathbf{-k_0}$'], fontsize=font_size, fontweight=font_weight)
+        # # ax4.grid(color='white', lw=3, ls=':', alpha=0.5)
+        #
+        # #
+        # # nested vortex
+        # #
+        #
+        # ax1_ticks = [150, 390, 600, 850]
+        # ax1.set_xticks(ax1_ticks)
+        # ax1.set_xticklabels(['$\mathbf{-\\xi_{out}}$', '$\mathbf{-\\xi_{in}}$', '$\mathbf{+\\xi_{in}}$',
+        #                      '$\mathbf{+\\xi_{out}}$'], fontsize=font_size, fontweight=font_weight)
+        # ax1.set_yticks(ax1_ticks)
+        # ax1.set_yticklabels(['$\mathbf{-\\xi_{out}}$', '$\mathbf{-\\xi_{in}}$', '$\mathbf{+\\xi_{in}}$',
+        #                      '$\mathbf{+\\xi_{out}}$'], fontsize=font_size, fontweight=font_weight)
+        # ax1.grid(color='white', lw=3, ls=':', alpha=0.5)
+        #
+        # ax3_ticks = ax1_ticks
+        # ax3.set_xticks(ax3_ticks)
+        # ax3.set_xticklabels(['$\mathbf{-\\xi_{out}}$', '$\mathbf{-\\xi_{in}}$', '$\mathbf{+\\xi_{in}}$',
+        #                      '$\mathbf{+\\xi_{out}}$'], fontsize=font_size, fontweight=font_weight)
+        # ax3.set_yticks(ax3_ticks)
+        # ax3.set_yticklabels(['', '', '', ''], fontsize=font_size, fontweight=font_weight)
+        # ax3.grid(color='white', lw=3, ls=':', alpha=0.5)
+        #
+        # ax4_ticks = [8, 22, 34, 48]
+        # ax4.set_xticks(ax4_ticks)
+        # ax4.set_xticklabels(['$\mathbf{-k_2}$', '$\mathbf{-k_1}$', '$\mathbf{+k_1}$', '$\mathbf{+k_2}$'], fontsize=font_size, fontweight=font_weight)
+        # ax4.set_yticks(ax4_ticks)
+        # ax4.yaxis.tick_right()
+        # ax4.set_yticklabels(['$\mathbf{+k_2}$', '$\mathbf{+k_1}$', '$\mathbf{-k_1}$', '$\mathbf{-k_2}$'], fontsize=font_size, fontweight=font_weight)
+        # ax4.grid(color='white', lw=3, ls=':', alpha=0.5)
+        #
+        # # ax1.set_axis_off()
+        # # #ax2.set_axis_off()
+        # # ax3.set_axis_off()
+        # # ax4.set_axis_off()
+        #
+        # plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=50)
+        # plt.close()
 
