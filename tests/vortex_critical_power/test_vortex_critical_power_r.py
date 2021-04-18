@@ -84,7 +84,7 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
 
             self._p_v_rel_pred[idx] = p_v_pred
 
-            self._plot_propagation(dfs, m_dir, m)
+            self._plot_propagation_nice(dfs, m_dir, m)
 
     def test_vortex_critical_power_r(self):
         self.process()
@@ -92,3 +92,8 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
 
         if self._flag_plot:
             self._plot(self.__results_dir)
+
+
+if __name__ == '__main__':
+    test_vortex = TestVortexCriticalPowerR()
+    test_vortex.test_vortex_critical_power_r()

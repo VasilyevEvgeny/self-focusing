@@ -1,1 +1,1 @@
-from .test_vortex_critical_power_r import TestVortexCriticalPowerR
+from test_vortex_critical_power_r import TestVortexCriticalPowerR

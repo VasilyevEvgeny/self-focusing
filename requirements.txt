@@ -2,7 +2,7 @@ numpy
 scipy==1.3.3
 matplotlib
 numba
-pyfftw
+pyFFTW
 imageio
 opencv-python
 xlsxwriter
@@ -10,3 +10,4 @@ tqdm
 pandas
 xlrd
 scikit-image
+openpyxl

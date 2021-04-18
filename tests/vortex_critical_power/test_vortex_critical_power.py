@@ -6,6 +6,13 @@ from numpy import array, zeros, log10, polyfit, linspace
 from matplotlib import pyplot as plt
 from matplotlib.cm import get_cmap
 
+from matplotlib import pyplot as plt
+from matplotlib import rc
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman']})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'\usepackage[utf8]{inputenc}')
+rc('text.latex', preamble=r'\usepackage[russian]{babel}')
+
 from core import MathConstants, Medium, calculate_p_vortex, load_dirnames
 
 
@@ -36,7 +43,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         self._eps = None
         self._png_name = None
 
-        self._ms = [1, 2, 3, 4, 5]
+        self._ms = [1, 2, 3, 4]
 
         self._p_v_rel_true = array([calculate_p_vortex(m, 1) for m in self._ms])
         self._p_v_rel_pred = zeros(shape=self._p_v_rel_true.shape)
@@ -102,6 +109,51 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         plt.legend(bbox_to_anchor=(0., 1.1, 1., .102), fontsize=font_size - 22, loc='center', ncol=4)
 
         plt.savefig(path_to_save_plot + '/i_max(z)_m=%d.png' % m, bbox_inches='tight')
+        plt.close()
+
+    def _plot_propagation_nice(self, dfs, path_to_save_plot, m):
+        def cm2inch(*tupl):
+            inch = 2.54
+            if isinstance(tupl[0], tuple):
+                return tuple(i / inch for i in tupl[0])
+            else:
+                return tuple(i / inch for i in tupl)
+
+        plt.figure(figsize=cm2inch(21, 5))
+        for idx, (p_v_normalized, df) in enumerate(dfs):
+            if p_v_normalized == 1.0:
+                color = 'black'
+                z_order = 1
+                linewidth = 3
+            else:
+                color = self._p_colors[idx]
+                linewidth = 2
+                z_order = 0
+
+            logarithmic = [log10(e) for e in df['i_max_normalized']]
+            plt.plot(df['z_normalized'], logarithmic, color=color, linewidth=linewidth, linestyle='solid',
+                     alpha=0.8, label='$P_0/P_V^{(m)} = %2.2f$' % p_v_normalized, zorder=z_order)
+
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+
+        if self._language == 'english':
+            xlabel = '$z \ / \ z_{\mathrm{diff}}$'
+            ylabel = '$\lg(I_{\mathrm{max}} \ / \ I_{\mathrm{max} 0})$'
+        else:
+            xlabel = '$z \ / \ z_{\mathrm{диф}}$'
+            ylabel = '$\lg(I_{\mathrm{макс}} \ / \ I_{\mathrm{макс} 0})$'
+
+        plt.xlabel(xlabel, fontsize=14)
+        plt.ylabel(ylabel, fontsize=14)
+
+        plt.ylim([-0.35, 1.1 * log10(self._n_i_max_to_stop)])
+
+        plt.grid(linewidth=0.5, linestyle='dotted', alpha=0.5, color='gray')
+
+        plt.legend(bbox_to_anchor=(0., 1.5, 1., .102), fontsize=10, loc='center', ncol=4)
+
+        plt.savefig(path_to_save_plot + '/i_max(z)_m=%d.png' % m, bbox_inches='tight', dpi=500)
         plt.close()
 
     def _plot(self, path_to_save_plot, polyfit_degree=2):
