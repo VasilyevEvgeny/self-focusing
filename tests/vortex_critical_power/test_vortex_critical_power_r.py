@@ -91,7 +91,7 @@ class TestVortexCriticalPowerR(TestVortexCriticalPower):
         self._check()
 
         if self._flag_plot:
-            self._plot(self.__results_dir)
+            self._plot_nice(self.__results_dir)
 
 
 if __name__ == '__main__':

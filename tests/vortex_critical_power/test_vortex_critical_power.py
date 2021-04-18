@@ -43,7 +43,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         self._eps = None
         self._png_name = None
 
-        self._ms = [1, 2, 3, 4]
+        self._ms = [1, 2, 3, 4, 5]
 
         self._p_v_rel_true = array([calculate_p_vortex(m, 1) for m in self._ms])
         self._p_v_rel_pred = zeros(shape=self._p_v_rel_true.shape)
@@ -119,7 +119,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
             else:
                 return tuple(i / inch for i in tupl)
 
-        plt.figure(figsize=cm2inch(21, 5))
+        plt.figure(figsize=cm2inch(11, 4))
         for idx, (p_v_normalized, df) in enumerate(dfs):
             if p_v_normalized == 1.0:
                 color = 'black'
@@ -151,7 +151,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         plt.grid(linewidth=0.5, linestyle='dotted', alpha=0.5, color='gray')
 
-        plt.legend(bbox_to_anchor=(0., 1.5, 1., .102), fontsize=10, loc='center', ncol=4)
+        # plt.legend(bbox_to_anchor=(0., 1.5, 1., .102), fontsize=10, loc='center', ncol=4)
 
         plt.savefig(path_to_save_plot + '/i_max(z)_m=%d.png' % m, bbox_inches='tight', dpi=500)
         plt.close()
@@ -167,6 +167,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         # polynomial regression
         a, b, c = polyfit(self._ms, self._p_v_rel_pred, polyfit_degree)
+        print('Curve: {}m^2 + {}m + {}'.format(a, b, c))
         xs = linspace(self._ms[0], self._ms[-1], 1000)
         ys = [a * x ** 2 + b * x + c for x in xs]
         sign_a = '+' if a >= 0 else '-'
@@ -192,4 +193,48 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         plt.legend(fontsize=font_size)
 
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight')
+        plt.close()
+
+    def _plot_nice(self, path_to_save_plot, polyfit_degree=2):
+        def cm2inch(*tupl):
+            inch = 2.54
+            if isinstance(tupl[0], tuple):
+                return tuple(i / inch for i in tupl[0])
+            else:
+                return tuple(i / inch for i in tupl)
+
+        plt.figure(figsize=cm2inch(8, 8))
+
+        plt.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
+        plt.scatter(self._ms, self._p_v_rel_pred, s=50, color='red', zorder=0, label='численное решение')
+
+        # polynomial regression
+        a, b, c = polyfit(self._ms, self._p_v_rel_pred, polyfit_degree)
+        print('Curve: {}m^2 + {}m + {}'.format(a, b, c))
+        xs = linspace(self._ms[0], self._ms[-1], 1000)
+        ys = [a * x ** 2 + b * x + c for x in xs]
+        sign_a = '+' if a >= 0 else '-'
+        sign_b = '+' if b >= 0 else '-'
+        sign_c = '+' if c >= 0 else '-'
+        # regr_label = '$%s$%05.3fm$^2$$%s$%05.3fm$%s$%05.3f' % (sign_a, abs(a), sign_b, abs(b), sign_c, abs(c))
+        plt.plot(xs, ys, color='blue', linewidth=2, zorder=1, label='квадратичная аппроксимация')
+
+        plt.xlim([0, 6])
+        plt.ylim([0.95, 1.1])
+
+        plt.xticks(self._ms, fontsize=12)
+        plt.yticks(fontsize=12)
+
+        plt.xlabel('$m$', fontsize=14)
+
+        if self._language == 'english':
+            ylabel = '$P_{V \mathrm{(num)}}^{(m)} \ / \ P_V^{(m)}$'
+        else:
+            ylabel = '$\mathbf{P_V (числ) \ / \ P_V (аналитич)}$'
+        plt.ylabel(ylabel, fontsize=14)
+
+        plt.grid(linewidth=0.5, linestyle='dotted', color='gray', alpha=0.5)
+        plt.legend(bbox_to_anchor=(0., 1.2, 1., .102), fontsize=12, loc='center', ncol=1)
+
+        plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight', dpi=500)
         plt.close()
