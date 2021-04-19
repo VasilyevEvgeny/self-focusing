@@ -203,11 +203,6 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
             else:
                 return tuple(i / inch for i in tupl)
 
-        plt.figure(figsize=cm2inch(8, 8))
-
-        plt.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
-        plt.scatter(self._ms, self._p_v_rel_pred, s=50, color='red', zorder=0, label='численное решение')
-
         # polynomial regression
         a, b, c = polyfit(self._ms, self._p_v_rel_pred, polyfit_degree)
         print('Curve: {}m^2 + {}m + {}'.format(a, b, c))
@@ -217,24 +212,131 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         sign_b = '+' if b >= 0 else '-'
         sign_c = '+' if c >= 0 else '-'
         # regr_label = '$%s$%05.3fm$^2$$%s$%05.3fm$%s$%05.3f' % (sign_a, abs(a), sign_b, abs(b), sign_c, abs(c))
-        plt.plot(xs, ys, color='blue', linewidth=2, zorder=1, label='квадратичная аппроксимация')
+        errors = [abs(self._p_v_rel_pred[i] - 1) * 100 for i in range(len(self._ms))]
 
-        plt.xlim([0, 6])
-        plt.ylim([0.95, 1.1])
+        fig = plt.figure(figsize=cm2inch(8, 8))
+        ax = fig.add_subplot(111)
 
-        plt.xticks(self._ms, fontsize=12)
-        plt.yticks(fontsize=12)
+        #
+        # errors
+        #
 
-        plt.xlabel('$m$', fontsize=14)
+        ax.fill_between(self._ms, errors, alpha=0.25, facecolor='blue', edgecolor=None,
+                        label='$\\varepsilon$')
+
+        x_ticks = self._ms
+        x_ticklabels = ['{:d}'.format(e) for e in x_ticks]
+        ax.set_xticks(x_ticks)
+        ax.set_xticklabels(x_ticklabels, fontsize=10)
+        ax.set_xlabel('$m$', fontsize=14)
+
+        ax.set_xlim(0, 6)
+        ax.set_ylim(0, 10)
+        ax.set_ylabel('$\\varepsilon, \%$', fontsize=14)
+
+        # plt.tick_params(axis='y', which='both', labelleft=False, labelright=True)
+
+        ax.grid(c='gray', ls=':', lw=0.5, alpha=0.5)
+
+        ax.legend(bbox_to_anchor=(0.37, 1.06, 1., .102), handlelength=3.0,
+                  fontsize=10, loc='center', ncol=1, frameon=False)
+
+        #
+        # p_v
+        #
+
+        ax_ghost = ax.twinx()
+        # ax.tick_params(top=False, labeltop=False, left=False, labelleft=False, right=True, labelright=True,
+        #                bottom=False, labelbottom=False)
+        # ax_ghost.tick_params(top=False, labeltop=False, left=True, labelleft=True, right=False, labelright=False,
+        #                      bottom=False, labelbottom=False)
+        ax.yaxis.tick_right()
+        ax.yaxis.set_label_position('right')
+        ax_ghost.yaxis.tick_left()
+        ax_ghost.yaxis.set_label_position('left')
+
+        ax_ghost.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
+        ax_ghost.scatter(self._ms, self._p_v_rel_pred, s=50, color='red', zorder=0, label='численное решение')
+        ax_ghost.plot(xs, ys, color='green', linewidth=2, zorder=1, label='квадратичная аппроксимация')
+
+        ax_ghost.set_ylim(0.95, 1.1)
 
         if self._language == 'english':
             ylabel = '$P_{V \mathrm{(num)}}^{(m)} \ / \ P_V^{(m)}$'
         else:
             ylabel = '$\mathbf{P_V (числ) \ / \ P_V (аналитич)}$'
-        plt.ylabel(ylabel, fontsize=14)
+        ax_ghost.set_ylabel(ylabel, fontsize=14)
 
-        plt.grid(linewidth=0.5, linestyle='dotted', color='gray', alpha=0.5)
-        plt.legend(bbox_to_anchor=(0., 1.2, 1., .102), fontsize=12, loc='center', ncol=1)
+        ax_ghost.grid(c='gray', ls='-', lw=0.5, alpha=0.5)
+
+        ax_ghost.legend(bbox_to_anchor=(-0.08, 1.15, 1., .102), handlelength=3.0,
+                        fontsize=10, loc='center', ncol=1, frameon=False)
 
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight', dpi=500)
         plt.close()
+
+
+
+
+
+
+
+        #
+        # fig = plt.figure(figsize=cm2inch(8, 8))
+        #
+        # ax = fig.add_subplot(111)
+        #
+        # # errors
+        # # ax.plot(self.__cores, self.__errors, c='blue', ls='-', lw=2, zorder=-1, alpha=0.25,
+        # #         label='$\\varepsilon = (t_i^{theory} - t_i^{real}) / t_i^{theory} \\times 100$')
+        # ax.fill_between(self.__cores, self.__errors, alpha=0.25, facecolor='blue', edgecolor=None,
+        #                 label='$\\varepsilon$')
+        #
+        # x_ticks = [2, 4, 6, 8, 10, 12]
+        # x_ticklabels = ['{:d}'.format(e) for e in x_ticks]
+        # ax.set_xticks(x_ticks)
+        # ax.set_xticklabels(x_ticklabels, fontsize=10)
+        # ax.set_xlabel('$i$', fontsize=18)
+        #
+        # ax.set_xlim(0, 13)
+        # ax.set_ylim(-5, 90)
+        # ax.set_ylabel('$\\varepsilon, \%$', fontsize=18)
+        #
+        # # plt.tick_params(axis='y', which='both', labelleft=False, labelright=True)
+        #
+        # ax.grid(c='gray', ls=':', lw=0.5, alpha=0.5)
+        #
+        # ax.legend(bbox_to_anchor=(0.55, 1.05, 1., .102), handlelength=3.0,
+        #           fontsize=10, loc='center', ncol=1, frameon=False)
+        #
+        # # ts
+        #
+        # ax_ghost = ax.twinx()
+        # # ax.tick_params(top=False, labeltop=False, left=False, labelleft=False, right=True, labelright=True,
+        # #                bottom=False, labelbottom=False)
+        # # ax_ghost.tick_params(top=False, labeltop=False, left=True, labelleft=True, right=False, labelright=False,
+        # #                      bottom=False, labelbottom=False)
+        # ax.yaxis.tick_right()
+        # ax.yaxis.set_label_position('right')
+        # ax_ghost.yaxis.tick_left()
+        # ax_ghost.yaxis.set_label_position('left')
+        #
+        # ax_ghost.scatter(self.__xs, self.__ys, c='black', marker='o', s=50, zorder=-1,
+        #                  label='$\\overline{t}_i^{theory} = 1 / i$')
+        # ax_ghost.scatter(self.__cores, self.__ts, c='red', marker='x', s=50, zorder=1,
+        #                  label='$\\overline{t}_i^{real}$')
+        #
+        # # y_ticks = [i * 0.1 for i in range(11)]
+        # # y_ticklabels = ['{:03.1f}'.format(e) for e in y_ticks]
+        # # ax_ghost.set_yticks(y_ticks)
+        # # ax_ghost.set_yticklabels(y_ticklabels, fontsize=10)
+        #
+        # ax_ghost.set_ylabel('$\\overline{t}_i$', fontsize=18)
+        #
+        # ax_ghost.grid(c='gray', ls='-', lw=0.5, alpha=0.5)
+        #
+        # ax_ghost.legend(bbox_to_anchor=(-0.25, 1.05, 1., .102), handlelength=3.0,
+        #                 fontsize=10, loc='center', ncol=2, frameon=False)
+        #
+        # plt.savefig('threads.png', bbox_inches='tight', dpi=500)
+        # plt.close()
