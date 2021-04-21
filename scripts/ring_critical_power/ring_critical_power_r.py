@@ -84,14 +84,15 @@ class RingCriticalPowerR(RingCriticalPower):
 
             self._p_g_rel_pred[idx] = p_g_pred
 
-            self._plot_propagation(dfs, M_dir, M)
+            self._plot_propagation_nice(dfs, M_dir, M)
 
     def ring_critical_power_r(self):
         self.process()
 
         if self._flag_plot:
-            self._plot(self.__results_dir)
+            self._plot_nice(self.__results_dir)
 
 
-ring_critical_power_r = RingCriticalPowerR()
-ring_critical_power_r.ring_critical_power_r()
+if __name__ == '__main__':
+    ring_critical_power_r = RingCriticalPowerR()
+    ring_critical_power_r.ring_critical_power_r()
