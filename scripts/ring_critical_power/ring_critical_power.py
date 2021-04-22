@@ -36,7 +36,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
 
         self._n_z = None
         self._n_z_diff = 10
-        self._n_i_max_to_stop = 10
+        self._n_i_max_to_stop = 30
 
         self._eps = None
         self._png_name = None
@@ -45,7 +45,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
 
         self._p_g_rel_pred = zeros(shape=self._Ms.shape)
 
-        self._p_gs = [ i * 0.02 + 1.0 for i in range(50) ]
+        self._p_gs = [i * 0.02 + 1.0 for i in range(50)]
 
         self.__cmap = get_cmap('jet')
         self.__n_p_gs = len(self._p_gs)
@@ -132,9 +132,9 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
 
         plt.grid(linewidth=0.5, linestyle='dotted', alpha=0.5, color='gray')
 
-        # plt.legend(bbox_to_anchor=(0., 1.5, 1., .102), fontsize=10, loc='center', ncol=4)
+        plt.legend(bbox_to_anchor=(0., 1.5, 1., .102), fontsize=10, loc='center', ncol=10)
 
-        plt.savefig(path_to_save_plot + '/i_max(z)_m=%d.png' % M, bbox_inches='tight', dpi=500)
+        plt.savefig(path_to_save_plot + '/i_max(z)_M=%d.png' % M, bbox_inches='tight', dpi=500)
         plt.close()
 
     def _plot(self, path_to_save_plot, polyfit_degree=1):
@@ -172,7 +172,7 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight')
         plt.close()
 
-    def _plot_nice(self, path_to_save_plot, polyfit_degree=2):
+    def _plot_nice(self, path_to_save_plot, polyfit_degree=1):
         def cm2inch(*tupl):
             inch = 2.54
             if isinstance(tupl[0], tuple):
@@ -181,15 +181,15 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
                 return tuple(i / inch for i in tupl)
 
         # polynomial regression
-        a, b, c = polyfit(self._Ms, self._p_g_rel_pred, polyfit_degree)
-        print('Curve: {}m^2 + {}m + {}'.format(a, b, c))
+        a, b = polyfit(self._Ms, self._p_g_rel_pred, polyfit_degree)
+        print('Curve: {}M + {}'.format(a, b))
         xs = linspace(self._Ms[0], self._Ms[-1], 1000)
-        ys = [a * x ** 2 + b * x + c for x in xs]
-        sign_a = '+' if a >= 0 else '-'
-        sign_b = '+' if b >= 0 else '-'
-        sign_c = '+' if c >= 0 else '-'
+        ys = [a * x + b for x in xs]
+        # sign_a = '+' if a >= 0 else '-'
+        # sign_b = '+' if b >= 0 else '-'
+        # sign_c = '+' if c >= 0 else '-'
         # regr_label = '$%s$%05.3fm$^2$$%s$%05.3fm$%s$%05.3f' % (sign_a, abs(a), sign_b, abs(b), sign_c, abs(c))
-        errors = [abs(self._p_g_rel_pred[i] - 1) * 100 for i in range(len(self._Ms))]
+        # errors = [abs(self._p_g_rel_pred[i] - 1) * 100 for i in range(len(self._Ms))]
 
         fig = plt.figure(figsize=cm2inch(8, 8))
         ax = fig.add_subplot(111)
@@ -198,56 +198,57 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         # errors
         #
 
-        ax.fill_between(self._Ms, errors, alpha=0.25, facecolor='blue', edgecolor=None,
-                        label='$\\varepsilon$')
-
-        x_ticks = self._Ms
-        x_ticklabels = ['{:d}'.format(e) for e in x_ticks]
-        ax.set_xticks(x_ticks)
-        ax.set_xticklabels(x_ticklabels, fontsize=10)
-        ax.set_xlabel('$M$', fontsize=14)
-
-        ax.set_xlim(0, 6)
-        ax.set_ylim(0, 10)
-        ax.set_ylabel('$\\varepsilon, \%$', fontsize=14)
-
-        # plt.tick_params(axis='y', which='both', labelleft=False, labelright=True)
-
-        ax.grid(c='gray', ls=':', lw=0.5, alpha=0.5)
-
-        ax.legend(bbox_to_anchor=(0.37, 1.06, 1., .102), handlelength=3.0,
-                  fontsize=10, loc='center', ncol=1, frameon=False)
+        # ax.fill_between(self._Ms, errors, alpha=0.25, facecolor='blue', edgecolor=None,
+        #                 label='$\\varepsilon$')
+        #
+        # x_ticks = self._Ms
+        # x_ticklabels = ['{:d}'.format(e) for e in x_ticks]
+        # ax.set_xticks(x_ticks)
+        # ax.set_xticklabels(x_ticklabels, fontsize=10)
+        # ax.set_xlabel('$M$', fontsize=14)
+        #
+        # ax.set_xlim(0, 6)
+        # ax.set_ylim(0, 10)
+        # ax.set_ylabel('$\\varepsilon, \%$', fontsize=14)
+        #
+        # # plt.tick_params(axis='y', which='both', labelleft=False, labelright=True)
+        #
+        # ax.grid(c='gray', ls=':', lw=0.5, alpha=0.5)
+        #
+        # ax.legend(bbox_to_anchor=(0.37, 1.06, 1., .102), handlelength=3.0,
+        #           fontsize=10, loc='center', ncol=1, frameon=False)
 
         #
         # p_v
         #
 
-        ax_ghost = ax.twinx()
+        # ax_ghost = ax.twinx()
         # ax.tick_params(top=False, labeltop=False, left=False, labelleft=False, right=True, labelright=True,
         #                bottom=False, labelbottom=False)
         # ax_ghost.tick_params(top=False, labeltop=False, left=True, labelleft=True, right=False, labelright=False,
         #                      bottom=False, labelbottom=False)
-        ax.yaxis.tick_right()
-        ax.yaxis.set_label_position('right')
-        ax_ghost.yaxis.tick_left()
-        ax_ghost.yaxis.set_label_position('left')
+        # ax.yaxis.tick_right()
+        # ax.yaxis.set_label_position('right')
+        # ax.yaxis.tick_left()
+        # ax.yaxis.set_label_position('left')
 
-        ax_ghost.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
-        ax_ghost.scatter(self._Ms, self._p_g_rel_pred, s=50, color='red', zorder=0, label='численное решение')
-        ax_ghost.plot(xs, ys, color='green', linewidth=2, zorder=1, label='квадратичная аппроксимация')
+        # ax.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
+        ax.scatter(self._Ms, self._p_g_rel_pred, s=50, color='red', zorder=0, label='численное решение')
+        ax.plot(xs, ys, color='green', linewidth=2, zorder=1, label='линейная аппроксимация')
 
-        ax_ghost.set_ylim(1.1, 1.8)
+        ax.set_ylim(1.1, 1.8)
 
         if self._language == 'english':
             ylabel = '$P_{R \mathrm{(num)}}^{(M)} \ / \ P_G$'
         else:
             ylabel = '$\mathbf{P_V (числ) \ / \ P_V (аналитич)}$'
-        ax_ghost.set_ylabel(ylabel, fontsize=14)
+        ax.set_xlabel('$M$', fontsize=14)
+        ax.set_ylabel(ylabel, fontsize=14)
 
-        ax_ghost.grid(c='gray', ls='-', lw=0.5, alpha=0.5)
+        ax.grid(c='gray', ls=':', lw=0.5, alpha=0.5)
 
-        ax_ghost.legend(bbox_to_anchor=(-0.08, 1.15, 1., .102), handlelength=3.0,
-                        fontsize=10, loc='center', ncol=1, frameon=False)
+        ax.legend(bbox_to_anchor=(0, 1.1, 1., .102), handlelength=3.0,
+                  fontsize=10, loc='center', ncol=1, frameon=False)
 
         plt.savefig(path_to_save_plot + '/' + self._png_name + '.png', bbox_inches='tight', dpi=500)
         plt.close()
