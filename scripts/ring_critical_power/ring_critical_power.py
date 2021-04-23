@@ -236,7 +236,9 @@ class RingCriticalPower(metaclass=abc.ABCMeta):
         ax.scatter(self._Ms, self._p_g_rel_pred, s=50, color='red', zorder=0, label='численное решение')
         ax.plot(xs, ys, color='green', linewidth=2, zorder=1, label='линейная аппроксимация')
 
-        ax.set_ylim(1.1, 1.8)
+        ax.set_xticks([1, 2, 3, 4, 5])
+        ax.set_xlim(0, 6)
+        ax.set_ylim(1.0, 1.9)
 
         if self._language == 'english':
             ylabel = '$P_{R \mathrm{(num)}}^{(M)} \ / \ P_G$'
