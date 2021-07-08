@@ -5,6 +5,12 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.gridspec as gridspec
 from pylab import contourf
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib import rc, cm
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman']})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'\usepackage[utf8]{inputenc}')
+rc('text.latex', preamble=r'\usepackage[russian]{babel}')
 
 from .functions import r_to_xy_real, crop_x, calc_ticks_x
 
@@ -50,6 +56,14 @@ class BeamVisualizer:
         # picture
         self.__dpi = kwargs.get('dpi', 50)
 
+    @staticmethod
+    def __cm2inch(*tupl):
+        inch = 2.54
+        if isinstance(tupl[0], tuple):
+            return tuple(i / inch for i in tupl[0])
+        else:
+            return tuple(i / inch for i in tupl)
+
     def get_path_to_save(self, path_to_save):
         self._path_to_save = path_to_save
 
@@ -88,15 +102,14 @@ class BeamVisualizer:
             arr = transpose(arr)
 
         if self._normalize_intensity_to == 1:
-            arr *= self.__beam.i_0 / 10**16
+            arr *= self.__beam.i_0 / 10**17
 
         xs = xs[x_idx_left:x_idx_right]
         ys = ys[y_idx_left:y_idx_right]
 
         return arr, xs, ys
 
-    def _initialize_levels_plot(self):
-        n_plot_levels = 100
+    def _initialize_levels_plot(self, n_plot_levels=100):
         max_intensity = None
 
         if isinstance(self.__maximum_intensity, int) or isinstance(self.__maximum_intensity, float):
@@ -107,7 +120,8 @@ class BeamVisualizer:
         if self._normalize_intensity_to == self.__beam.i_0:
             max_intensity /= self.__beam.i_0
         else:
-            max_intensity /= 10**16
+            pass
+            # max_intensity /= 10**16
 
         di = max_intensity / n_plot_levels
         levels_plot = [i * di for i in range(n_plot_levels + 1)]
@@ -118,7 +132,8 @@ class BeamVisualizer:
         if self.__plot_type == 'profile':
             return self.__plot_beam_profile(beam, z, step)
         elif self.__plot_type == 'flat':
-            return self.__plot_beam_flat(beam, z, step)
+            # return self.__plot_beam_flat(beam, z, step)
+            return self.__plot_beam_flat_dissertation(beam, z, step)
         elif self.__plot_type == 'volume':
             return self.__plot_beam_volume(beam, z, step)
         else:
@@ -194,7 +209,7 @@ class BeamVisualizer:
 
         fig, ax = plt.subplots(figsize=(9, 7))
 
-        levels_plot, max_intensity = self._initialize_levels_plot()
+        levels_plot, max_intensity = self._initialize_levels_plot(n_plot_levels=500)
         arr, xs, ys = self._initialize_arr()
 
         plot = contourf(arr, cmap=self._cmap, levels=levels_plot)
@@ -247,6 +262,89 @@ class BeamVisualizer:
         bbox = fig.bbox_inches.from_bounds(-0.8, -1.0, self.__bbox_width, self.__bbox_height)
 
         plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox, dpi=self.__dpi)
+        plt.close()
+
+        del arr
+
+    @staticmethod
+    def __calc_ticks_x(labels, xs):
+        ticks = []
+        nxt = 0
+        for label in labels:
+            for i in range(nxt, len(xs)):
+                if xs[i] > float(label.replace('$-$', '-')) * 1e-3:
+                    ticks.append(i)
+                    nxt = i
+                    break
+        return ticks
+
+    def __plot_beam_flat_dissertation(self, beam, z, step, legend=True):
+        """Plots intensity distribution in 2D beam with contour_plot"""
+
+        w, h = (8.5, 7) if legend else (5, 5)
+
+        fig, ax = plt.subplots(figsize=self.__cm2inch(w, h))
+        fig.patch.set_facecolor('white')
+
+        arr, xs, ys = self._initialize_arr()
+
+        # print(np.max(arr) * self.__beam.i_0, self.__maximum_intensity)
+
+        cmap = plt.get_cmap('jet')
+        # levels_plot = [-1. + i * 0.005 for i in range(500)]
+        levels_plot, max_intensity = self._initialize_levels_plot()
+        # levels_plot = [e / self.__beam.i_0 for e in levels_plot]
+        # levels_plot = [i * di for i in range(n_levels + 1)]
+        # print(self.__beam.i_max)
+        # print(levels_plot)
+        contour_plot = contourf(arr, cmap=cmap, levels=levels_plot)
+
+        x_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        x_ticks = self.__calc_ticks_x(x_ticklabels, xs)
+        y_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        y_ticks = self.__calc_ticks_x(y_ticklabels, ys)
+
+        ax.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax.spines.values():
+            spine.set_edgecolor('white')
+
+        plt.xticks(x_ticks, x_ticklabels, fontsize=10)
+        plt.yticks(y_ticks, y_ticklabels, fontsize=10)
+        plt.xlabel('$x$, мм', fontsize=12)
+        plt.ylabel('$y$, мм', fontsize=12)
+
+        # ax.set_xticklabels(c='black')
+
+        # plt.grid(c='white', ls=':', lw=0.5, alpha=0.5)
+
+        # # t profile
+        # t_profile_minimum = np.min(t_profile)
+        # t_profile_maximum = np.max(t_profile)
+        # delta_t_profile = t_profile_maximum - t_profile_minimum
+        # ax_profile = ax.twinx()
+        # ax_profile.set_yticks([])
+        # ax_profile.plot(t_profile, c='white', lw=1)
+        # ax_profile.set_ylim(t_profile_minimum - delta_t_profile * 0.1, t_profile_maximum + delta_t_profile * 5)
+
+        if legend:
+        #     levels_cbar = [-1.0, 0.0, 1.0]
+            colorbar = fig.colorbar(contour_plot, orientation='vertical', aspect=10, pad=0.05)
+            colorbar_label = 'I, TW/cm$\mathbf{^2}$'
+            colorbar.set_label(colorbar_label, labelpad=-15, y=1.15, rotation=0,
+                               fontsize=12, fontweight='bold')
+        #     cbar.set_label('lg$(I/I_0)$', labelpad=-25, y=1.15, rotation=0, fontsize=14)
+        #     ticks_cbar = ['+' + str(round(e, 1)) if e > 0 else '$-$' + str(abs(round(e, 1))) if e != 0 else '0.0' for e
+        #                   in
+        #                   levels_cbar]
+        #     cbar.ax.set_yticklabels(ticks_cbar, usetex=True)
+        #     cbar.ax.tick_params(labelsize=12)
+
+        bbox = 'tight' if legend else fig.bbox_inches.from_bounds(-0.42, -0.25, 2.25, 2)
+        # t_type, number = file.split('/')[0], file.split('/')[1]
+        # plt.savefig('{}/{}_{}.png'.format(t_type, t_type, number), bbox_inches=bbox, dpi=500)
+        # plt.close()
+
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches=bbox, dpi=500)
         plt.close()
 
         del arr

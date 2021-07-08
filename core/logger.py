@@ -282,7 +282,7 @@ $R_{kerr}$ & %.2f & -- \\tabularnewline
         if beam.info == 'beam_xy':
             tex_file_data += \
 '''\hline
-C & %.2f & -- \\tabularnewline
+C & %.4f & -- \\tabularnewline
 ''' % (beam.noise_percent / 100)
 
             if beam.noise_percent:
@@ -291,9 +291,9 @@ C & %.2f & -- \\tabularnewline
 \hline
 $\sigma^2$ & %.2f & -- \\tabularnewline
 \hline
-$r_{corr}$ & %d & $\mu$m \\tabularnewline
+$r_{corr}$ & %.4f & $\mu$m \\tabularnewline
 ''' % (beam.noise.variance_expected,
-       round(beam.noise.r_corr_in_meters * 10**6, 1))
+       round(beam.noise.r_corr_in_meters * 10**6, 5))
 
         tex_file_data += \
 '''\\midrule[2pt]'''
@@ -333,13 +333,13 @@ $n_x$ & %d & -- \\tabularnewline
 \hline
 $n_y$ & %d & -- \\tabularnewline
 \hline
-$h_x$ & %.2f & $\mu$m \\tabularnewline
+$h_x$ & %.4f & $\mu$m \\tabularnewline
 \hline
-$h_y$ & %.2f & $\mu$m \\tabularnewline
+$h_y$ & %.4f & $\mu$m \\tabularnewline
 ''' % (round(beam.x_max * 10 ** 6), round(beam.y_max * 10 ** 6),
        beam.n_x, beam.n_y,
-       round(beam.dx * 10 ** 6),
-       round(beam.dy * 10 ** 6))
+       round(beam.dx * 10 ** 6, 4),
+       round(beam.dy * 10 ** 6, 4))
 
         tex_file_data += \
 '''\\midrule[2pt]'''
