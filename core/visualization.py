@@ -39,7 +39,7 @@ class BeamVisualizer:
         self._cmap = plt.get_cmap('jet')
 
         # axes
-        self.__x_max = 250 * 10**-6  # m
+        self.__x_max = 200 * 10**-6  # m
         self.__y_max = self.__x_max
         self._x_ticklabels = ['-150', '0', '+150']
         self._y_ticklabels = ['-150', '0', '+150']
@@ -102,7 +102,7 @@ class BeamVisualizer:
             arr = transpose(arr)
 
         if self._normalize_intensity_to == 1:
-            arr *= self.__beam.i_0 / 10**17
+            arr *= self.__beam.i_0 / 10**16
 
         xs = xs[x_idx_left:x_idx_right]
         ys = ys[y_idx_left:y_idx_right]
@@ -120,8 +120,7 @@ class BeamVisualizer:
         if self._normalize_intensity_to == self.__beam.i_0:
             max_intensity /= self.__beam.i_0
         else:
-            pass
-            # max_intensity /= 10**16
+            max_intensity /= 10**16
 
         di = max_intensity / n_plot_levels
         levels_plot = [i * di for i in range(n_plot_levels + 1)]
@@ -292,16 +291,24 @@ class BeamVisualizer:
 
         cmap = plt.get_cmap('jet')
         # levels_plot = [-1. + i * 0.005 for i in range(500)]
-        levels_plot, max_intensity = self._initialize_levels_plot()
+        # levels_plot, max_intensity = self._initialize_levels_plot()
         # levels_plot = [e / self.__beam.i_0 for e in levels_plot]
         # levels_plot = [i * di for i in range(n_levels + 1)]
         # print(self.__beam.i_max)
+        n_levels = 500
+        max_intensity = 20
+        min_intensity = 0
+        di = (max_intensity - min_intensity) / n_levels
+        levels_plot = [min_intensity + i * di for i in range(n_levels + 1)]
+
         # print(levels_plot)
         contour_plot = contourf(arr, cmap=cmap, levels=levels_plot)
 
-        x_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        # x_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        x_ticklabels = ['$-$0.1', '0', '+0.1']
         x_ticks = self.__calc_ticks_x(x_ticklabels, xs)
-        y_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        # y_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
+        y_ticklabels = ['$-$0.1', '0', '+0.1']
         y_ticks = self.__calc_ticks_x(y_ticklabels, ys)
 
         ax.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
@@ -327,17 +334,18 @@ class BeamVisualizer:
         # ax_profile.set_ylim(t_profile_minimum - delta_t_profile * 0.1, t_profile_maximum + delta_t_profile * 5)
 
         if legend:
-        #     levels_cbar = [-1.0, 0.0, 1.0]
-            colorbar = fig.colorbar(contour_plot, orientation='vertical', aspect=10, pad=0.05)
-            colorbar_label = 'I, TW/cm$\mathbf{^2}$'
-            colorbar.set_label(colorbar_label, labelpad=-15, y=1.15, rotation=0,
-                               fontsize=12, fontweight='bold')
-        #     cbar.set_label('lg$(I/I_0)$', labelpad=-25, y=1.15, rotation=0, fontsize=14)
-        #     ticks_cbar = ['+' + str(round(e, 1)) if e > 0 else '$-$' + str(abs(round(e, 1))) if e != 0 else '0.0' for e
-        #                   in
-        #                   levels_cbar]
-        #     cbar.ax.set_yticklabels(ticks_cbar, usetex=True)
-        #     cbar.ax.tick_params(labelsize=12)
+            #     levels_cbar = [-1.0, 0.0, 1.0]
+            levels_colorbar = [0, 5, 10, 15, 20]
+            ticks_colorbar = ['0.0', '0.5', '1.0', '1.5', '2.0']
+            colorbar = fig.colorbar(contour_plot, ticks=levels_colorbar, orientation='vertical', aspect=10, pad=0.2)
+            colorbar_label = '$I, \\times 10^{13}$\nВт/см$^2$'
+            colorbar.set_label(colorbar_label, labelpad=-20, y=1.4, rotation=0,
+                               fontsize=18)
+            # cbar.set_label('lg$(I/I_0)$', labelpad=-25, y=1.15, rotation=0, fontsize=14)
+            # ticks_cbar = ['+' + str(round(e, 1)) if e > 0 else '$-$' + str(abs(round(e, 1))) if e != 0 else '0.0' for e
+            #               in levels_cbar]
+            colorbar.ax.set_yticklabels(ticks_colorbar, usetex=True)
+            colorbar.ax.tick_params(labelsize=18)
 
         bbox = 'tight' if legend else fig.bbox_inches.from_bounds(-0.42, -0.25, 2.25, 2)
         # t_type, number = file.split('/')[0], file.split('/')[1]
@@ -561,8 +569,8 @@ def plot_noise(beam, path):
     ax_iy.set_yticks(y_ticks)
     ax_iy.set_yticklabels(y_labels, fontsize=font_size - 5, fontweight=font_weight)
 
-    fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r_{corr} = %d}$ $\mathbf{\mu m}$' %
-                 (variance_expected, round(r_corr)), fontsize=font_size, fontweight=font_weight)
+    # fig.suptitle('Complex Gaussian gaussian_noise $\mathbf{\\xi(x,y) = \\xi_{real}(x,y) + i \\xi_{imag}(x,y)}$\n$\mathbf{\sigma^2_{expected}}$ = %.2f\n$\mathbf{r_{corr} = %d}$ $\mathbf{\mu m}$' %
+    #              (variance_expected, round(r_corr)), fontsize=font_size, fontweight=font_weight)
 
     plt.savefig(path + '/gaussian_noise.png', bbox_inches='tight')
     plt.close()
