@@ -1,5 +1,6 @@
 from numpy import zeros
 from numba import jit
+from numpy import save
 
 from .visualization import BeamVisualizer, plot_track, plot_noise
 from .logger import Logger
@@ -121,12 +122,15 @@ class Propagator:
 
         :return: None
         """
-
         # initial preparations
         self.__manager.create_dirs()
         self.__logger.save_initial_parameters(self.__beam, self.__n_z, self.__dz, self.__max_intensity_to_stop)
         if self.__beam.info == 'beam_xy' and self.__beam.noise_percent:
             plot_noise(self.__beam, self.__manager.results_dir)
+            if self.__save_field:
+                print(type(self.__beam.noise.noise_field))
+                print(self.__beam.noise.noise_field.shape)
+                save('{}/noise.npy'.format(self.__manager.results_dir), self.__beam.noise.noise_field)
 
         # main cycle
         for n_step in range(int(self.__n_z) + 1):

@@ -5,7 +5,7 @@ from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecut
 args = parse_args()
 
 # create noise object
-noise = GaussianNoise(r_corr_in_meters=1e-6,
+noise = GaussianNoise(r_corr_in_meters=20e-6,
                       variance=1)
 
 # create object of 3D beam
@@ -39,7 +39,7 @@ propagator = Propagator(args=args,
                         plot_beam_every=5,
                         max_intensity_to_stop=5*10**17,
                         visualizer=visualizer,
-                        save_field=False)
+                        save_field=True)
 
 # initiate propagation process
 propagator.propagate()

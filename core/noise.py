@@ -176,7 +176,7 @@ class GaussianNoise(ComplexNoise):
 
         scale = r_corr_in_points / max(n_x, n_y)
         cf = scale * sqrt(pi * variance)
-        d = 0.5 * (pi * scale) ** 2
+        d = 1.0 * (pi * scale) ** 2
         amplitude = sqrt(12)
 
         for i in range(n_x):
