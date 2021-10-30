@@ -6,6 +6,7 @@ import matplotlib.gridspec as gridspec
 from pylab import contourf
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rc, cm
+import matplotlib.ticker as ticker
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman']})
 rc('text', usetex=True)
@@ -132,7 +133,8 @@ class BeamVisualizer:
             return self.__plot_beam_profile(beam, z, step)
         elif self.__plot_type == 'flat':
             # return self.__plot_beam_flat(beam, z, step)
-            return self.__plot_beam_flat_dissertation(beam, z, step)
+            # return self.__plot_beam_flat_dissertation(beam, z, step)
+            return self.__plot_beam_flat_dissertation_vortex_sf(beam, z, step)
         elif self.__plot_type == 'volume':
             return self.__plot_beam_volume(beam, z, step)
         else:
@@ -277,6 +279,42 @@ class BeamVisualizer:
                     break
         return ticks
 
+    def __plot_beam_flat_dissertation_vortex_sf(self, beam, z, step, legend=True):
+        """Plots intensity distribution in 2D beam with contour_plot"""
+
+        fig, ax = plt.subplots(figsize=self.__cm2inch(6.5, 5))
+        fig.patch.set_facecolor('white')
+
+        arr, xs, ys = self._initialize_arr()
+
+        contour_plot = contourf(arr, cmap=plt.get_cmap('jet'), levels=500)
+
+        x_ticklabels = ['$-$0.1', '0', '+0.1']
+        x_ticks = self.__calc_ticks_x(x_ticklabels, xs)
+        y_ticklabels = ['$-$0.1', '0', '+0.1']
+        y_ticks = self.__calc_ticks_x(y_ticklabels, ys)
+
+        ax.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax.spines.values():
+            spine.set_edgecolor('white')
+
+        plt.xticks(x_ticks, x_ticklabels, fontsize=10)
+        plt.yticks(y_ticks, y_ticklabels, fontsize=10)
+        plt.xlabel('$x$, мм', fontsize=12)
+        plt.ylabel('$y$, мм', fontsize=12)
+
+        colorbar = fig.colorbar(contour_plot, orientation='vertical', aspect=10, pad=0.1)
+        colorbar_label = '$I$, ТВт/см$^2$'
+        colorbar.set_label(colorbar_label, labelpad=-20, y=1.17, rotation=0, fontsize=14)
+        colorbar.ax.locator_params(nbins=5)
+        colorbar.ax.set_yticklabels(['{:05.2f}'.format(i) for i in colorbar.get_ticks()])
+        colorbar.ax.tick_params(labelsize=12)
+
+        plt.savefig(self._path_to_save + '/chapter3_self-focusing_xy_%04d.png' % step, bbox_inches='tight', dpi=500)
+        plt.close()
+
+        del arr
+
     def __plot_beam_flat_dissertation(self, beam, z, step, legend=True):
         """Plots intensity distribution in 2D beam with contour_plot"""
 
@@ -295,20 +333,20 @@ class BeamVisualizer:
         # levels_plot = [e / self.__beam.i_0 for e in levels_plot]
         # levels_plot = [i * di for i in range(n_levels + 1)]
         # print(self.__beam.i_max)
-        n_levels = 500
-        max_intensity = 20
-        min_intensity = 0
-        di = (max_intensity - min_intensity) / n_levels
-        levels_plot = [min_intensity + i * di for i in range(n_levels + 1)]
+        # n_levels = 500
+        # max_intensity = 20
+        # min_intensity = 0
+        # di = (max_intensity - min_intensity) / n_levels
+        # levels_plot = [min_intensity + i * di for i in range(n_levels + 1)]
 
         # print(levels_plot)
-        contour_plot = contourf(arr, cmap=cmap, levels=levels_plot)
+        contour_plot = contourf(arr, cmap=cmap, levels=500)
 
         # x_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
-        x_ticklabels = ['$-$0.1', '0', '+0.1']
+        x_ticklabels = ['-0.1', '0', '+0.1']
         x_ticks = self.__calc_ticks_x(x_ticklabels, xs)
         # y_ticklabels = ['$-$0.2', '$-$0.1', '0', '+0.1', '+0.2']
-        y_ticklabels = ['$-$0.1', '0', '+0.1']
+        y_ticklabels = ['-0.1', '0', '+0.1']
         y_ticks = self.__calc_ticks_x(y_ticklabels, ys)
 
         ax.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
@@ -335,16 +373,16 @@ class BeamVisualizer:
 
         if legend:
             #     levels_cbar = [-1.0, 0.0, 1.0]
-            levels_colorbar = [0, 5, 10, 15, 20]
-            ticks_colorbar = ['0.0', '0.5', '1.0', '1.5', '2.0']
-            colorbar = fig.colorbar(contour_plot, ticks=levels_colorbar, orientation='vertical', aspect=10, pad=0.2)
+            # levels_colorbar = [0, 5, 10, 15, 20]
+            # ticks_colorbar = ['0.0', '0.5', '1.0', '1.5', '2.0']
+            colorbar = fig.colorbar(contour_plot, orientation='vertical', aspect=10, pad=0.2)
             colorbar_label = '$I, \\times 10^{13}$\nВт/см$^2$'
             colorbar.set_label(colorbar_label, labelpad=-20, y=1.4, rotation=0,
                                fontsize=18)
             # cbar.set_label('lg$(I/I_0)$', labelpad=-25, y=1.15, rotation=0, fontsize=14)
             # ticks_cbar = ['+' + str(round(e, 1)) if e > 0 else '$-$' + str(abs(round(e, 1))) if e != 0 else '0.0' for e
             #               in levels_cbar]
-            colorbar.ax.set_yticklabels(ticks_colorbar, usetex=True)
+            # colorbar.ax.set_yticklabels(ticks_colorbar, usetex=True)
             colorbar.ax.tick_params(labelsize=18)
 
         bbox = 'tight' if legend else fig.bbox_inches.from_bounds(-0.42, -0.25, 2.25, 2)
@@ -470,8 +508,8 @@ def plot_noise(beam, path):
     xs = xs[x_idx_left:x_idx_right]
     ys = ys[y_idx_left:y_idx_right]
 
-    x_labels = ['-200', '0', '+200']
-    y_labels = ['-200', '0', '+200']
+    x_labels = ['$-$300', '$-$200', '$-$100', '0', '+100', '+200', '+300']
+    y_labels = ['$-$300', '$-$200', '$-$100', '0', '+100', '+200', '+300']
     x_ticks = calc_ticks_x(x_labels, xs)
     y_ticks = calc_ticks_x(y_labels, ys)
 

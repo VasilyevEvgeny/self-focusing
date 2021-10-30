@@ -38,7 +38,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
 
         self._n_z = None
         self._n_z_diff = 10
-        self._n_i_max_to_stop = 60
+        self._n_i_max_to_stop = 30
 
         self._eps = None
         self._png_name = None
@@ -224,6 +224,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         ax.fill_between(self._ms, errors, alpha=0.25, facecolor='blue', edgecolor=None,
                         label='$\\varepsilon$')
 
+
         x_ticks = self._ms
         x_ticklabels = ['{:d}'.format(e) for e in x_ticks]
         ax.set_xticks(x_ticks)
@@ -258,6 +259,11 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         ax_ghost.axhline(1, linewidth=2, color='black', zorder=-1, label='аналитическая формула')
         ax_ghost.scatter(self._ms, self._p_v_rel_pred, s=50, color='red', zorder=0, label='численное решение')
         ax_ghost.plot(xs, ys, color='green', linewidth=2, zorder=1, label='квадратичная аппроксимация')
+
+        dp = 0.01
+        for i in range(len(self._ms)):
+            ax_ghost.plot([self._ms[i], self._ms[i]], [self._p_v_rel_pred[i] - dp, self._p_v_rel_pred[i] + dp],
+                          marker='_', c='black', lw=1)
 
         ax_ghost.set_ylim(0.95, 1.1)
 

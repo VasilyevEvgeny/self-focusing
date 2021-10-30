@@ -65,7 +65,7 @@ def calc_ticks_x(labels, xs):
     nxt = 0
     for label in labels:
         for i in range(nxt, len(xs)):
-            if xs[i] > float(label) * 10**-6:
+            if xs[i] > float(label.replace('$-$', '-')) * 10**-6:
                 ticks.append(i)
                 nxt = i
                 break

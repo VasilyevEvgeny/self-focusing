@@ -5,31 +5,31 @@ from core import BeamR, SweepDiffractionExecutorR, KerrExecutorR, Propagator, Be
 args = parse_args()
 
 # create object of 3D axisymmetric beam
-beam = BeamR(medium='LiF',
-             p_0_to_p_vortex=5,
+beam = BeamR(medium='SiO2',
+             p_0_to_p_vortex=9,
              m=1,
              M=1,
              lmbda=1800*10**-9,
              r_0=100*10**-6,
-             n_r=2048)
+             n_r=1024)
 
 # create visualizer object
 visualizer = BeamVisualizer(beam=beam,
                             maximum_intensity='local',
-                            normalize_intensity_to=beam.i_0,
-                            plot_type='volume')
+                            normalize_intensity_to=1,
+                            plot_type='flat')
 
 # create propagator object
 propagator = Propagator(args=args,
                         beam=beam,
                         diffraction=SweepDiffractionExecutorR(beam=beam),
                         kerr_effect=KerrExecutorR(beam=beam),
-                        n_z=1000,
+                        n_z=5000,
                         dz_0=beam.z_diff / 1000,
-                        const_dz=True,
-                        print_current_state_every=50,
+                        const_dz=False,
+                        print_current_state_every=1,
                         plot_beam_every=50,
-                        max_intensity_to_stop=10**17,
+                        max_intensity_to_stop=5e17,
                         visualizer=visualizer)
 
 # initiate propagation process
