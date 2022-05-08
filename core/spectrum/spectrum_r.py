@@ -1,4 +1,4 @@
-from numpy import zeros, complex64, exp, arctan2, pi, angle
+from numpy import zeros, complex64, exp, arctan2, pi, angle, save
 from numba import jit
 
 from core.functions import r_to_xy_real, r_to_xy_complex
@@ -36,9 +36,23 @@ class SpectrumR(Spectrum):
         self._kerr_phase_xy = angle(field_xy)
 
         # full phase
+        self._nonvortex_phase_xy = angle(field_xy)
         field_xy *= self.__vortex_phase
         self._phase_xy = angle(field_xy)
 
         # spectrum
         self._make_fft(field_xy)
         self._spectrum_intensity_xy = beam._field_to_intensity(self._spectrum_xy)
+
+    def save_spectrum(self, path, only_center=True):
+        if only_center:
+            percent = 15
+            center = self.beam.n_r
+            print('self.beam.n_r = ', self.beam.n_r)
+            ambit = int(self.beam.n_r * percent / 100)
+            print('ambit = ', ambit)
+            spectrum_xy = self._spectrum_xy[center-ambit:center+ambit, center-ambit:center+ambit]
+            print(spectrum_xy.shape)
+        else:
+            spectrum_xy = self._spectrum_xy
+        save(path, spectrum_xy)

@@ -29,8 +29,8 @@ def plot_helicoid(**kwargs):
     r0 = 0.5 * r
     delta = 0.5 * r0
     amp = 2 * c
-    x = u * np.cos(v)  + amp * exp(-((u - r0) / delta)**2)
-    y = u * np.sin(v)  + amp * exp(-((u - r0) / delta)**2)
+    x = u * np.cos(v) + amp * exp(-((u - r0) / delta)**2)
+    y = u * np.sin(v) + amp * exp(-((u - r0) / delta)**2)
     z = c * v
 
     fig = plt.figure(figsize=(30, 10))

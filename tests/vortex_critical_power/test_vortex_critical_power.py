@@ -232,7 +232,10 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
         ax.set_xlabel('$m$', fontsize=14)
 
         ax.set_xlim(0, 6)
-        ax.set_ylim(0, 10)
+        ax.set_ylim(0, 7)
+        y_ticks = [0, 1, 2, 3, 4, 5, 6, 7]
+        ax.set_yticks(y_ticks)
+        ax.set_yticklabels(y_ticks)
         ax.set_ylabel('$\\varepsilon, \%$', fontsize=14)
 
         # plt.tick_params(axis='y', which='both', labelleft=False, labelright=True)
@@ -265,7 +268,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
             ax_ghost.plot([self._ms[i], self._ms[i]], [self._p_v_rel_pred[i] - dp, self._p_v_rel_pred[i] + dp],
                           marker='_', c='black', lw=1)
 
-        ax_ghost.set_ylim(0.95, 1.1)
+        ax_ghost.set_ylim(0.96, 1.1)
 
         if self._language == 'english':
             ylabel = '$P_{V \mathrm{(num)}}^{(m)} \ / \ P_V^{(m)}$'
@@ -273,7 +276,7 @@ class TestVortexCriticalPower(TestCase, metaclass=abc.ABCMeta):
             ylabel = '$\mathbf{P_V (числ) \ / \ P_V (аналитич)}$'
         ax_ghost.set_ylabel(ylabel, fontsize=14)
 
-        ax_ghost.grid(c='gray', ls='-', lw=0.5, alpha=0.5)
+        # ax_ghost.grid(c='gray', ls='-', lw=0.5, alpha=0.5)
 
         ax_ghost.legend(bbox_to_anchor=(-0.08, 1.15, 1., .102), handlelength=3.0,
                         fontsize=10, loc='center', ncol=1, frameon=False)

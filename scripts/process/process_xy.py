@@ -5,7 +5,7 @@ from core import BeamXY, GaussianNoise, FourierDiffractionExecutorXY, KerrExecut
 args = parse_args()
 
 # create noise object
-noise = GaussianNoise(r_corr_in_meters=10e-6,
+noise = GaussianNoise(r_corr_in_meters=1e-6,
                       variance=1)
 
 # create object of 3D beam
@@ -13,7 +13,7 @@ beam = BeamXY(medium='LiF',
               p_0_to_p_vortex=8,
               m=1,
               M=1,
-              noise_percent=0.0001,
+              noise_percent=10,
               noise=noise,
               lmbda=1800*10**-9,
               x_0=100*10**-6,

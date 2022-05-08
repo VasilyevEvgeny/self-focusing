@@ -9,6 +9,7 @@ class Spectrum(metaclass=ABCMeta):
         # field
         self._kerr_phase_xy = None
         self._phase_xy = None
+        self._nonvortex_phase_xy = None
         self._intensity_xy = None
 
         # spectrum
@@ -24,6 +25,10 @@ class Spectrum(metaclass=ABCMeta):
         """"""
 
     @property
+    def beam(self):
+        return self._beam
+
+    @property
     def intensity_xy(self):
         return self._intensity_xy
 
@@ -34,6 +39,10 @@ class Spectrum(metaclass=ABCMeta):
     @property
     def phase_xy(self):
         return self._phase_xy
+
+    @property
+    def nonvortex_phase_xy(self):
+        return self._nonvortex_phase_xy
 
     @property
     def spectrum_intensity_xy(self):

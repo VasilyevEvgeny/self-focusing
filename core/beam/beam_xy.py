@@ -186,24 +186,30 @@ class BeamXY(Beam3D):
             for j in range(n_y):
                 x, y = i * dx - 0.5 * x_max, j * dy - 0.5 * y_max
 
-                # #
-                # # nested vortices
-                # #
                 #
+                # nested vortices
+                #
+
                 # r1 = 100 * 10 ** -6
                 # d1 = 10 * 10 ** -6
                 #
                 # r2 = 300 * 10 ** -6
                 # d2 = 50 * 10 ** -6
-                #
-                # r = sqrt(x ** 2 + y ** 2)
-                #
-                # arr[i, j] = exp(-0.5 * ((r - r1) ** 2) / d1 ** 2) + 0.4 * exp(-0.5 * ((r - r2) ** 2) / d2 ** 2)
-                #
-                # if r < 0.5 * (r1 + r2):
-                #     arr[i, j] *= exp(1j * m * (arctan2(x, y)))
-                # else:
-                #     arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + pi))
+
+                r1 = 100 * 10 ** -6
+                d1 = 10 * 10 ** -6
+
+                r2 = 300 * 10 ** -6
+                d2 = 50 * 10 ** -6
+
+                r = sqrt(x ** 2 + y ** 2)
+
+                arr[i, j] = exp(-0.5 * ((r - r1) ** 2) / d1 ** 2) + 0.4 * exp(-0.5 * ((r - r2) ** 2) / d2 ** 2)
+
+                if r < 0.5 * (r1 + r2):
+                    arr[i, j] *= exp(1j * m * (arctan2(x, y)))
+                else:
+                    arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + 0 * pi))
 
                 # #
                 # # ring width
@@ -215,11 +221,11 @@ class BeamXY(Beam3D):
                 # arr[i, j] = exp(-0.5 * ((r - r0) ** 2) / d ** 2)
 
 
-                # OLD
-                arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
-                            sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
-                            exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
-                            exp(1j * m * (arctan2(x, y) + pi))
+                # # OLD
+                # arr[i, j] = (1.0 + 0.01 * noise_percent * noise[i, j]) * \
+                #             sqrt((abs(x) / x_0)**2 + (abs(y) / y_0)**2)**M * \
+                #             exp(-0.5 * ((abs(x) / x_0) ** 2 + (abs(y) / y_0) ** 2)) * \
+                #             exp(1j * m * (arctan2(x, y) + pi))
 
         return arr
 

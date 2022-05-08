@@ -20,8 +20,9 @@ spectrum = SpectrumXY(beam=beam)
 
 # create visualizer object
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
-                                         remaining_central_part_coeff_field=0.12,
-                                         remaining_central_part_coeff_spectrum=0.007)  # 0.02
+                                         log_scale_of_spectrum=False,
+                                         remaining_central_part_coeff_field=0.12,#0.12,
+                                         remaining_central_part_coeff_spectrum=0.007) #0.007)  # 0.02
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -29,7 +30,7 @@ propagator = Propagator(args=args,
                         spectrum=spectrum,
                         diffraction=FourierDiffractionExecutorXY(beam=beam),
                         kerr_effect=KerrExecutorXY(beam=beam),
-                        n_z=1,
+                        n_z=0,
                         dz_0=beam.z_diff / 1000,
                         const_dz=True,
                         print_current_state_every=1,

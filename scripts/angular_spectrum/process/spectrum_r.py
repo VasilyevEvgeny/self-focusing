@@ -12,7 +12,7 @@ beam = BeamR(medium='LiF',
              lmbda=1800*10**-9,
              r_0=100*10**-6,
              radii_in_grid=70,
-             n_r=2048)
+             n_r=4096)
 
 spectrum = SpectrumR(beam=beam)
 
@@ -20,7 +20,7 @@ spectrum = SpectrumR(beam=beam)
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
                                          log_scale_of_spectrum=False,
                                          remaining_central_part_coeff_field=0.04,     # 0.05
-                                         remaining_central_part_coeff_spectrum=0.04)  # 0.12
+                                         remaining_central_part_coeff_spectrum=0.03)  # 0.12
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -28,15 +28,16 @@ propagator = Propagator(args=args,
                         spectrum=spectrum,
                         diffraction=SweepDiffractionExecutorR(beam=beam),
                         kerr_effect=KerrExecutorR(beam=beam),
-                        n_z=1000,
+                        n_z=1001,
                         dz_0=beam.z_diff / 1000,
-                        const_dz=True,
+                        const_dz=False,
                         print_current_state_every=1,
                         max_intensity_to_stop=5 * 10**17,
                         plot_beam_every=0,
                         plot_spectrum_every=5,
                         spectrum_visualizer=spectrum_visualizer,
-                        save_field=False)
+                        save_field=False,
+                        save_spectrum=False)
 
 # initiate propagation process
 propagator.propagate()

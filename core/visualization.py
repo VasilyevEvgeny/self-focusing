@@ -132,9 +132,9 @@ class BeamVisualizer:
         if self.__plot_type == 'profile':
             return self.__plot_beam_profile(beam, z, step)
         elif self.__plot_type == 'flat':
-            # return self.__plot_beam_flat(beam, z, step)
+            return self.__plot_beam_flat(beam, z, step)
             # return self.__plot_beam_flat_dissertation(beam, z, step)
-            return self.__plot_beam_flat_dissertation_vortex_sf(beam, z, step)
+            # return self.__plot_beam_flat_dissertation_vortex_sf(beam, z, step)
         elif self.__plot_type == 'volume':
             return self.__plot_beam_volume(beam, z, step)
         else:
@@ -664,6 +664,10 @@ class SpectrumVisualizer:
 
         return arr[i_min:i_max, i_min:i_max]
 
+    @property
+    def spectrum(self):
+        return self.__spectrum
+
     def __crop_arr_spectrum(self, arr):
         """
         :param remaining_central_part_coeff:
@@ -691,6 +695,351 @@ class SpectrumVisualizer:
         low_level = MAX * 10**-p
         arr[where(arr < low_level)] = low_level
         return log10(arr / MAX)
+
+    def __normalize_intensity(self, arr):
+        for i in range(arr.shape[0]):
+            for j in range(arr.shape[1]):
+                arr[i, j] *= self.__spectrum.beam.i_0 / 5e16
+
+        return arr
+
+    def __normalize_intensity_synthetic_example(self, arr):
+        for i in range(arr.shape[0]):
+            for j in range(arr.shape[1]):
+                arr[i, j] *= self.__spectrum.beam.i_0 / 1e16
+
+        return arr
+
+    def plot_dissertation_diffraction(self, spectrum, z, step):
+        legend = False
+        x_axis = True
+
+        def cm2inch(*tupl):
+            inch = 2.54
+            if isinstance(tupl[0], tuple):
+                return tuple(i / inch for i in tupl[0])
+            else:
+                return tuple(i / inch for i in tupl)
+
+        fig = plt.figure(figsize=cm2inch(10, 6))
+        grid = plt.GridSpec(1, 2, hspace=0, wspace=0.18)
+
+        ax1 = fig.add_subplot(grid[0, 0])
+        ax1.set_aspect('equal')
+        intensity_for_plot = self.__normalize_intensity(self.__crop_arr_field(spectrum.intensity_xy))
+        levels_plot = [i * 0.002 for i in range(501)]
+        im1 = ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=levels_plot)
+
+        length = intensity_for_plot.shape[0]
+        c_tick = length // 2
+        p = 0.35
+        ll_tick = c_tick - int(p * length)
+        l_tick = c_tick - int(0.5 * p * length)
+        p_tick = c_tick + int(0.5 * p * length)
+        pp_tick = c_tick + int(p * length)
+        ax1_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+        ax1.set_xticks(ax1_ticks)
+        ax1.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+        ax1.set_yticks(ax1_ticks)
+        ax1.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+
+        ax1.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax1.spines.values():
+            spine.set_edgecolor('white')
+        x_label = '$x / r_0$'
+        y_label = '$y / r_0$'
+        if x_axis:
+            ax1.set_xlabel(x_label, fontsize=12)
+            ax1.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=True)
+        else:
+            ax1.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=False)
+        ax1.set_ylabel(y_label, fontsize=12)
+        if legend:
+            divider = make_axes_locatable(ax1)
+            cax1 = divider.new_vertical(size='8%', pad=0.3)
+            fig.add_axes(cax1)
+            cb1 = fig.colorbar(im1, cax=cax1, orientation='horizontal')
+            cb1.set_label('$I(x,y), \\times 10^{12}$ Вт/см$^2$', labelpad=-45, fontsize=12)
+            # cb1.set_ticks([np.min(intensity_for_plot), np.max(intensity_for_plot)])
+            cb1.set_ticks([0, 0.5, 1.0])
+            cb1.set_ticklabels(['0.0', '0.5', '1.0'])
+            cb1.ax.tick_params(labelsize=10)
+
+        ax2 = fig.add_subplot(grid[0, 1])
+        ax2.set_aspect('equal')
+        phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
+        im2 = ax2.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=500)
+        length = intensity_for_plot.shape[0]
+        c_tick = length // 2
+        p = 0.35
+        ll_tick = c_tick - int(p * length)
+        l_tick = c_tick - int(0.5 * p * length)
+        p_tick = c_tick + int(0.5 * p * length)
+        pp_tick = c_tick + int(p * length)
+        ax2_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+        ax2.set_xticks(ax2_ticks)
+        ax2.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+        ax2.set_yticks(ax2_ticks)
+        ax2.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+        ax2.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax2.spines.values():
+            spine.set_edgecolor('white')
+        x_label = '$x / r_0$'
+        if x_axis:
+            ax2.set_xlabel(x_label, fontsize=12)
+            ax2.tick_params(top=True, bottom=True, left=True, right=True, labelleft=False, labelright=True, labelbottom=True)
+        else:
+            ax2.tick_params(top=True, bottom=True, left=True, right=True, labelleft=False, labelright=True, labelbottom=False)
+        ax2.yaxis.set_label_position('right')
+        ax2.set_ylabel('$y / r_0$', fontsize=12)
+        if legend:
+            divider = make_axes_locatable(ax2)
+            cax2 = divider.new_vertical(size='8%', pad=0.3)
+            fig.add_axes(cax2)
+            cb2 = fig.colorbar(im2, cax=cax2, orientation='horizontal')
+            cb2.set_label('$\\theta(x,y)$', labelpad=-45, fontsize=12)
+            min_ph, max_ph = np.min(phase_for_plot), np.max(phase_for_plot)
+            cb2.set_ticks([min_ph, 0, max_ph])
+            cb2.set_ticklabels(['0', '$\pi$', '2$\pi$'])
+            cb2.ax.tick_params(labelsize=10)
+
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=500)
+        plt.close()
+
+    def plot_dissertation(self, spectrum, z, step):
+        legend = False
+        x_axis = False
+        is_synthetic_example = False
+        is_nonvortex_phase = False
+        is_circles = True
+
+        def cm2inch(*tupl):
+            inch = 2.54
+            if isinstance(tupl[0], tuple):
+                return tuple(i / inch for i in tupl[0])
+            else:
+                return tuple(i / inch for i in tupl)
+
+        fig = plt.figure(figsize=cm2inch(15, 6))
+        grid = plt.GridSpec(1, 3, hspace=0, wspace=0.18)
+
+        ax1 = fig.add_subplot(grid[0, 0])
+        ax1.set_aspect('equal')
+        intensity_for_plot = self.__crop_arr_field(spectrum.intensity_xy)
+        if is_synthetic_example:
+            intensity_for_plot = self.__normalize_intensity_synthetic_example(intensity_for_plot)
+        else:
+            intensity_for_plot = self.__normalize_intensity(intensity_for_plot)
+        levels_plot = [i * 0.002 for i in range(501)]
+        im1 = ax1.contourf(intensity_for_plot, cmap=plt.get_cmap('jet'), levels=levels_plot)
+
+        if is_synthetic_example:
+            length = intensity_for_plot.shape[0]
+            c_tick = length // 2
+            p = 0.35
+            ll_tick = c_tick - int(p * length)
+            l_tick = c_tick - int(0.33 * p * length)
+            p_tick = c_tick + int(0.33 * p * length)
+            pp_tick = c_tick + int(p * length)
+            ax1_ticks = [ll_tick, l_tick, p_tick, pp_tick]
+            ax1.set_xticks(ax1_ticks)
+            ax1.set_xticklabels(['$-3$', '$-1$', '$+1$', '$+3$'], fontsize=10)
+            ax1.set_yticks(ax1_ticks)
+            ax1.set_yticklabels(['$+3$', '$+1$', '$-1$', '$-3$'], fontsize=10)
+        else:
+            length = intensity_for_plot.shape[0]
+            c_tick = length // 2
+            p = 0.35
+            ll_tick = c_tick - int(p * length)
+            l_tick = c_tick - int(0.5 * p * length)
+            p_tick = c_tick + int(0.5 * p * length)
+            pp_tick = c_tick + int(p * length)
+            ax1_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+            ax1.set_xticks(ax1_ticks)
+            ax1.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+            ax1.set_yticks(ax1_ticks)
+            ax1.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+
+        ax1.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax1.spines.values():
+            spine.set_edgecolor('white')
+        x_label = '$x / \\xi$' if is_synthetic_example else '$x / r_0$'
+        y_label = '$y / \\xi$' if is_synthetic_example else '$y / r_0$'
+        if x_axis:
+            ax1.set_xlabel(x_label, fontsize=12)
+            ax1.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=True)
+        else:
+            ax1.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=False)
+        ax1.set_ylabel(y_label, fontsize=12)
+        if legend:
+            divider = make_axes_locatable(ax1)
+            cax1 = divider.new_vertical(size='8%', pad=0.3)
+            fig.add_axes(cax1)
+            cb1 = fig.colorbar(im1, cax=cax1, orientation='horizontal')
+            cb1.set_label('$I(x,y), \\times 10^{12}$ Вт/см$^2$', labelpad=-45, fontsize=12)
+            # cb1.set_ticks([np.min(intensity_for_plot), np.max(intensity_for_plot)])
+            cb1.set_ticks([0, 0.5, 1.0])
+            cb1.set_ticklabels(['0.0', '0.5', '1.0'])
+            cb1.ax.tick_params(labelsize=10)
+
+
+        ax2 = fig.add_subplot(grid[0, 1])
+        ax2.set_aspect('equal')
+        phase_for_plot = self.__crop_arr_field(spectrum.phase_xy)
+        im2 = ax2.contourf(phase_for_plot, cmap=plt.get_cmap('hot'), levels=500)
+        if is_synthetic_example:
+            length = intensity_for_plot.shape[0]
+            c_tick = length // 2
+            p = 0.35
+            ll_tick = c_tick - int(p * length)
+            l_tick = c_tick - int(0.33 * p * length)
+            p_tick = c_tick + int(0.33 * p * length)
+            pp_tick = c_tick + int(p * length)
+            ax2_ticks = [ll_tick, l_tick, p_tick, pp_tick]
+            ax2.set_xticks(ax2_ticks)
+            ax2.set_xticklabels(['$-3$', '$-1$', '$+1$', '$+3$'], fontsize=10)
+            ax2.set_yticks(ax2_ticks)
+            ax2.set_yticklabels(['', '', '', ''], fontsize=10)
+        else:
+            length = intensity_for_plot.shape[0]
+            c_tick = length // 2
+            p = 0.35
+            ll_tick = c_tick - int(p * length)
+            l_tick = c_tick - int(0.5 * p * length)
+            p_tick = c_tick + int(0.5 * p * length)
+            pp_tick = c_tick + int(p * length)
+            ax2_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+            ax2.set_xticks(ax2_ticks)
+            ax2.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+            ax2.set_yticks(ax2_ticks)
+            ax2.set_yticklabels(['', '', '', '', ''], fontsize=10)
+        if is_circles:
+            color = 'white'
+            circle1 = plt.Circle((c_tick, c_tick), int(0.25 * c_tick), color=color, ls='-', lw='2', fill=False)
+            circle2 = plt.Circle((c_tick, c_tick), int(0.48 * c_tick), color=color, ls='-', lw='2', fill=False)
+            ax2.add_patch(circle1)
+            ax2.add_patch(circle2)
+            ax2.text(int(0.89 * c_tick), int(0.89 * c_tick), s='$1$', fontsize=11, color=color)
+            ax2.text(int(0.70 * c_tick), int(0.70 * c_tick), s='$2$', fontsize=11, color=color)
+            ax2.text(int(0.35 * c_tick), int(0.35 * c_tick), s='$3$', fontsize=11, color=color)
+        ax2.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
+        for spine in ax2.spines.values():
+            spine.set_edgecolor('white')
+        x_label = '$x / \\xi$' if is_synthetic_example else '$x / r_0$'
+        if x_axis:
+            ax2.set_xlabel(x_label, fontsize=12)
+            ax2.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=True)
+        else:
+            ax2.tick_params(top=True, bottom=True, left=True, right=True, labelleft=True, labelbottom=False)
+        if legend:
+            divider = make_axes_locatable(ax2)
+            cax2 = divider.new_vertical(size='8%', pad=0.3)
+            fig.add_axes(cax2)
+            cb2 = fig.colorbar(im2, cax=cax2, orientation='horizontal')
+            cb2.set_label('$\\theta(x,y)$', labelpad=-45, fontsize=12)
+            min_ph, max_ph = np.min(phase_for_plot), np.max(phase_for_plot)
+            cb2.set_ticks([min_ph, 0, max_ph])
+            cb2.set_ticklabels(['0', '$\pi$', '2$\pi$'])
+            cb2.ax.tick_params(labelsize=10)
+
+        ax3 = fig.add_subplot(grid[0, 2])
+        ax3.set_aspect('equal')
+        nonvortex_phase_xy = self.__crop_arr_field(spectrum.nonvortex_phase_xy)
+        if self.__log_scale_of_spectrum:
+            spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+        else:
+            spectrum_for_plot = self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy)
+        if is_nonvortex_phase:
+            im3 = ax3.contourf(nonvortex_phase_xy, cmap=plt.get_cmap('hot'), levels=500)
+        else:
+            im3 = ax3.contourf(spectrum_for_plot, cmap=plt.get_cmap('gray'), levels=500)
+        if is_synthetic_example:
+            length = spectrum_for_plot.shape[0]
+            c_tick = length // 2
+            p = 0.35
+            ll_tick = c_tick - int(p * length)
+            l_tick = c_tick - int(0.33 * p * length)
+            p_tick = c_tick + int(0.33 * p * length)
+            pp_tick = c_tick + int(p * length)
+            ax3_ticks = [ll_tick, l_tick, p_tick, pp_tick]
+            ax3.yaxis.tick_right()
+            ax3.set_xticks(ax3_ticks)
+            ax3.set_xticklabels(['$-3$', '$-1$', '$+1$', '$+3$'], fontsize=10)
+            ax3.set_yticks(ax3_ticks)
+            ax3.set_yticklabels(['$-3$', '$-1$', '$+1$', '$+3$'], fontsize=10)
+        else:
+            if is_nonvortex_phase:
+                length = nonvortex_phase_xy.shape[0]
+                c_tick = length // 2
+                p = 0.35
+                ll_tick = c_tick - int(p * length)
+                l_tick = c_tick - int(0.5 * p * length)
+                p_tick = c_tick + int(0.5 * p * length)
+                pp_tick = c_tick + int(p * length)
+                ax3_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+                ax3.set_xticks(ax3_ticks)
+                ax3.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+                ax3.set_yticks(ax2_ticks)
+                ax3.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+            else:
+                length = spectrum_for_plot.shape[0]
+                c_tick = length // 2
+                p = 0.35
+                ll_tick = c_tick - int(p * length)
+                l_tick = c_tick - int(0.5 * p * length)
+                p_tick = c_tick + int(0.5 * p * length)
+                pp_tick = c_tick + int(p * length)
+                ax3_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+                ax3.yaxis.tick_right()
+                ax3.set_xticks(ax3_ticks)
+                ax3.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+                ax3.set_yticks(ax3_ticks)
+                ax3.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+
+        # length = spectrum_for_plot.shape[0]
+        # c_tick = length // 2
+        # p = 0.35
+        # ll_tick = c_tick - int(p * length)
+        # l_tick = c_tick - int(0.5 * p * length)
+        # p_tick = c_tick + int(0.5 * p * length)
+        # pp_tick = c_tick + int(p * length)
+        # ax3_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+        # ax3_ticks = ax2_ticks #[37, 60, 83]
+        # ax3.set_xticks(ax3_ticks)
+        # ax3.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+        # ax3.set_yticks(ax3_ticks)
+        # ax3.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+        # ax3.yaxis.tick_right()
+        ax3.yaxis.set_label_position('right')
+        if is_nonvortex_phase:
+            ax3.set_ylabel('$y / r_0$', fontsize=12)
+        else:
+            ax3.set_ylabel('$k_y / \kappa$', fontsize=12)
+        ax3.tick_params(direction='in', colors='white', labelcolor='black', left=True, top=True, right=True)
+        for spine in ax3.spines.values():
+            spine.set_edgecolor('white')
+        if x_axis:
+            if is_nonvortex_phase:
+                ax3.set_xlabel('$x / r_0$', fontsize=12)
+            else:
+                ax3.set_xlabel('$k_x / \kappa$', fontsize=12)
+            ax3.tick_params(top=True, bottom=True, left=True, right=True, labelright=True, labelleft=False, labelbottom=True)
+        else:
+            ax3.tick_params(top=True, bottom=True, left=True, right=True, labelright=True, labelleft=False, labelbottom=False)
+        if legend:
+            divider = make_axes_locatable(ax3)
+            cax3 = divider.new_vertical(size='8%', pad=0.3)
+            fig.add_axes(cax3)
+            cb3 = fig.colorbar(im3, cax=cax3, orientation='horizontal')
+            cb3.set_label('$S(k_x,k_y) \ / \ S_{max}$', labelpad=-45, fontsize=12)
+            min_sp, max_sp = np.min(spectrum_for_plot), np.max(spectrum_for_plot)
+            center_sp = 0.5 * (max_sp - min_sp)
+            cb3.set_ticks([min_sp, center_sp, max_sp])
+            cb3.set_ticklabels(['0.0', '0.5', '1.0'])
+            cb3.ax.tick_params(labelsize=10)
+
+        plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=500)
+        plt.close()
 
     def plot(self, spectrum, z, step):
 

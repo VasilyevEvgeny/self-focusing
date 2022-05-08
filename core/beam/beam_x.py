@@ -1,4 +1,4 @@
-from numpy import exp, zeros, complex64, heaviside
+from numpy import exp, zeros, complex64, heaviside, save
 
 from .beam_2d import Beam2D
 
@@ -72,3 +72,7 @@ class BeamX(Beam2D):
                      exp(-0.5 * (abs(x) / x_0) ** 2)
 
         return arr
+
+    def save_field(self, path, only_center=True):
+        save(path, self._field)
+

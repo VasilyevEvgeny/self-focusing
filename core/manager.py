@@ -43,9 +43,17 @@ class Manager:
             self.__field_dir = self.__beam_dir + '/field'
             self.create_dir(self.__field_dir)
 
+        if kwargs.get('save_spectrum', False):
+            self.__spectrum_dir = self.__beam_dir + '/spectrum'
+            self.create_dir(self.__spectrum_dir)
+
     @property
     def field_dir(self):
         return self.__field_dir
+
+    @property
+    def spectrum_dir(self):
+        return self.__spectrum_dir
 
     @property
     def results_dir(self):
