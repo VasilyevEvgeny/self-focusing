@@ -43,12 +43,14 @@ class Propagator:
         if self.__plot_beam_every:
             self.__visualizer = kwargs['visualizer']
             self.__visualizer.get_path_to_save(self.__manager.beam_dir)
+            self.__visualizer.get_path_to_save_spectrum(self.__manager.spectrum_dir)
 
         # spectrum
         self.__spectrum = kwargs.get('spectrum', None)
         if self.__plot_spectrum_every:
             self.__spectrum_visualizer = kwargs['spectrum_visualizer']
             self.__spectrum_visualizer.get_path_to_save(self.__manager.beam_dir)
+            self.__spectrum_visualizer.get_path_to_save_spectrum(self.__manager.spectrum_dir)
 
         self.__z = 0.0  # initial value of z
         self.__dz = kwargs['dz_0']  # initial step along z

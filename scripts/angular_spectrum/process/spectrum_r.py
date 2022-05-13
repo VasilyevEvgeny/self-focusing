@@ -6,7 +6,7 @@ args = parse_args()
 
 # create object of 3D axisymmetric beam
 beam = BeamR(medium='LiF',
-             p_0_to_p_vortex=5,
+             p_0_to_p_vortex=5, #7.2133885212,  # 3.47,
              m=1,
              M=1,
              lmbda=1800*10**-9,
@@ -20,7 +20,7 @@ spectrum = SpectrumR(beam=beam)
 spectrum_visualizer = SpectrumVisualizer(spectrum=spectrum,
                                          log_scale_of_spectrum=False,
                                          remaining_central_part_coeff_field=0.04,     # 0.05
-                                         remaining_central_part_coeff_spectrum=0.03)  # 0.12
+                                         remaining_central_part_coeff_spectrum=0.15)  #0.03)  # 0.12
 
 # create propagator object
 propagator = Propagator(args=args,
@@ -37,7 +37,7 @@ propagator = Propagator(args=args,
                         plot_spectrum_every=5,
                         spectrum_visualizer=spectrum_visualizer,
                         save_field=False,
-                        save_spectrum=False)
+                        save_spectrum=True)
 
 # initiate propagation process
 propagator.propagate()

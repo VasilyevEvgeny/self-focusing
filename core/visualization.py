@@ -1,4 +1,4 @@
-from numpy import transpose, meshgrid, zeros, log10, where
+from numpy import transpose, meshgrid, zeros, log10, where, pi
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -27,7 +27,7 @@ class BeamVisualizer:
             raise Exception('Wrong normalize_to arg!')
         self.__plot_type = kwargs['plot_type']
         self.__language = kwargs.get('language', 'english')
-        self._path_to_save = None
+        self._path_to_save, self._path_to_save_spectrum = None, None
 
         # font
         self._font_size = {'title': 40, 'ticks': 40, 'labels': 50, 'colorbar_ticks': 40,
@@ -67,6 +67,9 @@ class BeamVisualizer:
 
     def get_path_to_save(self, path_to_save):
         self._path_to_save = path_to_save
+
+    def get_path_to_save_spectrum(self, path_to_save):
+        self._path_to_save_spectrum = path_to_save
 
     def __initialize_labels(self):
         if self.__language == 'english':
@@ -689,6 +692,9 @@ class SpectrumVisualizer:
     def get_path_to_save(self, path_to_save):
         self._path_to_save = path_to_save
 
+    def get_path_to_save_spectrum(self, path_to_save):
+        self._path_to_save_spectrum = path_to_save
+
     @staticmethod
     def __log_spectrum(arr, p=5):
         MAX = np.max(arr)
@@ -914,14 +920,15 @@ class SpectrumVisualizer:
             ax2.set_yticks(ax2_ticks)
             ax2.set_yticklabels(['', '', '', '', ''], fontsize=10)
         if is_circles:
-            color = 'white'
-            circle1 = plt.Circle((c_tick, c_tick), int(0.25 * c_tick), color=color, ls='-', lw='2', fill=False)
-            circle2 = plt.Circle((c_tick, c_tick), int(0.48 * c_tick), color=color, ls='-', lw='2', fill=False)
+            color_circle = 'cyan'
+            color_text = 'white'
+            circle1 = plt.Circle((c_tick, c_tick), int(0.25 * c_tick), color=color_circle, ls='-', lw='2', fill=False)
+            circle2 = plt.Circle((c_tick, c_tick), int(0.48 * c_tick), color=color_circle, ls='-', lw='2', fill=False)
             ax2.add_patch(circle1)
             ax2.add_patch(circle2)
-            ax2.text(int(0.89 * c_tick), int(0.89 * c_tick), s='$1$', fontsize=11, color=color)
-            ax2.text(int(0.70 * c_tick), int(0.70 * c_tick), s='$2$', fontsize=11, color=color)
-            ax2.text(int(0.35 * c_tick), int(0.35 * c_tick), s='$3$', fontsize=11, color=color)
+            ax2.text(int(0.89 * c_tick), int(0.89 * c_tick), s='$1$', fontsize=11, color=color_text)
+            ax2.text(int(0.70 * c_tick), int(0.70 * c_tick), s='$2$', fontsize=11, color=color_text)
+            ax2.text(int(0.35 * c_tick), int(0.35 * c_tick), s='$3$', fontsize=11, color=color_text)
         ax2.tick_params(direction='in', colors='white', labelcolor='black', top=True, right=True)
         for spine in ax2.spines.values():
             spine.set_edgecolor('white')
@@ -1039,6 +1046,34 @@ class SpectrumVisualizer:
             cb3.ax.tick_params(labelsize=10)
 
         plt.savefig(self._path_to_save + '/%04d.png' % step, bbox_inches='tight', dpi=500)
+        plt.close()
+
+
+        #######################################
+        # Radial angular spectrum
+        #######################################
+
+        spectrum = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+
+        k0 = 2 * pi / self.spectrum.beam.lmbda
+        h_k = 2 * pi / self.spectrum.beam.r_max
+        n = int(self.spectrum.beam.n_r * self._remaining_central_part_coeff_spectrum)
+        thetas = [i * h_k / k0 for i in range(n)]
+        n = spectrum.shape[0]
+        n_half = n // 2
+
+        plt.figure(figsize=cm2inch(10, 6))
+        plt.plot(thetas, spectrum[n_half, n_half:], c='black')
+
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+
+        plt.grid(c='gray', lw=0.5, ls=':', alpha=0.5)
+
+        plt.xlabel('$\\theta$, rad', fontsize=12)
+        plt.ylabel('$\lg(S / S_{max})$', fontsize=12)
+
+        plt.savefig(self._path_to_save_spectrum + '/%04d.png' % step, bbox_inches='tight', dpi=500)
         plt.close()
 
     def plot(self, spectrum, z, step):

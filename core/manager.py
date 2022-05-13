@@ -38,6 +38,7 @@ class Manager:
         # other directories paths
         self.__track_dir = self.results_dir + '/track'
         self.__beam_dir = self.results_dir + '/beam'
+        self.__spectrum_dir = self.results_dir + '/spectrum'
 
         if kwargs.get('save_field', False):
             self.__field_dir = self.__beam_dir + '/field'
@@ -76,6 +77,9 @@ class Manager:
     def __create_beam_dir(self):
         self.create_dir(self.__beam_dir)
 
+    def __create_spectrum_dir(self):
+        self.create_dir(self.__spectrum_dir)
+
     def create_dirs(self):
         """Creates all nessesary directories"""
 
@@ -83,6 +87,7 @@ class Manager:
         self.__create_results_dir()
         self.__create_track_dir()
         self.__create_beam_dir()
+        self.__create_spectrum_dir()
 
     @property
     def beam_dir(self):
@@ -91,3 +96,7 @@ class Manager:
     @property
     def track_dir(self):
         return self.__track_dir
+
+    @property
+    def spectrum_dir(self):
+        return self.__spectrum_dir

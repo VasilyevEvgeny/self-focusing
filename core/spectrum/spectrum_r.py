@@ -48,11 +48,11 @@ class SpectrumR(Spectrum):
         if only_center:
             percent = 15
             center = self.beam.n_r
-            print('self.beam.n_r = ', self.beam.n_r)
+            # print('self.beam.n_r = ', self.beam.n_r)
             ambit = int(self.beam.n_r * percent / 100)
-            print('ambit = ', ambit)
+            # print('ambit = ', ambit)
             spectrum_xy = self._spectrum_xy[center-ambit:center+ambit, center-ambit:center+ambit]
-            print(spectrum_xy.shape)
+            # print(spectrum_xy.shape)
         else:
             spectrum_xy = self._spectrum_xy
         save(path, spectrum_xy)
