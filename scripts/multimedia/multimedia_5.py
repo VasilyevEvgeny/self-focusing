@@ -10,8 +10,8 @@ class Multimedia5(BaseMultimedia):
 
     def _get_data(self):
         indices = []
-        for idx_col, (M, m) in enumerate([(0, 0), (1, 0), (1, 1)]):
-            for idx_row, plot_type in enumerate(['profile', 'flat']):
+        for idx_col, (M, m) in enumerate([(0, 0), (1, 1)]):
+            for idx_row, plot_type in enumerate(['profile']):
                 print('================================================================')
                 print('M = %d' % M, ', m = %d' % m)
                 print('================================================================')

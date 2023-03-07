@@ -209,7 +209,7 @@ class BeamXY(Beam3D):
                 if r < 0.5 * (r1 + r2):
                     arr[i, j] *= exp(1j * m * (arctan2(x, y)))
                 else:
-                    arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + 0 * pi))
+                    arr[i, j] *= exp(1j * 1 * (arctan2(x, y) + 1 * pi))
 
                 # #
                 # # ring width

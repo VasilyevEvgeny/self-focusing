@@ -813,8 +813,8 @@ class SpectrumVisualizer:
         plt.close()
 
     def plot_dissertation(self, spectrum, z, step):
-        legend = False
-        x_axis = False
+        legend = True
+        x_axis = True
         is_synthetic_example = False
         is_nonvortex_phase = False
         is_circles = True
@@ -882,10 +882,12 @@ class SpectrumVisualizer:
             cax1 = divider.new_vertical(size='8%', pad=0.3)
             fig.add_axes(cax1)
             cb1 = fig.colorbar(im1, cax=cax1, orientation='horizontal')
-            cb1.set_label('$I(x,y), \\times 10^{12}$ Вт/см$^2$', labelpad=-45, fontsize=12)
+            cb1.set_label('$I(x,y), \\times 10^{13}$ Вт/см$^2$', labelpad=-45, fontsize=12)
             # cb1.set_ticks([np.min(intensity_for_plot), np.max(intensity_for_plot)])
             cb1.set_ticks([0, 0.5, 1.0])
-            cb1.set_ticklabels(['0.0', '0.5', '1.0'])
+            # cb1.set_ticklabels(['0.0', '0.5', '1.0'])
+            # cb1.set_ticks([0, 0.5, 1.0])
+            cb1.set_ticklabels(['0.00', '0.25', '0.50'])
             cb1.ax.tick_params(labelsize=10)
 
 
@@ -951,7 +953,7 @@ class SpectrumVisualizer:
 
         ax3 = fig.add_subplot(grid[0, 2])
         ax3.set_aspect('equal')
-        nonvortex_phase_xy = self.__crop_arr_field(spectrum.nonvortex_phase_xy)
+        # nonvortex_phase_xy = self.__crop_arr_field(spectrum.nonvortex_phase_xy)
         if self.__log_scale_of_spectrum:
             spectrum_for_plot = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
         else:
@@ -992,16 +994,21 @@ class SpectrumVisualizer:
                 length = spectrum_for_plot.shape[0]
                 c_tick = length // 2
                 p = 0.35
+                # ll_tick = c_tick - int(p * length)
+                # l_tick = c_tick - int(0.5 * p * length)
+                # p_tick = c_tick + int(0.5 * p * length)
+                # pp_tick = c_tick + int(p * length)
+                # ax3_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
                 ll_tick = c_tick - int(p * length)
-                l_tick = c_tick - int(0.5 * p * length)
-                p_tick = c_tick + int(0.5 * p * length)
+                l_tick = c_tick - int(0.33 * p * length)
+                p_tick = c_tick + int(0.33 * p * length)
                 pp_tick = c_tick + int(p * length)
-                ax3_ticks = [ll_tick, l_tick, c_tick, p_tick, pp_tick]
+                ax3_ticks = [ll_tick, l_tick, p_tick, pp_tick]
                 ax3.yaxis.tick_right()
                 ax3.set_xticks(ax3_ticks)
-                ax3.set_xticklabels(['$-2$', '$-1$', '0', '$+1$', '$+2$'], fontsize=10)
+                ax3.set_xticklabels(['$-3$', '$-1$', '$+1$', '$+3$'], fontsize=10)
                 ax3.set_yticks(ax3_ticks)
-                ax3.set_yticklabels(['$+2$', '$+1$', '0', '$-1$', '$-2$'], fontsize=10)
+                ax3.set_yticklabels(['$+3$', '$+1$', '$-1$', '$-3$'], fontsize=10)
 
         # length = spectrum_for_plot.shape[0]
         # c_tick = length // 2
@@ -1021,7 +1028,7 @@ class SpectrumVisualizer:
         if is_nonvortex_phase:
             ax3.set_ylabel('$y / r_0$', fontsize=12)
         else:
-            ax3.set_ylabel('$k_y / \kappa$', fontsize=12)
+            ax3.set_ylabel('$k_y / \kappa_0$', fontsize=12)
         ax3.tick_params(direction='in', colors='white', labelcolor='black', left=True, top=True, right=True)
         for spine in ax3.spines.values():
             spine.set_edgecolor('white')
@@ -1029,7 +1036,7 @@ class SpectrumVisualizer:
             if is_nonvortex_phase:
                 ax3.set_xlabel('$x / r_0$', fontsize=12)
             else:
-                ax3.set_xlabel('$k_x / \kappa$', fontsize=12)
+                ax3.set_xlabel('$k_x / \kappa_0$', fontsize=12)
             ax3.tick_params(top=True, bottom=True, left=True, right=True, labelright=True, labelleft=False, labelbottom=True)
         else:
             ax3.tick_params(top=True, bottom=True, left=True, right=True, labelright=True, labelleft=False, labelbottom=False)
@@ -1053,28 +1060,28 @@ class SpectrumVisualizer:
         # Radial angular spectrum
         #######################################
 
-        spectrum = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
-
-        k0 = 2 * pi / self.spectrum.beam.lmbda
-        h_k = 2 * pi / self.spectrum.beam.r_max
-        n = int(self.spectrum.beam.n_r * self._remaining_central_part_coeff_spectrum)
-        thetas = [i * h_k / k0 for i in range(n)]
-        n = spectrum.shape[0]
-        n_half = n // 2
-
-        plt.figure(figsize=cm2inch(10, 6))
-        plt.plot(thetas, spectrum[n_half, n_half:], c='black')
-
-        plt.xticks(fontsize=10)
-        plt.yticks(fontsize=10)
-
-        plt.grid(c='gray', lw=0.5, ls=':', alpha=0.5)
-
-        plt.xlabel('$\\theta$, rad', fontsize=12)
-        plt.ylabel('$\lg(S / S_{max})$', fontsize=12)
-
-        plt.savefig(self._path_to_save_spectrum + '/%04d.png' % step, bbox_inches='tight', dpi=500)
-        plt.close()
+        # spectrum = self.__log_spectrum(self.__crop_arr_spectrum(spectrum.spectrum_intensity_xy))
+        #
+        # k0 = 2 * pi / self.spectrum.beam.lmbda
+        # h_k = 2 * pi / self.spectrum.beam.r_max
+        # n = int(self.spectrum.beam.n_r * self._remaining_central_part_coeff_spectrum)
+        # thetas = [i * h_k / k0 for i in range(n)]
+        # n = spectrum.shape[0]
+        # n_half = n // 2
+        #
+        # plt.figure(figsize=cm2inch(10, 6))
+        # plt.plot(thetas, spectrum[n_half, n_half:], c='black')
+        #
+        # plt.xticks(fontsize=10)
+        # plt.yticks(fontsize=10)
+        #
+        # plt.grid(c='gray', lw=0.5, ls=':', alpha=0.5)
+        #
+        # plt.xlabel('$\\theta$, rad', fontsize=12)
+        # plt.ylabel('$\lg(S / S_{max})$', fontsize=12)
+        #
+        # plt.savefig(self._path_to_save_spectrum + '/%04d.png' % step, bbox_inches='tight', dpi=500)
+        # plt.close()
 
     def plot(self, spectrum, z, step):
 
